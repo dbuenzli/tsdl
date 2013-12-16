@@ -3355,6 +3355,13 @@ let main () = match Sdl.init Sdl.Init.video with
           
 let () = main ()
 ]}
+
+This can be compiled to byte and native code with:
+{v
+> ocamlfind ocamlc -package tsdl -linkpkg -o min.byte min.ml
+> ocamlfind ocamlopt -package tsdl -linkpkg -o min.native min.ml
+v}
+
 *)
 
 (*---------------------------------------------------------------------------
