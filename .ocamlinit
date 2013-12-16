@@ -1,0 +1,14 @@
+#directory "_build/src"
+#directory "_build/test"
+
+#use "topfind"
+#thread
+#require "ctypes"
+#require "ctypes.foreign"
+
+(* TODO fix that, see https://github.com/ocamllabs/ocaml-ctypes/issues/51*)
+let libsdl = Dl.(dlopen ~filename:"libSDL2-2.0.0.dylib" ~flags:[RTLD_NOW]);;
+
+#load "tsdl.cma"
+#directory "+compiler-libs";;
+#use "src/tsdl_top.ml";;

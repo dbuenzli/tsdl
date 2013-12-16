@@ -1,0 +1,19 @@
+opam-version: "1"
+maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
+homepage: "http://erratique.ch/software/tsdl"
+authors: ["Daniel Bünzli <daniel.buenzli i@erratique.ch>"]
+doc: "http://erratique.ch/software/tsdl/doc/Tsdl"
+tags: [ "audio" "bindings" "graphics" "media" "opengl" ]
+license: "BSD3"
+ocaml-version: [>= "4.00.1"]
+depends: [ "ocamlfind" ]
+depexts: [
+ [["debian"] ["libsdl2-dev"]]
+ [["ubuntu"] ["libsdl2-dev"]]
+]
+build: 
+[
+  ["./pkg/pkg-git" ] 
+  ["./pkg/build" "true" ]
+]
+

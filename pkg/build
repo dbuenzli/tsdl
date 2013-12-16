@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Usage: build has_native
+
+set -e 
+LOC=`dirname $0`
+
+. $LOC/pkg-builder
+
+NATIVE=$1
+
+add lib pkg/META		
+add lib src/tsdl.mli	
+add lib src/tsdl.cmi
+add lib src/tsdl.cmx
+add lib src/tsdl.cma
+add lib src/tsdl.a
+add lib src/tsdl.cmxa
+add lib src/tsdl.cmxs
+add stublibs src/dlltsdl.so 
+
+add lib src/tsdl_top.ml
+add lib src/tsdl_top.cmi
+add lib src/tsdl_top.cmx
+add lib src/tsdl_top.cma
+add lib src/tsdl_top.a
+add lib src/tsdl_top.cmxa
+add lib src/tsdl_top.cmxs
+
+add doc README.md
+add doc CHANGES.md
+add doc test/min.ml
+add doc test/minc.c 
+
+build
+install tsdl
