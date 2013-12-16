@@ -16,9 +16,12 @@ let pkg_config_lib has_lib lib =
   let cflags_ocaml = ocaml_copts "-ccopt" cflags in
   let ldflags = pkg_config "libs" lib in
   let ldflags_ocaml = ocaml_copts "-cclib" ldflags in
+  let dldflags_ocaml = ocaml_copts "-dllib" ldflags in
   flag ["c"; "ocamlmklib"; tag] (S ldflags);
   flag ["c"; "compile"; tag] (S cflags_ocaml); 
-  flag ["link"; "ocaml"; tag] (S ((A "-thread") :: ldflags_ocaml))
+  flag ["link"; "ocaml"; tag] (S ((A "-thread") :: ldflags_ocaml));
+  flag ["link"; "ocaml"; "library"; "byte"; tag] (S dldflags_ocaml)
+    
     
 let sdl_consts_build () =
   dep [ "link"; "ocaml"; "link_consts_stub" ] [ "support/consts_stub.o" ];
