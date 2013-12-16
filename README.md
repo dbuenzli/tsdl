@@ -1,4 +1,4 @@
-Tsdl — Simple DirectMedia Layer (SDL) thin bindings
+Tsdl — Simple DirectMedia Layer (SDL) thin OCaml bindings
 -------------------------------------------------------------------------------
 Release %%VERSION%%
 

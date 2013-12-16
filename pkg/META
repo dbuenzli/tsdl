@@ -1,5 +1,5 @@
 version = "%%VERSION%%"
-description = "Simple DirectMedia Layer (SDL) thin bindings"
+description = "Simple DirectMedia Layer (SDL) thin OCaml bindings"
 requires = "ctypes ctypes.foreign"
 archive(byte) = "tsdl.cma"
 archive(byte, plugin) = "tsdl.cma"
