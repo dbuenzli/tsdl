@@ -863,27 +863,31 @@ let test_message_boxes human =
   ()
 
 let test_clipboard () = 
-  try 
-    log "Testing clipboard"; 
-    let saved = 
-      if not (Sdl.has_clipboard_text ()) then None else
-      begin match Sdl.get_clipboard_text () with 
-      | `Error -> log_err " Could not get clipboard text"; None
-      | `Ok text -> Some text
+  log "Testing clipboard"; 
+  match Sdl.create_window "Clipboard" ~w:640 ~h:480 Sdl.Window.shown with
+  | `Error -> log_err " Could not create window"
+  | `Ok w -> 
+      (* N.B. we need a window on Linux otherwise we get an 
+         odd stackoverflow. *)
+      let saved = 
+        if not (Sdl.has_clipboard_text ()) then None else
+        begin match Sdl.get_clipboard_text () with 
+        | `Error -> log_err " Could not get clipboard text"; None
+        | `Ok text -> Some text
+        end;
+      in
+      let saved = None in
+      begin match Sdl.set_clipboard_text "öpooo" with
+      | `Error -> log_err " Could not set clipboard text" 
+      | `Ok () -> 
+          assert (Sdl.has_clipboard_text ());
+          assert (Sdl.get_clipboard_text () = `Ok "öpooo");
       end;
-    in
-    let saved = None in
-    begin match Sdl.set_clipboard_text "öpooo" with
-    | `Error -> log_err " Could not set clipboard text" 
-    | `Ok () -> 
-        assert (Sdl.has_clipboard_text ());
-        assert (Sdl.get_clipboard_text () = `Ok "öpooo");
-    end;
-    begin match saved with 
-    | None -> () | Some t -> assert (Sdl.set_clipboard_text t = `Ok ())
-    end;
-    ()
-  with Stack_overflow -> log "TODO/FIXME: odd stackoverflow on Linux"
+      begin match saved with 
+      | None -> () | Some t -> assert (Sdl.set_clipboard_text t = `Ok ())
+      end;
+      ()
+
 
 let test_keyboard () =  
   log "Testing keyboard";
