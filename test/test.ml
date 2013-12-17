@@ -885,6 +885,7 @@ let test_clipboard () =
       begin match saved with 
       | None -> () | Some t -> assert (Sdl.set_clipboard_text t = `Ok ())
       end;
+      Sdl.destroy_window w;
       ()
 
 let test_keyboard () =  
