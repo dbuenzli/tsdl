@@ -1643,7 +1643,7 @@ module Scancode : sig
   val app2 : scancode
 end
 
-type keycode = int
+type keycode = int32
 (** {{:http://wiki.libsdl.org/SDL_Keycode}SDL_Keycode} *)
 
 (** Constants for {!keycode} *)

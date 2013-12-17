@@ -635,7 +635,7 @@ end
 
 module Pixel = struct
   type format_enum = Unsigned.UInt32.t 
-  let i = Unsigned.UInt32.of_int
+  let i = Unsigned.UInt32.of_int32
   let to_uint32 = Unsigned.UInt32.to_int32
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
   let format_unknown = i sdl_pixelformat_unknown
@@ -2389,8 +2389,8 @@ module Scancode = struct
   let app2 = sdl_scancode_app2
 end
 
-type keycode = int
-let keycode = int 
+type keycode = int32
+let keycode = int32_t
 
 module K = struct
   let unknown = sdlk_unknown

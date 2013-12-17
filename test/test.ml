@@ -454,8 +454,7 @@ let test_renderers () =
           assert (Sdl.render_fill_rects_ba r rects_ba = `Ok ()); 
           assert (Sdl.set_render_draw_color r 0xFF 0xFF 0xFF 0xFF = `Ok ());
           assert (Sdl.render_draw_rects r rects = `Ok ()); 
-          assert (Sdl.render_draw_rects_ba r rects_ba = `Ok ()); 
-          assert (Sdl.render_clear r = `Ok ());
+          assert (Sdl.render_draw_rects_ba r rects_ba = `Ok ());
           Sdl.render_present r;
           assert (Sdl.get_render_target r = None); 
           assert (Sdl.set_render_target r None = `Ok ());
