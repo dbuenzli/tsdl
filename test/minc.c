@@ -1,7 +1,7 @@
 /* 
    Minimal C SDL example. This code is in the public domain.
    Compile with: 
-   gcc `sdl2-config --cflags` `sdl2-config --libs` minc.c 
+   gcc -o minc minc.c `sdl2-config --cflags --libs`
 */
 
 #include <unistd.h>
