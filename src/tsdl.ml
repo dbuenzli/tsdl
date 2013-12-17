@@ -136,20 +136,24 @@ let ba_kind_byte_size :  ('a, 'b) Bigarray.kind -> int = fun k ->
   | k -> assert false
 
 let access_ptr_typ_of_ba_kind : ('a, 'b) Bigarray.kind -> 'a ptr typ = fun k -> 
-  let open Bigarray in 
-  (* FIXME: better support in future ctypes ? *)
-  match Obj.magic k with 
-  | k when k = float32 || k = float64 -> Obj.magic (ptr Ctypes.double)
-  | k when k = complex32 || k = complex64 -> Obj.magic (ptr Ctypes.complex64)
-  | k when k = int8_signed || k = int8_unsigned || k = int16_signed || 
-           k = int16_unsigned || k = int -> Obj.magic (ptr Ctypes.camlint)
+  let open Bigarray in
+  (* FIXME: use typ_of_bigarray_kind when ctypes support it. *)
+  match Obj.magic k with
+  | k when k = float32 -> Obj.magic (ptr Ctypes.float)
+  | k when k = float64 -> Obj.magic (ptr Ctypes.double)
+  | k when k = complex32 -> Obj.magic (ptr Ctypes.complex32)
+  | k when k = complex64 -> Obj.magic (ptr Ctypes.complex64)
+  | k when k = int8_signed -> Obj.magic (ptr Ctypes.int8_t)
+  | k when k = int8_unsigned -> Obj.magic (ptr Ctypes.uint8_t)
+  | k when k = int16_signed -> Obj.magic (ptr Ctypes.int16_t)
+  | k when k = int16_unsigned -> Obj.magic (ptr Ctypes.uint16_t)
+  | k when k = int -> Obj.magic (ptr Ctypes.camlint)
   | k when k = int32 -> Obj.magic (ptr Ctypes.int32_t)
   | k when k = int64 -> Obj.magic (ptr Ctypes.int64_t)
   | k when k = nativeint -> Obj.magic (ptr Ctypes.nativeint)
   | k when k = char -> Obj.magic (ptr Ctypes.char)
-  | k -> assert false 
-  
-
+  | _ -> assert false
+        
 let ba_byte_size ba = 
   let el_size = ba_kind_byte_size (Bigarray.Array1.kind ba) in 
   el_size * Bigarray.Array1.dim ba 
