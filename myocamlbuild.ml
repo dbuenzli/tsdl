@@ -15,19 +15,24 @@ let pkg_config flags package =
        
 let pkg_config_lib ~lib ~has_lib ~stublib = 
   let cflags = (A has_lib) :: pkg_config "cflags" lib in
-  let ldflags =
-    let os_flags = if os = "Linux\n" then [ A "-Wl,-no-as-needed"] else [] in
-    os_flags @ pkg_config "libs" lib 
+  let stub_l = [A (Printf.sprintf "-l%s" stublib)] in
+  let libs_l = pkg_config "libs-only-l" lib in
+  let libs_L = pkg_config "libs-only-L" lib in
+  let linker = match os with
+  | "Linux\n" -> [A "-Wl,-no-as-needed"]
+  | _ -> []
   in
-  let ocaml_copts pre_opt l = List.map (fun a -> S [A pre_opt; a]) l in
-  let ocaml_cflags = ocaml_copts "-ccopt" cflags in
-  let ocaml_ldflags = ocaml_copts "-cclib" ldflags in
-  let dll_stublib = [ A "-dllib"; A (Printf.sprintf "-l%s" stublib) ] in
+  let make_opt o arg = S [ A o; arg ] in
+  let mklib_flags = (List.map (make_opt "-ldopt") linker) @ libs_l @ libs_L in
+  let compile_flags = List.map (make_opt "-ccopt") cflags in
+  let lib_flags = List.map (make_opt "-cclib") libs_l in
+  let link_flags = List.map (make_opt "-ccopt") (linker @ libs_L) in
+  let stublib_flags = List.map (make_opt "-dllib") stub_l  in
   let tag = Printf.sprintf "use_%s" lib in
-  flag ["c"; "ocamlmklib"; tag] (S ldflags);
-  flag ["c"; "compile"; tag] (S ocaml_cflags); 
-  flag ["link"; "ocaml"; tag] (S ocaml_ldflags);
-  flag ["link"; "ocaml"; "library"; "byte"; tag] (S dll_stublib)
+  flag ["c"; "ocamlmklib"; tag] (S mklib_flags);
+  flag ["c"; "compile"; tag] (S compile_flags); 
+  flag ["link"; "ocaml"; tag] (S (link_flags @ lib_flags));
+  flag ["link"; "ocaml"; "library"; "byte"; tag] (S stublib_flags)
     
 (* tsdl_const.ml generation. *)
 

@@ -868,7 +868,7 @@ let test_clipboard () =
   | `Error -> log_err " Could not create window"
   | `Ok w -> 
       (* N.B. we need a window on Linux otherwise we get an 
-         odd stackoverflow. *)
+         odd stack overflow. *)
       let saved = 
         if not (Sdl.has_clipboard_text ()) then None else
         begin match Sdl.get_clipboard_text () with 
@@ -876,7 +876,6 @@ let test_clipboard () =
         | `Ok text -> Some text
         end;
       in
-      let saved = None in
       begin match Sdl.set_clipboard_text "öpooo" with
       | `Error -> log_err " Could not set clipboard text" 
       | `Ok () -> 
@@ -887,7 +886,6 @@ let test_clipboard () =
       | None -> () | Some t -> assert (Sdl.set_clipboard_text t = `Ok ())
       end;
       ()
-
 
 let test_keyboard () =  
   log "Testing keyboard";
