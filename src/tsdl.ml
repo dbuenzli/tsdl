@@ -2120,10 +2120,7 @@ let show_simple_message_box t ~title msg w =
 (* Clipboard *)
 
 let get_clipboard_text = 
-  foreign "SDL_GetClipboardText" (void @-> returning string_opt)
-
-let get_clipboard_text () = match get_clipboard_text () with 
-| None -> `Error | Some s -> `Ok s 
+  foreign "SDL_GetClipboardText" (void @-> returning (some_to_ok string_opt))
 
 let has_clipboard_text = 
   foreign "SDL_HasClipboardText" (void @-> returning bool)
