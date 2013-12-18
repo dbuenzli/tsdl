@@ -904,6 +904,9 @@ let test_keyboard () =
       assert (Sdl.get_scancode_from_key Sdl.K.k = Sdl.Scancode.k);
       assert (Sdl.get_scancode_from_name "K" = Sdl.Scancode.k);
       assert (Sdl.get_scancode_name Sdl.Scancode.k = "K"); 
+      assert (Sdl.Scancode.(enum unknown) = `Unknown);
+      assert (Sdl.Scancode.(enum a) = `A);
+      assert (Sdl.Scancode.(enum app2) = `App2);
       log " screen keyboard: %b shown: %b" 
         (Sdl.has_screen_keyboard_support ()) 
         (Sdl.is_screen_keyboard_shown w); 

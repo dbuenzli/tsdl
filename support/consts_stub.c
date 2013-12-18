@@ -225,6 +225,7 @@ void consts (FILE *fd)
   assert(sizeof (SDL_Keycode) == 4);
   assert(sizeof (SDL_Scancode) == 4);
 
+  int_v (SDL_SCANCODE_UNKNOWN);
   int_v (SDL_SCANCODE_A);
   int_v (SDL_SCANCODE_B);
   int_v (SDL_SCANCODE_C);

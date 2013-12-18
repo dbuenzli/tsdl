@@ -1399,9 +1399,53 @@ val enable : toggle_state
 type scancode = int
 (** {{:http://wiki.libsdl.org/SDL_Scancode}SDL_Scancode} *)
 
-(** Constants for {!scancode} *)
+(** Constants and enumeration for {!scancode} *)
 module Scancode : sig
+  
+  val enum : scancode -> 
+    [ `A | `Ac_back | `Ac_bookmarks | `Ac_forward | `Ac_home 
+    | `Ac_refresh | `Ac_search | `Ac_stop | `Again | `Alterase 
+    | `Apostrophe | `App1 | `App2 | `Application | `Audiomute 
+    | `Audionext | `Audioplay | `Audioprev | `Audiostop | `B 
+    | `Backslash | `Backspace | `Brightnessdown | `Brightnessup | `C 
+    | `Calculator | `Cancel | `Capslock | `Clear | `Clearagain | `Comma
+    | `Computer | `Copy | `Crsel | `Currencysubunit | `Currencyunit 
+    | `Cut | `D | `Decimalseparator | `Delete | `Displayswitch | `Down 
+    | `E | `Eject | `End | `Equals | `Escape | `Execute | `Exsel | `F 
+    | `F1 | `F10 | `F11 | `F12 | `F13 | `F14 | `F15 | `F16 | `F17 | `F18
+    | `F19 | `F2 | `F20 | `F21 | `F22 | `F23 | `F24 | `F3 | `F4 | `F5
+    | `F6 | `F7 | `F8 | `F9 | `Find | `G | `Grave | `H | `Help | `Home
+    | `I | `Insert | `International1 | `International2 
+    | `International3 | `International4 | `International5 
+    | `International6 | `International7 | `International8 
+    | `International9 | `J | `K | `K0 | `K1 | `K2 | `K3 | `K4 | `K5 
+    | `K6 | `K7 | `K8 | `K9 | `Kbdillumdown | `Kbdillumtoggle 
+    | `Kbdillumup | `Kp_0 | `Kp_00 | `Kp_000 | `Kp_1 | `Kp_2 | `Kp_3 
+    | `Kp_4 | `Kp_5 | `Kp_6 | `Kp_7 | `Kp_8 | `Kp_9 | `Kp_a 
+    | `Kp_ampersand | `Kp_at | `Kp_b | `Kp_backspace | `Kp_binary 
+    | `Kp_c | `Kp_clear | `Kp_clearentry | `Kp_colon | `Kp_comma | `Kp_d
+    | `Kp_dblampersand | `Kp_dblverticalbar | `Kp_decimal | `Kp_divide
+    | `Kp_e | `Kp_enter | `Kp_equals | `Kp_equalsas400 | `Kp_exclam 
+    | `Kp_f | `Kp_greater | `Kp_hash | `Kp_hexadecimal | `Kp_leftbrace 
+    | `Kp_leftparen | `Kp_less | `Kp_memadd | `Kp_memclear 
+    | `Kp_memdivide | `Kp_memmultiply | `Kp_memrecall | `Kp_memstore 
+    | `Kp_memsubtract | `Kp_minus | `Kp_multiply | `Kp_octal 
+    | `Kp_percent | `Kp_period | `Kp_plus | `Kp_plusminus | `Kp_power 
+    | `Kp_rightbrace | `Kp_rightparen | `Kp_space | `Kp_tab 
+    | `Kp_verticalbar | `Kp_xor | `L | `Lalt | `Lang1 | `Lang2 | `Lang3
+    | `Lang4 | `Lang5 | `Lang6 | `Lang7 | `Lang8 | `Lang9 | `Lctrl 
+    | `Left | `Leftbracket | `Lgui | `Lshift | `M | `Mail | `Mediaselect
+    | `Menu | `Minus | `Mode | `Mute | `N | `Nonusbackslash 
+    | `Nonushash | `Numlockclear | `O | `Oper | `Out | `P | `Pagedown 
+    | `Pageup | `Paste | `Pause | `Period | `Power | `Printscreen 
+    | `Prior | `Q | `R | `Ralt | `Rctrl | `Return | `Return2 | `Rgui 
+    | `Right | `Rightbracket | `Rshift | `S | `Scrolllock | `Select 
+    | `Semicolon | `Separator | `Slash | `Sleep | `Space | `Stop 
+    | `Sysreq | `T | `Tab | `Thousandsseparator | `U | `Undo | `Unknown
+    | `Up | `V | `Volumedown | `Volumeup | `W | `Www | `X | `Y | `Z ]
+
   val num_scancodes : int
+  val unknown : scancode
   val a : scancode
   val b : scancode
   val c : scancode
