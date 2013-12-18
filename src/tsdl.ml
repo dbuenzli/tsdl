@@ -112,13 +112,16 @@ let () =
 
 type 'a result = [ `Ok of 'a | `Error ]
 
-(* Integer types *)
+(* Integer types and maps *)
 
 type uint8 = int
 type uint16 = int
 type int16 = int
 type uint32 = int32
 type uint64 = int64
+
+module Int = struct type t = int let compare : int -> int -> int = compare end
+module Imap = Map.Make(Int) 
 
 (* Bigarrays *) 
 
@@ -2150,7 +2153,6 @@ type scancode = int
 let scancode = int 
 
 module Scancode = struct
-
   let num_scancodes = sdl_num_scancodes
   let unknown = sdl_scancode_unknown
   let a = sdl_scancode_a
@@ -3559,7 +3561,7 @@ module Event = struct
 
   let first_event = sdl_firstevent
   let last_event = sdl_lastevent
-
+      
   (* Common *)
   
   let typ  = F (common, Common.typ)
@@ -3784,6 +3786,55 @@ module Event = struct
   let window_data2 = F (window_event, Window_event.data2)
   
   let window_event = sdl_windowevent
+
+  (* Event type enum *) 
+
+  let enum_of_event_type = 
+    let add acc (k, v) = Imap.add k v acc in
+    let enums = [ app_terminating, `App_terminating;
+                  app_low_memory, `App_low_memory;
+                  app_will_enter_background, `App_will_enter_background;
+                  app_did_enter_background, `App_did_enter_background;
+                  app_will_enter_foreground, `App_will_enter_foreground;
+                  app_did_enter_foreground, `App_did_enter_foreground;
+                  clipboard_update, `Clipboard_update;
+                  controller_axis_motion, `Controller_axis_motion;
+                  controller_button_down, `Controller_button_down;
+                  controller_button_up, `Controller_button_up;
+                  controller_device_added, `Controller_device_added;
+                  controller_device_remapped, `Controller_device_remapped;
+                  controller_device_removed, `Controller_device_removed;
+                  dollar_gesture, `Dollar_gesture;
+                  dollar_record, `Dollar_record;
+                  drop_file, `Drop_file;
+                  finger_down, `Finger_down;
+                  finger_motion, `Finger_motion;
+                  finger_up, `Finger_up;
+                  joy_axis_motion, `Joy_axis_motion;
+                  joy_ball_motion, `Joy_ball_motion;
+                  joy_button_down, `Joy_button_down;
+                  joy_button_up, `Joy_button_up;
+                  joy_device_added, `Joy_device_added;
+                  joy_device_removed, `Joy_device_removed;
+                  joy_hat_motion, `Joy_hat_motion;
+                  key_down, `Key_down;
+                  key_up, `Key_up;
+                  mouse_button_down, `Mouse_button_down;
+                  mouse_button_up, `Mouse_button_up;
+                  mouse_motion, `Mouse_motion;
+                  mouse_wheel, `Mouse_wheel;
+                  multi_gesture, `Multi_gesture;
+                  sys_wm_event, `Sys_wm_event;
+                  text_editing, `Text_editing;
+                  text_input, `Text_input;
+                  user_event, `User_event;
+                  quit, `Quit;
+                  window_event, `Window_event; ]
+    in
+    List.fold_left add Imap.empty enums
+    
+  let enum t = try Imap.find t enum_of_event_type with Not_found -> `Unknown
+
 end
 
 type event = Event.t union

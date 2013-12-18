@@ -4,7 +4,7 @@
 
 set -e
 
-OCAMLBUILD=${OCAMLBUILD:="ocamlbuild -tag debug -classic-display \
+OCAMLBUILD=${OCAMLBUILD:="ocamlbuild -tag annot -tag debug -classic-display \
                           -use-ocamlfind"}
 
 action () 

@@ -1114,6 +1114,9 @@ let test_events () =
   match Sdl.create_window "Events" ~w:640 ~h:480 Sdl.Window.resizable with  
   | `Error -> log_err " Could not create window"
   | `Ok w ->
+      assert (Sdl.Event.(enum first_event) = `Unknown);
+      assert (Sdl.Event.(enum quit) = `Quit);
+      assert (Sdl.Event.(enum window_event) = `Window_event);
       let e = Sdl.Event.create () in
       Sdl.pump_events (); 
       ignore (Sdl.has_events Sdl.Event.first_event Sdl.Event.last_event);
