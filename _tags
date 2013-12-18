@@ -1,5 +1,5 @@
 true: thread
-<**/*.{ml,mli}> : bin_annot, annot
+<**/*.{ml,mli}> : bin_annot
 
 <support> : include
 <support/consts_stub.c> : use_sdl2

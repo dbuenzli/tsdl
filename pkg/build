@@ -11,6 +11,7 @@ NATIVE=$1
 
 add lib pkg/META		
 add lib src/tsdl.mli	
+add lib src/tsdl.cmti
 add lib src/tsdl.cmi
 add lib src/tsdl.cmx
 add lib src/tsdl.cma
