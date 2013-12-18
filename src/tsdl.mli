@@ -87,7 +87,7 @@ type int16 = int
 type uint16 = int
 type uint32 = int32
 type uint64 = int64
-type ('a, 'b) barray = ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
+type ('a, 'b) bigarray = ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
 (** The type for bigarrays.*)
 
 type 'a result = [ `Ok of 'a | `Error ]
@@ -356,7 +356,7 @@ val enclose_points : ?clip:rect -> point list -> rect option
     Returns [None] if all the points were outside
     the clipping rectangle (if provided). *)
 
-val enclose_points_ba : ?clip:rect -> (int32, Bigarray.int32_elt) barray -> 
+val enclose_points_ba : ?clip:rect -> (int32, Bigarray.int32_elt) bigarray -> 
   rect option
 (** See {!enclose_points}. Each consecutive pair in the array defines a 
     point. 
@@ -402,7 +402,8 @@ val get_palette_colors : palette -> color list
 (** [get_palette_colors p] is a copy of the contents of the field [colors] 
     of [s]. *)
 
-val get_palette_colors_ba : palette -> (int, Bigarray.int8_unsigned_elt) barray
+val get_palette_colors_ba : palette -> 
+  (int, Bigarray.int8_unsigned_elt) bigarray
 (** [get_palette_colors_ba p] is a copy of the contents of the field [colors]
     of [p]. *)
 
@@ -410,8 +411,8 @@ val set_palette_colors : palette -> color list -> fst:int ->
   unit result 
 (** {{:http://wiki.libsdl.org/SDL_SetPaletteColors}SDL_SetPaletteColors} *)
 
-val set_palette_colors_ba : palette -> (int, Bigarray.int8_unsigned_elt) 
-    barray -> fst:int -> unit result 
+val set_palette_colors_ba : palette -> 
+  (int, Bigarray.int8_unsigned_elt) bigarray -> fst:int -> unit result 
 (** See {!set_palette_colors}. Each consecutive quadruplet defines a 
     color. The data is copied. 
     @raise Invalid_argument if the length of the array is not 
@@ -420,7 +421,7 @@ val set_palette_colors_ba : palette -> (int, Bigarray.int8_unsigned_elt)
 (** {2:pixel_formats {{:http://wiki.libsdl.org/CategoryPixels}Pixels 
     formats}} *)
 
-type gamma_ramp = (int, Bigarray.int16_unsigned_elt) barray
+type gamma_ramp = (int, Bigarray.int16_unsigned_elt) bigarray
 (** The type for gamma ramps, 256 [uint16] values. *)
 
 val calculate_gamma_ramp : float -> gamma_ramp
@@ -544,8 +545,8 @@ val blit_surface : src:surface -> rect -> dst:surface -> rect -> unit result
 (** {{:http://wiki.libsdl.org/SDL_BlitSurface}SDL_BlitSurface} *)
 
 val convert_pixels : w:int -> h:int -> src:Pixel.format_enum -> 
-  ('a, 'b) barray -> int -> dst:Pixel.format_enum -> ('c, 'd) barray -> int -> 
-  unit result
+  ('a, 'b) bigarray -> int -> dst:Pixel.format_enum -> 
+  ('c, 'd) bigarray -> int -> unit result
 (** {{:http://wiki.libsdl.org/SDL_ConvertPixels}SDL_ConvertPixels} 
 
     {b Note} Pitches are given in bigarray elements {b not} in bytes.
@@ -564,8 +565,8 @@ val create_rgb_surface : w:int -> h:int -> depth:int -> uint32 -> uint32 ->
   uint32 -> uint32 -> surface result 
 (** {{:http://wiki.libsdl.org/SDL_CreateRGBSurface}SDL_CreateRGBSurface} *)
 
-val create_rgb_surface_from : ('a, 'b) barray -> w:int -> h:int -> depth:int -> 
-  pitch:int -> uint32 -> uint32 -> uint32 -> uint32 -> 
+val create_rgb_surface_from : ('a, 'b) bigarray -> w:int -> h:int -> 
+  depth:int -> pitch:int -> uint32 -> uint32 -> uint32 -> uint32 -> 
   surface result 
 (** {{:http://wiki.libsdl.org/SDL_CreateRGBSurfaceFrom}
     SDL_CreateRGBSurfaceFrom} 
@@ -584,8 +585,8 @@ val fill_rect : surface -> rect option -> uint32 -> unit result
 val fill_rects : surface -> rect list -> uint32 -> unit result
 (** {{:http://wiki.libsdl.org/SDL_FillRects}SDL_FillRects} *)
 
-val fill_rects_ba : surface -> (int32, Bigarray.int32_elt) barray -> uint32 -> 
-  unit result
+val fill_rects_ba : surface -> (int32, Bigarray.int32_elt) bigarray -> 
+  uint32 -> unit result
 (** See {!fill_rects}. Each consecutive quadruplet defines a 
     rectangle. 
     @raise Invalid_argument if the length of the array is not 
@@ -618,7 +619,7 @@ val get_surface_format_enum : surface -> Pixel.format_enum
 val get_surface_pitch : surface -> int
 (** [get_surface_pitch s] is the field [pitch] of [s]. *)
 
-val get_surface_pixels : surface -> ('a, 'b) Bigarray.kind -> ('a, 'b) barray
+val get_surface_pixels : surface -> ('a, 'b) Bigarray.kind -> ('a, 'b) bigarray
 (** [get_surface_pixels s kind] is the field [pixels] of [s] viewed as
     a [kind] bigarray. Note that you must lock the surface before
     accessing this.  
@@ -788,7 +789,7 @@ val render_draw_line : renderer -> int -> int -> int -> int ->
 val render_draw_lines : renderer -> point list -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawLines}SDL_RenderDrawLines} *)
 
-val render_draw_lines_ba : renderer -> (int32, Bigarray.int32_elt) barray -> 
+val render_draw_lines_ba : renderer -> (int32, Bigarray.int32_elt) bigarray -> 
   unit result
 (** See {!render_draw_lines}. Each consecutive pair in the array
     defines a point.
@@ -802,8 +803,8 @@ val render_draw_point : renderer -> int -> int -> unit result
 val render_draw_points : renderer -> point list -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawPoints}SDL_RenderDrawPoints} *)
 
-val render_draw_points_ba : renderer -> (int32, Bigarray.int32_elt) barray 
-  -> unit result
+val render_draw_points_ba : renderer -> (int32, Bigarray.int32_elt) bigarray ->
+  unit result
 (** See {!render_draw_points}. Each consecutive pair in the array
     defines a point.
 
@@ -816,8 +817,8 @@ val render_draw_rect : renderer -> rect option -> unit result
 val render_draw_rects : renderer -> rect list -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawRects}SDL_RenderDrawRects} *)
 
-val render_draw_rects_ba : renderer -> (int32, Bigarray.int32_elt) barray 
-  -> unit result
+val render_draw_rects_ba : renderer -> (int32, Bigarray.int32_elt) bigarray -> 
+  unit result
 (** See {!render_draw_rects}. Each consecutive quadruple in the array
     defines a rectangle.
 
@@ -830,8 +831,8 @@ val render_fill_rect : renderer -> rect option -> unit result
 val render_fill_rects : renderer -> rect list -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawRects}SDL_RenderDrawRects} *)
 
-val render_fill_rects_ba : renderer -> (int32, Bigarray.int32_elt) barray 
-  -> unit result
+val render_fill_rects_ba : renderer -> (int32, Bigarray.int32_elt) bigarray -> 
+  unit result
 (** See {!render_draw_rects}. Each consecutive quadruple in the array
     defines a rectangle.
 
@@ -855,7 +856,7 @@ val render_present : renderer -> unit
 (** {{:http://wiki.libsdl.org/SDL_RenderPresent}SDL_RenderPresent} *)
 
 val render_read_pixels : renderer -> rect option -> Pixel.format_enum option -> 
-  ('a, 'b) barray -> int -> unit result
+  ('a, 'b) bigarray -> int -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderReadPixels}SDL_RenderReadPixels} *)
 
 val render_set_clip_rect : renderer -> rect option -> unit result
@@ -924,7 +925,7 @@ val get_texture_color_mod : texture -> (uint8 * uint8 * uint8) result
 (** {{:http://wiki.libsdl.org/SDL_GetTextureColorMod}SDL_GetTextureColorMod}. *)
 
 val lock_texture : texture -> rect option -> ('a, 'b) Bigarray.kind -> 
-  (('a, 'b) barray * int) result
+  (('a, 'b) bigarray * int) result
 (** {{:http://wiki.libsdl.org/SDL_LockTexture}SDL_LockTexture} 
     
     {b Note.} The returned pitch is in bigarray element, {b not} in bytes.
@@ -950,7 +951,7 @@ val set_texture_color_mod : texture -> uint8 -> uint8 -> uint8 -> unit result
 val unlock_texture : texture -> unit
 (** {{:http://wiki.libsdl.org/SDL_UnlockTexture}SDL_UnlockTexture} *)
 
-val update_texture : texture -> rect option -> ('a, 'b) barray -> int -> 
+val update_texture : texture -> rect option -> ('a, 'b) bigarray -> int -> 
   unit result 
 (** {{:http://wiki.libsdl.org/SDL_UpdateTexture}SDL_UpdateTexture} 
 
@@ -958,9 +959,9 @@ val update_texture : texture -> rect option -> ('a, 'b) barray -> int ->
     bytes. *)
 
 val update_yuv_texture : texture -> rect option ->
-  y:(int, Bigarray.int8_unsigned_elt) barray -> int -> 
-  u:(int, Bigarray.int8_unsigned_elt) barray -> int -> 
-  v:(int, Bigarray.int8_unsigned_elt) barray -> int -> unit result
+  y:(int, Bigarray.int8_unsigned_elt) bigarray -> int -> 
+  u:(int, Bigarray.int8_unsigned_elt) bigarray -> int -> 
+  v:(int, Bigarray.int8_unsigned_elt) bigarray -> int -> unit result
 (** {{:http://wiki.libsdl.org/SDL_UpdateYUVTexture}SDL_UpdateYUVTexture} *)
 
 (** {2:videodrivers {{:http://wiki.libsdl.org/CategoryVideo}Video drivers}} *)
@@ -1203,7 +1204,7 @@ val update_window_surface_rects : window -> rect list -> unit result
     SDL_UpdateWindowSurfaceRects} *)
 
 val update_window_surface_rects_ba : window -> 
-  (int32, Bigarray.int32_elt) barray -> unit result
+  (int32, Bigarray.int32_elt) bigarray -> unit result
 (** See {!update_window_surface_rects}. Each consecutive quadruplet defines a 
     rectangle. 
 
@@ -1958,7 +1959,7 @@ val get_keyboard_focus : unit -> window option
 (** {{:http://wiki.libsdl.org/SDL_GetKeyboardFocus}
     SDL_GetKeyboardFocus} *)
 
-val get_keyboard_state : unit -> (int, Bigarray.int8_unsigned_elt) barray
+val get_keyboard_state : unit -> (int, Bigarray.int8_unsigned_elt) bigarray
 (** {{:http://wiki.libsdl.org/SDL_GetKeyboardState}SDL_GetKeyboardState} *)
 
 val get_key_from_name : string -> keycode
@@ -2037,8 +2038,8 @@ end
 val create_color_cursor : surface -> hot_x:int -> hot_y:int -> cursor result
 (** {{:http://wiki.libsdl.org/SDL_CreateColorCursor}SDL_CreateColorCursor} *)
 
-val create_cursor : (int, Bigarray.int8_unsigned_elt) barray -> 
-  (int, Bigarray.int8_unsigned_elt) barray -> w:int -> h:int -> hot_x:int -> 
+val create_cursor : (int, Bigarray.int8_unsigned_elt) bigarray -> 
+  (int, Bigarray.int8_unsigned_elt) bigarray -> w:int -> h:int -> hot_x:int -> 
   hot_y:int -> cursor result
 (** {{:http://wiki.libsdl.org/SDL_CreateCursor}SDL_CreateCursor} *)
 
@@ -3101,14 +3102,14 @@ type ('a, 'b) audio_spec =
     as_samples : uint8;
     as_size : uint32;
     as_ba_kind : ('a, 'b) Bigarray.kind;
-    as_callback : (('a, 'b) barray -> unit) option; }
+    as_callback : (('a, 'b) bigarray -> unit) option; }
 (** {{:http://wiki.libsdl.org/SDL_AudioSpec}SDL_AudioSpec} *)
 
 val close_audio_device : audio_device_id -> unit
 (** {{:http://wiki.libsdl.org/SDL_CloseAudioDevice}
     SDL_CloseAudioDevice} *)
 
-val free_wav : ('a, 'b) barray -> unit
+val free_wav : ('a, 'b) bigarray -> unit
 (** {{:https://wiki.libsdl.org/SDL_FreeWAV}SDL_FreeWAV}. *)
 
 val get_audio_device_name : int -> bool -> string result
@@ -3124,7 +3125,7 @@ val get_num_audio_devices : bool -> int result
     SDL_GetNumAudioDevices} *)
 
 val load_wav_rw : rw_ops -> ('a, 'b) audio_spec -> 
-  (('a, 'b) audio_spec * ('a, 'b) barray) result
+  (('a, 'b) audio_spec * ('a, 'b) bigarray) result
 (** {{:https://wiki.libsdl.org/SDL_LoadWAV_RW}
     SDL_LoadWAV_RW}. *)
 
@@ -3160,7 +3161,7 @@ val build_audio_cvt : ~src:Audio.format -> uint8 -> uint8 ~dst:Audio.format ->
 (** {{:http://wiki.libsdl.org/SDL_BuildAudioCVT}
     SDL_BuildAudioCVT}. [None] is returned if no conversion is needed. *)
 
-val convert_audio : audio_cvt -> ('a, 'b) barray -> unit
+val convert_audio : audio_cvt -> ('a, 'b) bigarray -> unit
 (** {{:http://wiki.libsdl.org/SDL_ConvertAudio}
     SDL_ConvertAudio}. The bigarray has the source and destination *)
 *)

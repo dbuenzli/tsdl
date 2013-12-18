@@ -28,11 +28,11 @@ let err_index i = str "invalid index: %d" i
 let err_length_mul l mul = str "invalid length: %d not a multiple of %d" l mul
 let err_drop_file = "null file name (drop_file_free already called ?)"
 let err_read_field = "cannot read field" 
-let err_barray_pitch pitch ba_el_size = 
+let err_bigarray_pitch pitch ba_el_size = 
   "invalid bigarray kind: pitch (%d bytes) not a multiple of bigarray element \
    byte size (%d)"
 
-let err_barray_data len ba_el_size = 
+let err_bigarray_data len ba_el_size = 
   "invalid bigarray kind: data (%d bytes) not a multiple of bigarray element \
    byte size (%d)"
 
@@ -122,7 +122,7 @@ type uint64 = int64
 
 (* Bigarrays *) 
 
-type ('a, 'b) barray = ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
+type ('a, 'b) bigarray = ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
 
 let ba_create k len = Bigarray.Array1.create k Bigarray.c_layout len
 let ba_kind_byte_size :  ('a, 'b) Bigarray.kind -> int = fun k -> 
@@ -620,7 +620,7 @@ let set_palette_colors p cs ~fst =
 
 (* Pixel formats *)
 
-type gamma_ramp = (int, Bigarray.int16_unsigned_elt) barray
+type gamma_ramp = (int, Bigarray.int16_unsigned_elt) bigarray
 
 let calculate_gamma_ramp =
   foreign "SDL_CalculateGammaRamp" 
@@ -963,7 +963,7 @@ let get_surface_pixels s kind =
   let pitch = get_surface_pitch s in
   let kind_size = ba_kind_byte_size kind in 
   if pitch mod kind_size <> 0 
-  then invalid_arg (err_barray_pitch pitch kind_size)
+  then invalid_arg (err_bigarray_pitch pitch kind_size)
   else
   let h = getf (!@ s) surface_h in
   let ba_size = (pitch * h) / kind_size in
@@ -1474,7 +1474,7 @@ let lock_texture t r kind =
           let pitch = !@ pitch in
           let kind_size = ba_kind_byte_size kind in 
           if pitch mod kind_size <> 0 
-          then invalid_arg (err_barray_pitch pitch kind_size)
+          then invalid_arg (err_bigarray_pitch pitch kind_size)
           else
           let ba_size = (pitch * h) / kind_size in
           let pixels = coerce (ptr void) (access_ptr_typ_of_ba_kind kind) p in
@@ -4359,7 +4359,7 @@ type ('a, 'b) audio_spec =
     as_samples : uint8;
     as_size : uint32;
     as_ba_kind : ('a, 'b) Bigarray.kind;
-    as_callback : (('a, 'b) barray -> unit) option; }
+    as_callback : (('a, 'b) bigarray -> unit) option; }
 
 let audio_callback = 
   (ptr void @-> ptr uint8_t @-> int @-> returning void)
@@ -4448,7 +4448,7 @@ let load_wav_rw ops spec =
       let kind_size = ba_kind_byte_size spec.as_ba_kind in
       let len = Unsigned.UInt32.to_int (!@ len) in
       if len mod kind_size <> 0 
-      then invalid_arg (err_barray_data len kind_size)
+      then invalid_arg (err_bigarray_data len kind_size)
       else
       let ba_size = len / kind_size in 
       let ba_ptr = access_ptr_typ_of_ba_kind spec.as_ba_kind in

@@ -17,7 +17,7 @@ let log_err fmt =
 
 (* Bigarrays *)
 
-let create_barray k len = Bigarray.Array1.create k Bigarray.c_layout len
+let create_bigarray k len = Bigarray.Array1.create k Bigarray.c_layout len
 
 (* Tests. *)
 
@@ -127,7 +127,7 @@ let test_rectangles () =
   assert (Sdl.Rect.w r = 3);
   assert (Sdl.Rect.h r = 4);
   let bound = Sdl.Rect.create 1 2 2 3 in
-  let ba = create_barray Bigarray.int32 4 in
+  let ba = create_bigarray Bigarray.int32 4 in
   ba.{0} <- 1l; ba.{1} <- 2l; 
   ba.{2} <- 2l; ba.{3} <- 4l;
   begin match Sdl.enclose_points_ba ba with 
@@ -301,7 +301,7 @@ let test_surfaces () =
       | `Ok s1 -> 
           let r0 = Sdl.Rect.create 0 0 10 10 in
           let r1 = Sdl.Rect.create 2 3 5 5 in
-          let ba = create_barray Bigarray.int32 8 in 
+          let ba = create_bigarray Bigarray.int32 8 in 
           assert (Sdl.fill_rect s0 (Some r0) 0xFF000000l = `Ok ());
           assert (Sdl.fill_rects s0 [r0; r1] 0xFF000000l = `Ok ());
           assert (Sdl.fill_rects s0 [] 0xFF000000l = `Ok ());
@@ -353,7 +353,7 @@ let test_surfaces () =
       end;
       Sdl.free_surface s0;
   end;
-  let pixels = create_barray Bigarray.int32 (256 * 256) in
+  let pixels = create_bigarray Bigarray.int32 (256 * 256) in
   begin match Sdl.create_rgb_surface_from pixels ~w:256 ~h:256 ~depth:32 
                 ~pitch:256 0xFF000000l 0x00FF0000l 0x0000FF00l 0x000000FFl
   with 
@@ -363,7 +363,7 @@ let test_surfaces () =
       assert (Sdl.get_surface_pitch s = 1024); 
       Sdl.free_surface s
   end;
-  let pixels_16 = create_barray Bigarray.int16_unsigned (256 * 256) in 
+  let pixels_16 = create_bigarray Bigarray.int16_unsigned (256 * 256) in 
   begin match 
     Sdl.convert_pixels ~w:256 ~h:256 
       ~src:Sdl.Pixel.format_rgba8888 pixels 256
@@ -433,7 +433,7 @@ let test_renderers () =
           let pts = [Sdl.Point.create 100 100; Sdl.Point.create 100 200;
                      Sdl.Point.create 200 200; ]
           in
-          let pts_ba = create_barray Bigarray.int32 6 in 
+          let pts_ba = create_bigarray Bigarray.int32 6 in 
           pts_ba.{0} <- 20l; pts_ba.{1} <- 20l; 
           pts_ba.{2} <- 30l; pts_ba.{3} <- 20l;
           pts_ba.{4} <- 30l; pts_ba.{5} <- 30l; 
@@ -445,7 +445,7 @@ let test_renderers () =
           let rects = [Sdl.Rect.create 120 30 45 60; 
                        Sdl.Rect.create 150 40 56 57] 
           in
-          let rects_ba = create_barray Bigarray.int32 8 in 
+          let rects_ba = create_bigarray Bigarray.int32 8 in 
           rects_ba.{0} <- 200l; rects_ba.{1} <- 30l;
           rects_ba.{2} <- 45l; rects_ba.{3} <- 60l;
           rects_ba.{4} <- 230l; rects_ba.{5} <- 40l;
@@ -487,7 +487,7 @@ let test_textures () =
           assert (Sdl.get_texture_color_mod t = `Ok (0xFF, 0xFF, 0xFF));
           assert (Sdl.set_texture_color_mod t 0xAA 0xBB 0xCC = `Ok ());
           assert (Sdl.get_texture_color_mod t = `Ok (0xAA, 0xBB, 0xCC));
-          let p = create_barray Bigarray.int8_unsigned (256 * 256) in 
+          let p = create_bigarray Bigarray.int8_unsigned (256 * 256) in 
           assert (Sdl.update_yuv_texture t None ~y:p 256 ~u:p 256 ~v:p 256 = 
                   `Ok ());
           assert (Sdl.render_clear r = `Ok ()); 
@@ -521,7 +521,7 @@ let test_textures () =
           assert (Sdl.render_copy ~dst:(Sdl.Rect.create 100 100 50 50) r t = 
                   `Ok ());
           Sdl.render_present r;
-          let ba = create_barray Bigarray.int32 (50 * 50) in 
+          let ba = create_bigarray Bigarray.int32 (50 * 50) in 
           for i = 0 to 50 * 50 - 1 do ba.{i} <- 0xFF00FF00l done;
           begin match Sdl.update_texture t None ba 50 with 
           | `Error -> log_err " Could not update texture" 
@@ -546,7 +546,7 @@ let test_textures () =
               assert (Sdl.set_render_draw_color r 0x50 0xC8 0x78 0xFF = `Ok ());
               assert (Sdl.render_clear r = `Ok ()); 
               Sdl.render_present r;
-              let pixels = create_barray Bigarray.int32 (50 * 50) in
+              let pixels = create_bigarray Bigarray.int32 (50 * 50) in
               begin match Sdl.render_read_pixels r None 
                             (Some Sdl.Pixel.format_rgba8888) pixels (50 * 4)
               with
@@ -717,7 +717,7 @@ let test_windows () =
           let rs = [ Sdl.Rect.create 0 0 20 20; Sdl.Rect.create 20 20 20 20 ] in
           assert (Sdl.fill_rects s rs 0x00FF00FFl = `Ok ());
           assert (Sdl.update_window_surface_rects w rs = `Ok ());
-          let rs = create_barray Bigarray.int32 8 in 
+          let rs = create_bigarray Bigarray.int32 8 in 
           rs.{0} <- 40l; rs.{1} <- 40l; rs.{2} <- 20l; rs.{3} <- 20l;
           rs.{4} <- 60l; rs.{5} <- 60l; rs.{6} <- 20l; rs.{7} <- 20l;
           assert (Sdl.fill_rects_ba s rs 0x0000FFFFl = `Ok ());
@@ -931,8 +931,8 @@ let test_mouse () =
       Sdl.warp_mouse_in_window None 50 50;
       let current_cursor = Sdl.get_cursor () in
       let default_cursor = Sdl.get_default_cursor () in
-      let cd = create_barray Bigarray.int8_unsigned (2 * 16) in
-      let cm = create_barray Bigarray.int8_unsigned (2 * 16) in
+      let cd = create_bigarray Bigarray.int8_unsigned (2 * 16) in
+      let cm = create_bigarray Bigarray.int8_unsigned (2 * 16) in
       for i = 0 to 2 * 16 - 1 do cd.{i} <- 0x00; cm.{i} <- 0xFF done;
       begin match Sdl.create_cursor cd cm 16 16 7 7 with 
       | `Error -> log_err " Could not create cursor" 
