@@ -10,6 +10,7 @@ depends: [ "ocamlfind" "ctypes" ]
 depexts: [
  [["debian"] ["libsdl2-dev"]]
  [["ubuntu"] ["libsdl2-dev"]]
+ [["mageia"] ["libsdl2.0-devel"]]
 ]
 build: 
 [
