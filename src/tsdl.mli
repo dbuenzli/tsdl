@@ -4,7 +4,7 @@
    %%NAME%% release %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-(** Simple DirectMedia Layer (SDL) thin bindings.
+(** SDL thin bindings.
 
     Consult the {{!conventions}binding conventions}, the
     {{!Sdl.coverage}binding coverage} and {{!examples}examples} of

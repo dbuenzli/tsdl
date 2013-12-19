@@ -1,9 +1,9 @@
-Tsdl — Simple DirectMedia Layer (SDL) thin OCaml bindings
+Tsdl — Thin bindings to SDL for OCaml
 -------------------------------------------------------------------------------
 Release %%VERSION%%
 
 Tsdl is an OCaml library providing thin bindings to the cross-platform
-Simple DirectMedia Layer (SDL) C library.
+SDL C library.
 
 Tsdl depends on the [SDL 2.0][1] C library and [ocaml-ctypes][2]. Tsdl
 is distributed under the BSD3 license.
@@ -17,8 +17,8 @@ Contact: Daniel Bünzli `<daniel.buenzl i@erratique.ch>`
 
 ## Installation
 
-Tsdl needs the C library SDL 2.0.1 or later on your system. Tsdl can
-be installed with `opam`:
+Tsdl needs the C library SDL 2.0.1 or later installed on your
+system. Tsdl can be installed with `opam`:
 
     opam install tsdl
 
