@@ -11,6 +11,38 @@ let log_err fmt =
   let k ppf = Format.printf ": %s@." (Sdl.get_error ()) in
   Format.kfprintf k Format.std_formatter fmt 
 
+let close_joysticks joysticks = List.iter Sdl.joystick_close joysticks
+let open_joysticks () = match Sdl.num_joysticks () with
+| `Error -> log_err " Could not get number of joysticks"; []
+| `Ok count ->
+    let joysticks = ref [] in
+    for i = 0 to count - 1 do
+      begin match Sdl.joystick_open i with
+      | `Error -> log_err " Could not open joystick %d:" i
+      | `Ok j ->
+          joysticks := j :: !joysticks;
+          begin match Sdl.joystick_name j with
+          | `Error -> log_err " Could not get joystick %d's name" i
+          | `Ok name -> log "Opened joystick %s" name
+          end
+      end
+    done;
+    List.rev !joysticks
+
+let event_loop () =
+  let e = Sdl.Event.create () in
+  let rec loop () = match Sdl.wait_event (Some e) with
+  | `Error -> log_err " Could not wait event"; ()
+  | `Ok () ->
+      log "%a" Fmts.pp_event e;
+      match Sdl.Event.(enum (get e typ)) with
+      | `Quit -> ()
+      | `Drop_file -> Sdl.Event.drop_file_free e; loop ()
+      | _ -> loop ()
+  in
+  Sdl.start_text_input ();
+  loop ()
+    
 let main () = 
   let inits = Sdl.Init.(video + joystick + gamecontroller + events) in
   match Sdl.init inits with 
@@ -20,22 +52,12 @@ let main () =
       match Sdl.create_window ~w:640 ~h:480 "SDL events" flags with 
       | `Error -> log_err " Create window:"
       | `Ok w -> 
-            Sdl.start_text_input ();
-            let e = Sdl.Event.create () in
-            try 
-              while true do match Sdl.wait_event (Some e) with 
-              | `Error -> log_err " Could not wait event"; raise Exit
-              | `Ok () -> 
-                  log "%a" Fmts.pp_event e; 
-                  match Sdl.Event.(get e typ) with 
-                  | t when t = Sdl.Event.drop_file -> Sdl.Event.drop_file_free e
-                  | t when t = Sdl.Event.quit -> raise Exit
-                  | _ -> ()
-              done;
-            with Exit ->
-              Sdl.destroy_window w;
-              Sdl.quit ();
-              exit 0
+          let joysticks = open_joysticks () in
+          event_loop ();
+          close_joysticks joysticks;
+          Sdl.destroy_window w;
+          Sdl.quit ();
+          exit 0
                              
 let () = main () 
     
