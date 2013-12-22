@@ -20,7 +20,7 @@ STBS=""; ISTBS=""
 MANS=""; IMANS=""
 
 add_lib ()      { LIBS="$LIBS $1"; ILIBS="$ILIBS$NL  \"$B/$1\" {\"$2\"}"; }
-add_lib_nobuild () {               ILIBS="$ILIBS$NL  \"$B/$1\" {\"$2\"}"; }
+add_lib_nobuild () {               ILIBS="$ILIBS$NL  \"?$B/$1\" {\"$2\"}"; }
 add_bin ()      { BINS="$BINS $1"; IBINS="$IBINS$NL  \"$B/$1\" {\"$2\"}"; }
 add_sbin ()     { SBIS="$SBIS $1"; ISBIS="$ISBIS$NL  \"$B/$1\" {\"$2\"}"; }
 add_toplevel () { TOPS="$TOPS $1"; ITOPS="$ITOPS$NL  \"$B/$1\" {\"$2\"}"; }
