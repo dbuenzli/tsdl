@@ -3787,6 +3787,33 @@ module Event = struct
   
   let window_event = sdl_windowevent
 
+  (* Window event id enum *) 
+
+  let enum_of_window_event_id = 
+    let add acc (k, v) = Imap.add k v acc in
+    let enums = [ 
+      window_event_shown, `Shown;
+      window_event_hidden, `Hidden;
+      window_event_exposed, `Exposed;
+      window_event_moved, `Moved;
+      window_event_resized, `Resized;
+      window_event_size_changed, `Size_changed;
+      window_event_minimized, `Minimized;
+      window_event_maximized, `Maximized;
+      window_event_restored, `Restored;
+      window_event_enter, `Enter;
+      window_event_leave, `Leave;
+      window_event_focus_gained, `Focus_gained;
+      window_event_focus_lost, `Focus_lost;
+      window_event_close, `Close; ]
+    in
+    List.fold_left add Imap.empty enums
+    
+  let window_event_enum id = 
+    try Imap.find id enum_of_window_event_id with Not_found -> assert false
+
+
+
   (* Event type enum *) 
 
   let enum_of_event_type = 

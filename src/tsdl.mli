@@ -2672,6 +2672,13 @@ module Event : sig
   val window_event : event_type
 
   type window_event_id = int 
+  (** {{:https://wiki.libsdl.org/SDL_WindowEventID}SDL_WindowEventID} *)
+
+  val window_event_enum : window_event_id ->
+    [ `Close | `Enter | `Exposed | `Focus_gained | `Focus_lost | `Hidden 
+    | `Leave | `Maximized | `Minimized | `Moved | `Resized | `Restored 
+    | `Shown | `Size_changed ]
+
   val window_event_shown : window_event_id
   val window_event_hidden : window_event_id
   val window_event_exposed : window_event_id
