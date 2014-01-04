@@ -3812,8 +3812,6 @@ module Event = struct
   let window_event_enum id = 
     try Imap.find id enum_of_window_event_id with Not_found -> assert false
 
-
-
   (* Event type enum *) 
 
   let enum_of_event_type = 

@@ -1,5 +1,5 @@
 version = "%%VERSION%%"
-description = "Simple DirectMedia Layer (SDL) thin OCaml bindings"
+description = "Thin bindings to SDL for OCaml"
 requires = "ctypes ctypes.foreign"
 archive(byte) = "tsdl.cma"
 archive(byte, plugin) = "tsdl.cma"
@@ -15,7 +15,7 @@ package "top" (
  requires = "compiler-libs.toplevel"
  archive(byte) = "tsdl_top.cma"
  archive(byte, plugin) = "tsdl_top.cma"
- archive(native) = "tdsl_top.cmxa"
+ archive(native) = "tsdl_top.cmxa"
  archive(native, plugin) = "tsdl_top.cmxs"
  exists_if = "tsdl_top.cma"
 )
