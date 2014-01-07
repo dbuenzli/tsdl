@@ -271,58 +271,59 @@ module Log = struct
   let priority_critical = sdl_log_priority_critical
 end
 
-let log_fun_t = (int @-> string @-> returning void)
+let log_fun_t = (int @-> string @-> string @-> returning void)
 
 let log = 
-  foreign "SDL_Log" (string @-> returning void)
+  foreign "SDL_Log" (string @-> string @-> returning void)
 
 let log fmt = 
-  kpp (fun s -> ignore (log s)) fmt
+  kpp (fun s -> ignore (log "%s" s)) fmt
 
 let log_critical = 
   foreign "SDL_LogCritical" log_fun_t
 
 let log_critical c fmt = 
-  kpp (fun s -> ignore (log_critical c s)) fmt
+  kpp (fun s -> ignore (log_critical c "%s" s)) fmt
 
 let log_debug = 
   foreign "SDL_LogDebug" log_fun_t
 
 let log_debug c fmt = 
-  kpp (fun s -> ignore (log_debug c s)) fmt
+  kpp (fun s -> ignore (log_debug c "%s" s)) fmt
 
 let log_error = 
   foreign "SDL_LogError" log_fun_t
 
 let log_error c fmt = 
-  kpp (fun s -> ignore (log_error c s)) fmt
+  kpp (fun s -> ignore (log_error c "%s" s)) fmt
 
 let log_info = 
   foreign "SDL_LogInfo" log_fun_t
 
 let log_info c fmt = 
-  kpp (fun s -> ignore (log_info c s)) fmt
+  kpp (fun s -> ignore (log_info c "%s" s)) fmt
 
 let log_verbose = 
   foreign "SDL_LogVerbose" log_fun_t
 
 let log_verbose c fmt = 
-  kpp (fun s -> ignore (log_verbose c s)) fmt
+  kpp (fun s -> ignore (log_verbose c "%s" s)) fmt
 
 let log_warn = 
   foreign "SDL_LogWarn" log_fun_t
 
 let log_warn c fmt = 
-  kpp (fun s -> ignore (log_warn c s)) fmt
+  kpp (fun s -> ignore (log_warn c "%s" s)) fmt
 
 let log_get_priority =
   foreign "SDL_LogGetPriority" (int @-> returning int)
 
 let log_message = 
-  foreign "SDL_LogMessage" (int @-> int @-> string @-> returning void)
+  foreign "SDL_LogMessage" 
+    (int @-> int @-> string @-> string @-> returning void)
 
 let log_message c p fmt = 
-  kpp (fun s -> ignore (log_message c p s)) fmt
+  kpp (fun s -> ignore (log_message c p "%s" s)) fmt
 
 let log_reset_priorities = 
   foreign "SDL_LogResetPriorities" (void @-> returning void)

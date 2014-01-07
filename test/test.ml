@@ -51,6 +51,7 @@ let test_error () =
 let test_log () = 
   let cmp_priority c p = Sdl.(Log.priority_compare (log_get_priority c) p) in
   log "Testing logging"; 
+  Sdl.log "Escape %%s";
   Sdl.log "1 @[%a@]" Format.pp_print_string "info";
   Sdl.(log_critical Log.category_application "2 Pif critical");
   Sdl.(log_debug Log.category_video "Hey silent debug");
