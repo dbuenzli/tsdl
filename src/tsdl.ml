@@ -1925,6 +1925,7 @@ module Gl = struct
   let context_flags = sdl_gl_context_flags
   let context_profile_mask = sdl_gl_context_profile_mask
   let share_with_current_context = sdl_gl_share_with_current_context
+  let framebuffer_srgb_capable = sdl_gl_framebuffer_srgb_capable
 end
 
 let gl_bind_texture = 

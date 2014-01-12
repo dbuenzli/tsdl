@@ -1263,6 +1263,7 @@ module Gl : sig
   val context_flags : attr
   val context_profile_mask : attr
   val share_with_current_context : attr
+  val framebuffer_srgb_capable : attr
 end
 
 val gl_create_context : window -> gl_context result

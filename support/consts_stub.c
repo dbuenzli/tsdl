@@ -203,6 +203,7 @@ void consts (FILE *fd)
   int_v (SDL_GL_CONTEXT_FLAGS);
   int_v (SDL_GL_CONTEXT_PROFILE_MASK);
   int_v (SDL_GL_SHARE_WITH_CURRENT_CONTEXT);
+  int_v (SDL_GL_FRAMEBUFFER_SRGB_CAPABLE);
 
   /* Message box */
 
