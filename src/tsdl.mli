@@ -90,9 +90,9 @@ type uint64 = int64
 type ('a, 'b) bigarray = ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
 (** The type for bigarrays.*)
 
-type 'a result = [ `Ok of 'a | `Error ]
+type 'a result = [ `Ok of 'a | `Error of string ]
 (** The type for function results. In the [`Error] case, 
-    the function {!Sdl.get_error} has more information. *)
+    the string is what {!Sdl.get_error} returned. *)
 
 (** {1:basics Basics} *)
 
@@ -3369,8 +3369,8 @@ end
 
     {2:errors Errors} 
 
-    All functions that return an {!Sdl.result} value can get more
-    information in case of [`Error] by calling [Sdl.get_error ()].
+    All functions that return an {!Sdl.result} have the string 
+    returned by [Sdl.get_error ()] in the [`Error _] case. 
 
     {2:enums Bit fields and enumerants}
 

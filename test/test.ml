@@ -11,9 +11,7 @@ open Tsdl;;
 (* Logging *)
 
 let log fmt = Format.printf (fmt ^^ "@.") 
-let log_err fmt = 
-  let k ppf = Format.printf ": %s@." (Sdl.get_error ()) in
-  Format.kfprintf k Format.std_formatter fmt 
+let log_err fmt = Format.eprintf (fmt ^^ "@.")
 
 (* Bigarrays *)
 
@@ -84,10 +82,10 @@ let test_rw_ops () =
   log "Testing IO abstraction"; 
   let file = "/tmp/bla" in
   begin match Sdl.rw_from_file "/tmp/bli" "wb" with
-  | `Error -> log_err " Could not get IO abstraction from %s" file 
+  | `Error e -> log_err " Could not get IO abstraction from %s: %s" file e
   | `Ok rw -> 
       begin match Sdl.rw_close rw with 
-      | `Error -> log_err " Could not close IO abstraction" 
+      | `Error e -> log_err " Could not close IO abstraction: %s" e
       | `Ok () -> ()
       end
   end
@@ -95,11 +93,11 @@ let test_rw_ops () =
 let test_file_system_paths () = 
   log "Testing filesystem paths functions";
   begin match Sdl.get_base_path () with 
-  | `Error -> log " Could not get base path" 
+  | `Error e -> log " Could not get base path: %s" e
   | `Ok path -> log " base path: %s" path
   end;
   begin match Sdl.get_pref_path ~org:"ch.erratique" ~app:"tsdl-test" with
-  | `Error -> log " Could not get pref path" 
+  | `Error e -> log " Could not get pref path: %s" e
   | `Ok path -> log " pref path: %s" path
   end;
   ()
@@ -179,11 +177,11 @@ let test_palettes () =
   let b = Sdl.Color.create 0 0 255 255 in 
   let cs = [r; g; b] in
   match Sdl.alloc_palette 3 with 
-  | `Error -> log " Error while creating palette" 
+  | `Error e -> log " Error while creating palette: %s" e
   | `Ok p ->
       assert (Sdl.get_palette_ncolors p = 3);
       begin match Sdl.set_palette_colors p cs ~fst:0 with 
-      | `Error -> log_err " Could not set palette colors"
+      | `Error e -> log_err " Could not set palette colors: %s" e
       | `Ok () ->
           assert (List.for_all2 eq_col cs (Sdl.get_palette_colors p));
           let ba = Sdl.get_palette_colors_ba p in 
@@ -192,7 +190,7 @@ let test_palettes () =
                  ba.{8} = 0 && ba.{9} = 0 && ba.{10} = 255 && ba.{11} = 255);
           for i = 0 to Bigarray.Array1.dim ba - 1 do ba.{i} <- ba.{i} / 2 done;
           begin match Sdl.set_palette_colors_ba p ba ~fst:0 with 
-          | `Error -> log_err " Could not set palette colors"; 
+          | `Error e -> log_err " Could not set palette colors: %s" e; 
           | `Ok () -> 
               let ba' = Sdl.get_palette_colors_ba p in 
               for i = 0 to Bigarray.Array1.dim ba' - 1 do 
@@ -213,7 +211,7 @@ let test_pixel_formats () =
   assert (Sdl.get_pixel_format_name Sdl.Pixel.format_rgba8888 = 
           "SDL_PIXELFORMAT_RGBA8888");
   begin match Sdl.alloc_format Sdl.Pixel.format_rgba8888 with 
-  | `Error -> log_err " Could not alloc format" 
+  | `Error e -> log_err " Could not alloc format: %s" e
   | `Ok pf -> 
       assert (Sdl.Pixel.eq 
                 (Sdl.get_pixel_format_format pf) 
@@ -227,7 +225,7 @@ let test_pixel_formats () =
       Sdl.free_format pf; 
   end;
   begin match Sdl.pixel_format_enum_to_masks Sdl.Pixel.format_argb8888 with
-  | `Error -> log_err " Could not get pixel format masks" 
+  | `Error e -> log_err " Could not get pixel format masks: %s" e
   | `Ok (bpp, rm, gm, bm, am) -> 
       let bpp', rm', gm', bm', am' = 
         32, 0x00FF0000l, 0x0000FF00l, 0x000000FFl, 0xFF000000l 
@@ -237,20 +235,20 @@ let test_pixel_formats () =
                 Sdl.Pixel.format_argb8888);
   end;
   begin match Sdl.alloc_format Sdl.Pixel.format_index8 with 
-  | `Error -> log_err " Could not alloc format" 
+  | `Error e -> log_err " Could not alloc format: %s" e 
   | `Ok pf -> 
       begin match Sdl.alloc_palette 256 with 
-      | `Error -> log_err " Could not alloc palette" 
+      | `Error e -> log_err " Could not alloc palette: %s" e
       | `Ok p -> 
           let r = Sdl.Color.create 0xFF 0x00 0x00 0xFF in 
           let g = Sdl.Color.create 0x00 0xFF 0x00 0xFF in 
           let b = Sdl.Color.create 0x00 0x00 0xFF 0xFF in 
           let cs = [r; g; b] in
           begin match Sdl.set_palette_colors p cs ~fst:0 with
-          | `Error -> log_err " Could not set palette colors"
+          | `Error e -> log_err " Could not set palette colors: %s" e
           | `Ok () -> 
               begin match Sdl.set_pixel_format_palette pf p with 
-              | `Error -> log_err " Could not set pixel format palette " 
+              | `Error e -> log_err " Could not set pixel format palette: %s" e
               | `Ok () -> (); 
               end;
               Sdl.free_palette p;
@@ -274,14 +272,14 @@ let test_surfaces () =
   begin match Sdl.create_rgb_surface ~w:256 ~h:256 ~depth:32 
                 0xFF000000l 0x00FF0000l 0x0000FF00l 0x000000FFl
   with 
-  | `Error -> log_err " Could not create surface" 
+  | `Error e -> log_err " Could not create surface: %s" e
   | `Ok s0 -> 
       assert (Sdl.rect_equals (Sdl.get_clip_rect s0) 
                 (Sdl.Rect.create 0 0 256 256)); 
       let r = Sdl.Rect.create 0 0 10 10 in
       assert (Sdl.set_clip_rect s0 r); 
       assert (Sdl.rect_equals (Sdl.get_clip_rect s0) r);
-      assert (Sdl.get_color_key s0 = `Error); 
+      assert (match Sdl.get_color_key s0 with `Error _ -> true | _ -> false); 
       assert (Sdl.set_color_key s0 true 0xFF000000l = `Ok ());
       assert (Sdl.get_color_key s0 = `Ok 0xFF000000l);
       assert (Sdl.get_surface_alpha_mod s0 = `Ok 0xFF);
@@ -298,7 +296,7 @@ let test_surfaces () =
       assert (Sdl.get_surface_format_enum s0 = Sdl.Pixel.format_rgba8888);
       assert (Sdl.set_surface_rle s0 true = `Ok ());
       begin match Sdl.convert_surface_format s0 Sdl.Pixel.format_argb8888 with 
-      | `Error -> log_err " Could not convert surface" 
+      | `Error e -> log_err " Could not convert surface: %s" e 
       | `Ok s1 -> 
           let r0 = Sdl.Rect.create 0 0 10 10 in
           let r1 = Sdl.Rect.create 2 3 5 5 in
@@ -317,13 +315,13 @@ let test_surfaces () =
           Sdl.free_surface s1
       end;
       begin match Sdl.alloc_format Sdl.Pixel.format_index8 with 
-      | `Error -> log_err " Could not alloc format"
+      | `Error e -> log_err " Could not alloc format: %s" e
       | `Ok pf -> 
           begin match Sdl.convert_surface s0 pf with 
-          | `Error -> log_err " Could not convert surface" 
+          | `Error e -> log_err " Could not convert surface: %s" e
           | `Ok s1 -> 
               begin match Sdl.alloc_palette 256 with 
-              | `Error -> log_err " Could not alloc palette" 
+              | `Error e -> log_err " Could not alloc palette: %s" e
               | `Ok p -> 
                   assert (Sdl.set_surface_palette s1 p = `Ok ());
                   Sdl.free_palette p;
@@ -337,10 +335,10 @@ let test_surfaces () =
       ba.{0} <- 0xFF0000FFl;
       Sdl.unlock_surface s0;
       begin match Sdl.save_bmp s0 "/tmp/bla.bmp" with 
-      | `Error -> log_err " Could not save bmp" 
+      | `Error e -> log_err " Could not save bmp: %s" e
       | `Ok () -> 
           begin match Sdl.load_bmp "/tmp/bla.bmp" with 
-          | `Error -> log_err " Could not load bmp" 
+          | `Error e -> log_err " Could not load bmp: %s" e 
           | `Ok s ->
               let ba = Sdl.get_surface_pixels s Bigarray.int8_unsigned in 
               assert (Sdl.get_surface_format_enum s = 
@@ -358,7 +356,7 @@ let test_surfaces () =
   begin match Sdl.create_rgb_surface_from pixels ~w:256 ~h:256 ~depth:32 
                 ~pitch:256 0xFF000000l 0x00FF0000l 0x0000FF00l 0x000000FFl
   with 
-  | `Error -> log_err " Could not create surface" 
+  | `Error e -> log_err " Could not create surface: %s" e
   | `Ok s ->
       assert (Sdl.get_surface_format_enum s = Sdl.Pixel.format_rgba8888);
       assert (Sdl.get_surface_pitch s = 1024); 
@@ -370,7 +368,7 @@ let test_surfaces () =
       ~src:Sdl.Pixel.format_rgba8888 pixels 256
       ~dst:Sdl.Pixel.format_rgba5551 pixels_16 256
   with
-  | `Error -> log_err " Could not convert pixels" 
+  | `Error e -> log_err " Could not convert pixels: %s" e 
   | `Ok () -> () 
   end;
   ()
@@ -378,11 +376,11 @@ let test_surfaces () =
 let test_renderers () = 
   log "Testing renderers"; 
   begin match Sdl.get_num_render_drivers () with 
-  | `Error -> log_err " Could not get number of render drivers" 
+  | `Error e -> log_err " Could not get number of render drivers: %s" e 
   | `Ok count -> 
       for n = 0 to count - 1 do
         begin match Sdl.get_render_driver_info n with 
-        | `Error -> log_err " Could not driver info for driver %d" n 
+        | `Error e -> log_err " Could not driver info for driver %d: %s" n e
         | `Ok i -> 
             log " Driver %d @[%a@]" n Fmts.pp_render_info i
         end
@@ -390,19 +388,19 @@ let test_renderers () =
   end;
   let w_props = Sdl.Window.opengl in 
   begin match Sdl.create_window "Renderer test" ~w:640 ~h:480 w_props with
-  | `Error -> log_err " Could not create window"
+  | `Error e -> log_err " Could not create window: %s" e
   | `Ok w -> 
-      assert (Sdl.get_renderer w = `Error);
+      assert (match Sdl.get_renderer w with `Error _ -> true | _ -> false);
       begin match Sdl.create_renderer w with
-      | `Error -> log_err " Could not create renderer" 
+      | `Error e -> log_err " Could not create renderer: %s" e
       | `Ok r -> 
-          assert (Sdl.get_renderer w != `Error);
+          assert (match Sdl.get_renderer w with `Error _ -> false | _ -> true);
           begin match Sdl.get_renderer_info r with 
-          | `Error -> log_err " Could not get renderer info"
+          | `Error e -> log_err " Could not get renderer info: %s" e
           | `Ok i -> log " Renderer @[%a@]" Fmts.pp_render_info i 
           end;
           begin match Sdl.get_renderer_output_size r with 
-          | `Error -> log_err " Could not get renderer output size"
+          | `Error e -> log_err " Could not get renderer output size: %s" e
           | `Ok (w,h) -> log " Renderer output size: %dx%d" w h
           end;
           log " Render target supported: %b" (Sdl.render_target_supported r);
@@ -469,12 +467,12 @@ let test_textures () =
   log "Testing textures";
   let w_props = Sdl.Window.(opengl + shown) in 
   begin match Sdl.create_window_and_renderer ~w:640 ~h:480 w_props with
-  | `Error -> log_err " Could not create window and renderer"
+  | `Error e -> log_err " Could not create window and renderer: %s" e
   | `Ok (w, r) -> 
       begin match Sdl.create_texture r Sdl.Pixel.format_iyuv ~w:256 ~h:256 
                     Sdl.Texture.access_streaming
       with 
-      | `Error -> log_err " Could not create texture" 
+      | `Error e -> log_err " Could not create texture: %s" e 
       | `Ok t -> 
           assert (Sdl.query_texture t = 
                   `Ok (Sdl.Pixel.format_iyuv, Sdl.Texture.access_streaming,
@@ -497,7 +495,7 @@ let test_textures () =
           assert (Sdl.render_copy_ex ~dst:(Sdl.Rect.create 150 150 256 256) r t
                     45. None Sdl.Flip.none = `Ok ());
           begin match Sdl.lock_texture t None Bigarray.int8_unsigned with
-          | `Error -> log_err " Could not lock texture" 
+          | `Error e -> log_err " Could not lock texture: %s" e
           | `Ok (ba, pitch) -> 
               assert (Bigarray.Array1.dim ba = pitch * 256); 
               assert (ba.{0} = 0x00);
@@ -509,11 +507,11 @@ let test_textures () =
       begin match Sdl.create_rgb_surface 50 50 32 
                     0xFF000000l 0x00FF0000l 0x0000FF00l 0x000000FFl
       with 
-      | `Error -> log_err " Could not create surface" 
+      | `Error e -> log_err " Could not create surface: %s" e 
       | `Ok s -> 
           assert(Sdl.fill_rect s None 0xFF0000FFl = `Ok ());
           begin match Sdl.create_texture_from_surface r s with
-          | `Error -> log_err " Could not create texture" 
+          | `Error e -> log_err " Could not create texture: %s" e 
           | `Ok t -> 
           assert (Sdl.query_texture t = 
                   `Ok (Sdl.Pixel.format_argb8888, Sdl.Texture.access_static,
@@ -525,7 +523,7 @@ let test_textures () =
           let ba = create_bigarray Bigarray.int32 (50 * 50) in 
           for i = 0 to 50 * 50 - 1 do ba.{i} <- 0xFF00FF00l done;
           begin match Sdl.update_texture t None ba 50 with 
-          | `Error -> log_err " Could not update texture" 
+          | `Error e -> log_err " Could not update texture: %s" e
           | `Ok () -> 
               assert (Sdl.render_clear r = `Ok ());
               assert (Sdl.render_copy ~dst:(Sdl.Rect.create 200 200 50 50) r t 
@@ -539,10 +537,10 @@ let test_textures () =
       begin match Sdl.create_texture r Sdl.Pixel.format_rgba8888 ~w:50 ~h:50
                     Sdl.Texture.access_target
       with 
-      | `Error -> log_err " Could not create texture" 
+      | `Error e -> log_err " Could not create texture: %s" e
       | `Ok t -> 
           begin match Sdl.set_render_target r (Some t) with 
-          | `Error -> log_err "Could not set render target" 
+          | `Error e -> log_err "Could not set render target: %s" e 
           | `Ok () -> 
               assert (Sdl.set_render_draw_color r 0x50 0xC8 0x78 0xFF = `Ok ());
               assert (Sdl.render_clear r = `Ok ()); 
@@ -551,7 +549,7 @@ let test_textures () =
               begin match Sdl.render_read_pixels r None 
                             (Some Sdl.Pixel.format_rgba8888) pixels (50 * 4)
               with
-              | `Error -> log_err " Could not read pixels" 
+              | `Error e -> log_err " Could not read pixels: %s" e 
               | `Ok () -> assert (pixels.{0} = 0x50C878FFl);
               end;
           end;
@@ -567,12 +565,12 @@ let test_video_drivers () =
   let driver = Sdl.get_current_video_driver () in
   log " Current video driver: %a" (Fmts.pp_opt Fmts.pp_str) driver;
   begin match Sdl.get_num_video_drivers () with 
-  | `Error -> log_err " Could not get number of video drivers"
+  | `Error e -> log_err " Could not get number of video drivers: %s" e
   | `Ok count -> 
       log " Number of video drivers: %d" count;
       for d = 0 to count - 1 do 
         begin match Sdl.get_video_driver d with 
-        | `Error -> log_err " Driver %d: error" d
+        | `Error e -> log_err " Driver %d: error: %s" d e
         | `Ok name -> log " Driver %d: %s" d name
         end;
       done
@@ -581,7 +579,7 @@ let test_video_drivers () =
   Sdl.video_quit (); 
   log " Init video with: %a" (Fmts.pp_opt Fmts.pp_str) driver;
   begin match Sdl.video_init None with 
-  | `Error -> log_err " Could not init video" 
+  | `Error e -> log_err " Could not init video: %s" e 
   | `Ok () -> ()
   end;
   ()
@@ -589,29 +587,29 @@ let test_video_drivers () =
 let test_displays () = 
   log "Testing displays"; 
   begin match Sdl.get_num_video_displays () with 
-  | `Error -> log_err " Could not get number of video displays"
+  | `Error e -> log_err " Could not get number of video displays: %s" e
   | `Ok count -> 
       log " Number of displays: %d" count;
       for d = 0 to count - 1 do 
         log " Display %d" d;
         begin match Sdl.get_display_name d with 
-        | `Error -> log_err "  Could not get display name" 
+        | `Error e -> log_err "  Could not get display name: %s" e 
         | `Ok n -> log "  Name: %s" n
         end;
         begin match Sdl.get_display_bounds d with 
-        | `Error -> log_err "  Could not get display bounds" 
+        | `Error e -> log_err "  Could not get display bounds: %s" e 
         | `Ok r -> log "  Bounds: @[%a@]" Fmts.pp_rect r 
         end;
         begin match Sdl.get_current_display_mode d with 
-        | `Error -> log_err "  Could not get display mode"
+        | `Error e -> log_err "  Could not get display mode: %s" e
         | `Ok m -> log "  Current mode: @[%a@]" Fmts.pp_display_mode m;
         end;
         begin match Sdl.get_desktop_display_mode d with 
-        | `Error -> log_err " Could not get desktop display mode"
+        | `Error e -> log_err " Could not get desktop display mode: %s" e
         | `Ok m -> log "  Desktop mode: @[%a@]" Fmts.pp_display_mode m; 
         end;
         begin match Sdl.get_current_display_mode d with 
-        | `Error -> log_err "  Could not get display mode" 
+        | `Error e -> log_err "  Could not get display mode: %s" e 
         | `Ok m -> 
             let m' = { m with dm_w = m.Sdl.dm_w / 2; 
                               dm_h = m.Sdl.dm_h / 2; 
@@ -628,15 +626,15 @@ let test_displays () =
             end
         end;
         begin match Sdl.get_num_display_modes d with 
-        | `Error -> log_err "  Could not get number of display modes"
+        | `Error e -> log_err "  Could not get number of display modes: %s" e
         | `Ok count ->    
             begin match Sdl.get_num_display_modes d with 
-            | `Error -> log_err " Could not get number of display modes"
+            | `Error e -> log_err " Could not get number of display modes: %s" e
             | `Ok count -> 
                 log "  %d display modes:" count;
                 for i = 0 to (count - 1) do
                   match Sdl.get_display_mode d i with 
-                  | `Error -> log_err "   Could not get display mode"
+                  | `Error e -> log_err "   Could not get display mode: %s" e
                   | `Ok m -> log "   @[%a@]" Fmts.pp_display_mode m
                 done
             end
@@ -650,18 +648,18 @@ let test_windows () =
   let w_title = "A windowé" in
   let w_props = Sdl.Window.(shown + resizable) in 
   begin match Sdl.create_window w_title ~w:640 ~h:480 w_props with
-  | `Error -> log_err " Could not create window"
+  | `Error e -> log_err " Could not create window: %s" e
   | `Ok w -> 
       begin match Sdl.set_window_brightness w 0.5 with
-      | `Error -> log_err " Could not set window brightness"
+      | `Error e -> log_err " Could not set window brightness: %s" e
       | `Ok () -> assert (Sdl.get_window_brightness w = 0.5)
       end;
       begin match Sdl.get_window_display_index w with 
-      | `Error -> log_err " Could not get display index"
+      | `Error e -> log_err " Could not get display index: %s" e
       | `Ok d -> log " Window display index: %d" d;
       end;
       begin match Sdl.get_window_display_mode w with 
-      | `Error -> log_err " Could not get display mode"
+      | `Error e -> log_err " Could not get display mode: %s" e
       | `Ok m -> 
           log " Window display mode: %a" Fmts.pp_display_mode m;
           let m' = { m with dm_w = m.Sdl.dm_w / 2; 
@@ -671,29 +669,30 @@ let test_windows () =
           in
           begin match Sdl.set_window_fullscreen w Sdl.Window.fullscreen_desktop 
           with
-          | `Error -> log_err " Failed to set window to full screen mode" 
+          | `Error e -> 
+              log_err " Failed to set window to full screen mode: %s" e 
           | `Ok () -> ()
           end;
           begin match Sdl.set_window_fullscreen w Sdl.Window.windowed with
-          | `Error -> log_err " Failed to set window to windowed mode"
+          | `Error e -> log_err " Failed to set window to windowed mode: %s" e
           | `Ok () -> ()
           end;
           begin match Sdl.set_window_display_mode w m' with
-          | `Error -> log_err " Could not set window display mode"
+          | `Error e -> log_err " Could not set window display mode: %s" e
           | `Ok () -> ()
           end
       end;
       assert (Sdl.Window.(test (Sdl.get_window_flags w) resizable));
       let id = Sdl.get_window_id w in
       begin match Sdl.get_window_from_id id with 
-      | `Error -> log_err " Could not get window from id"
+      | `Error e -> log_err " Could not get window from id: %s" e
       | `Ok w' -> assert (id = Sdl.get_window_id w')
       end;
       begin match Sdl.get_window_gamma_ramp w with 
-      | `Error -> log_err " Could get gamma ramps" 
+      | `Error e -> log_err " Could get gamma ramps: %s" e
       | `Ok (r, g, b) -> 
           begin match Sdl.set_window_gamma_ramp w r g b with 
-          | `Error -> log_err " Could not set gamma ramp" 
+          | `Error e -> log_err " Could not set gamma ramp: %s" e 
           | `Ok () -> ()
           end
       end;
@@ -711,7 +710,7 @@ let test_windows () =
       Sdl.set_window_size w ~w:100 ~h:200; 
       assert (Sdl.get_window_size w = (100, 200));
       begin match Sdl.get_window_surface w with 
-      | `Error -> log_err " Could not get window surface" 
+      | `Error e -> log_err " Could not get window surface: %s" e 
       | `Ok s -> 
           assert (Sdl.fill_rect s None 0xFF0000FFl = `Ok ());
           assert (Sdl.update_window_surface w = `Ok ());
@@ -736,7 +735,7 @@ let test_windows () =
       begin match Sdl.create_rgb_surface ~w:16 ~h:16 ~depth:32
                     0xFF000000l 0x00FF0000l 0x0000FF00l 0x000000FFl
       with 
-      | `Error -> log_err " Could not create surface" 
+      | `Error e -> log_err " Could not create surface: %s" e 
       | `Ok icon -> 
           assert (Sdl.fill_rect icon None 0x00FF007Fl = `Ok ());
           Sdl.set_window_icon w icon;
@@ -751,24 +750,25 @@ let test_opengl_contexts () =
   assert (Sdl.gl_set_attribute Sdl.Gl.doublebuffer 1 = `Ok ());
   let flags = Sdl.Window.(opengl) in
   match Sdl.create_window "OpenGL" ~w:640 ~h:480 flags with  
-  | `Error -> log_err " Could not create OpenGL window"
+  | `Error e -> log_err " Could not create OpenGL window: %s" e
   | `Ok w ->
       begin match Sdl.gl_create_context w with 
-      | `Error -> log_err " Could not create OpenGL context"
+      | `Error e -> log_err " Could not create OpenGL context: %s" e
       | `Ok ctx -> 
           begin match Sdl.gl_get_attribute Sdl.Gl.context_major_version with
-          | `Error -> log_err " Could not get context major version"
+          | `Error e -> log_err " Could not get context major version: %s" e
           | `Ok maj -> 
               match Sdl.gl_get_attribute Sdl.Gl.context_minor_version with
-              | `Error -> log_err " Could not get context minor version" 
+              | `Error e -> 
+                  log_err " Could not get context minor version: %s" e 
               | `Ok min -> log " Context version: %d.%d" maj min
           end;
           begin match Sdl.gl_get_attribute Sdl.Gl.context_egl with 
-          | `Error -> log_err " Could not get context EGL"
+          | `Error e -> log_err " Could not get context EGL: %s" e
           | `Ok egl -> log " Context is EGL: %b" (egl = 1)
           end;
           begin match Sdl.gl_get_attribute Sdl.Gl.context_profile_mask with 
-          | `Error -> log_err " Could not get context profile mask"
+          | `Error e -> log_err " Could not get context profile mask: %s" e
           | `Ok m -> 
               log " Context core: %b compatibility: %b ES: %b"
                 (m land Sdl.Gl.context_profile_core <> 0)
@@ -777,25 +777,25 @@ let test_opengl_contexts () =
           end;
           assert (Sdl.gl_extension_supported "BLA234241" = false);
           begin match (Sdl.gl_set_swap_interval 1) with
-          | `Error -> log_err " Could not set swap interval";
+          | `Error e -> log_err " Could not set swap interval: %s" e
           | `Ok () -> assert (Sdl.gl_get_swap_interval () = `Ok 1)
           end;
           assert (Sdl.gl_make_current w ctx = `Ok ());
           begin match Sdl.gl_get_current_context () with 
-          | `Error -> log_err " Could not get current context" 
+          | `Error e -> log_err " Could not get current context: %s" e 
           | `Ok _ -> (); 
           end;
           assert (Sdl.gl_get_drawable_size w = (640, 480));
           begin match Sdl.create_renderer w with 
-          | `Error -> log_err " Could not create renderer"
+          | `Error e -> log_err " Could not create renderer: %s" e
           | `Ok r -> 
               begin match Sdl.create_texture r Sdl.Pixel.format_rgba8888  
                             Sdl.Texture.access_static ~w:256 ~h:256
               with 
-              | `Error -> log_err " Could not create texture" 
+              | `Error e -> log_err " Could not create texture: %s" e 
               | `Ok t -> 
                   begin match Sdl.gl_bind_texture t with 
-                  | `Error -> log " Could not bind texture" 
+                  | `Error e -> log " Could not bind texture: %s" e 
                   | `Ok (w, h) ->
                       (* FIXME: this segfaults in 2.0.1 
                          see https://bugzilla.libsdl.org/show_bug.cgi?id=2296 *)
@@ -830,7 +830,7 @@ let test_message_boxes human =
   if not human then log " not tested, needs a human (invoke with -h)" else
   let show typ title msg = 
     match Sdl.show_simple_message_box typ ~title msg None with
-    | `Error -> log_err " Could not show message box: %s" title
+    | `Error e -> log_err " Could not show message box %s: %s" title e
     | `Ok () -> ()
   in
   show Sdl.Message_box.error "Error" "This is an error"; 
@@ -857,7 +857,7 @@ let test_message_boxes human =
       color_scheme = Some color_scheme } 
   in
   begin match Sdl.show_message_box d with 
-  | `Error -> log_err " Could not show message box" 
+  | `Error e -> log_err " Could not show message box: %s" e
   | `Ok 1 | `Ok 2 -> ()
   | `Ok _ -> assert false
   end;
@@ -866,19 +866,19 @@ let test_message_boxes human =
 let test_clipboard () = 
   log "Testing clipboard"; 
   match Sdl.create_window "Clipboard" ~w:640 ~h:480 Sdl.Window.shown with
-  | `Error -> log_err " Could not create window"
+  | `Error e -> log_err " Could not create window: %s" e
   | `Ok w -> 
       (* N.B. we need a window on Linux otherwise we get an 
          odd stack overflow. *)
       let saved = 
         if not (Sdl.has_clipboard_text ()) then None else
         begin match Sdl.get_clipboard_text () with 
-        | `Error -> log_err " Could not get clipboard text"; None
+        | `Error e -> log_err " Could not get clipboard text %s" e; None
         | `Ok text -> Some text
         end;
       in
       begin match Sdl.set_clipboard_text "öpooo" with
-      | `Error -> log_err " Could not set clipboard text" 
+      | `Error e -> log_err " Could not set clipboard text: %s" e 
       | `Ok () -> 
           assert (Sdl.has_clipboard_text ());
           assert (Sdl.get_clipboard_text () = `Ok "öpooo");
@@ -892,7 +892,7 @@ let test_clipboard () =
 let test_keyboard () =  
   log "Testing keyboard";
   match Sdl.create_window "Keyboard" ~w:640 ~h:480 Sdl.Window.input_focus with  
-  | `Error -> log_err " Could not create window"
+  | `Error e -> log_err " Could not create window: %s" e
   | `Ok w ->
       begin match Sdl.get_keyboard_focus () with 
       | None -> log " No keyboard focus" 
@@ -924,7 +924,7 @@ let test_keyboard () =
 let test_mouse () = 
   log "Testing mouse";
   match Sdl.create_window "Mouse" ~w:640 ~h:480 Sdl.Window.mouse_focus with  
-  | `Error -> log_err " Could not create window"
+  | `Error e -> log_err " Could not create window: %s" e
   | `Ok w ->
       ignore (Sdl.show_cursor true);
       ignore (Sdl.get_cursor_shown ());
@@ -936,7 +936,7 @@ let test_mouse () =
       let cm = create_bigarray Bigarray.int8_unsigned (2 * 16) in
       for i = 0 to 2 * 16 - 1 do cd.{i} <- 0x00; cm.{i} <- 0xFF done;
       begin match Sdl.create_cursor cd cm 16 16 7 7 with 
-      | `Error -> log_err " Could not create cursor" 
+      | `Error e -> log_err " Could not create cursor: %s" e 
       | `Ok c -> 
           Sdl.set_cursor (Some c);
           Sdl.pump_events (); Sdl.delay 300l;
@@ -945,11 +945,11 @@ let test_mouse () =
       begin match Sdl.create_rgb_surface ~w:16 ~h:16 ~depth:32
                     0xFF000000l 0x00FF0000l 0x0000FF00l 0x000000FFl
       with
-      | `Error -> log_err " Could not create surface"
+      | `Error e -> log_err " Could not create surface: %s" e
       | `Ok s ->
           assert (Sdl.fill_rect s None 0x0000FF7Fl = `Ok ());
           begin match Sdl.create_color_cursor s 7 7 with
-          | `Error -> log_err " Could not create color cursor"
+          | `Error e -> log_err " Could not create color cursor: %s" e
           | `Ok c ->
               Sdl.set_cursor (Some c); 
               Sdl.pump_events (); Sdl.delay 300l;
@@ -958,7 +958,7 @@ let test_mouse () =
           Sdl.free_surface s
       end;
       begin match Sdl.create_system_cursor Sdl.System_cursor.hand with 
-      | `Error -> log_err " Could not create hand cursor" 
+      | `Error e -> log_err " Could not create hand cursor: %s" e 
       | `Ok c -> 
           Sdl.set_cursor (Some c);
           Sdl.pump_events (); Sdl.delay 300l;
@@ -974,7 +974,7 @@ let test_mouse () =
       ignore (Sdl.get_relative_mouse_state ());
       let rm = Sdl.get_relative_mouse_mode () in
       begin match Sdl.set_relative_mouse_mode (not rm) with 
-      | `Error -> log_err " Could not set relative mouse mode"
+      | `Error e -> log_err " Could not set relative mouse mode: %s" e
       | `Ok () -> ()
       end;
       Sdl.destroy_window w;
@@ -983,12 +983,12 @@ let test_mouse () =
 let test_touch () = 
   log "Testing touch";
   match Sdl.create_window "Touch" ~w:640 ~h:480 Sdl.Window.mouse_focus with  
-  | `Error -> log_err " Could not create window"
+  | `Error e -> log_err " Could not create window: %s" e
   | `Ok w ->
       let count = Sdl.get_num_touch_devices () in
       for i = 0 to count - 1 do 
         begin match Sdl.get_touch_device i with 
-        | `Error -> log_err " Could not get touch device" 
+        | `Error e -> log_err " Could not get touch device: %s" e 
         | `Ok id ->
             let fingers = Sdl.get_num_touch_fingers id in 
             for i = 0 to fingers - 1 do 
@@ -999,7 +999,7 @@ let test_touch () =
               end;
             done;
             begin match Sdl.record_gesture id with 
-            | `Error -> log_err " Could not record gesture" 
+            | `Error e -> log_err " Could not record gesture: %s" e 
             | `Ok () -> ()
             end;
         end;
@@ -1010,21 +1010,22 @@ let test_touch () =
 let test_joysticks () = 
   log "Testing joysticks";
   match Sdl.create_window "Joystick" ~w:640 ~h:480 Sdl.Window.shown with  
-  | `Error -> log_err " Could not create window"
+  | `Error e -> log_err " Could not create window: %s" e
   | `Ok w ->
       ignore (Sdl.joystick_set_event_state Sdl.enable);
       assert (Sdl.joystick_get_event_state () = `Ok (Sdl.enable));
       Sdl.joystick_update ();
       begin match Sdl.num_joysticks () with 
-      | `Error -> log_err " Could not get number of joysticks"
+      | `Error e -> log_err " Could not get number of joysticks: %s" e
       | `Ok count -> 
           for i = 0 to count - 1 do match Sdl.joystick_open i with 
-          | `Error -> log_err " Could not open joystick"
+          | `Error e -> log_err " Could not open joystick: %s" e
           | `Ok j -> 
               let guid = Sdl.joystick_get_guid j in
               let guid_str = Sdl.joystick_get_guid_string guid in
               let name = match Sdl.joystick_name j with 
-              | `Error -> log_err " Could not get joystick name"; "unknown" 
+              | `Error e -> 
+                  log_err " Could not get joystick name: %s" e; "unknown" 
               | `Ok n -> n 
               in
               log "Joystick %d %s %s" i name guid_str;
@@ -1033,28 +1034,28 @@ let test_joysticks () =
               ignore (Sdl.joystick_instance_id j);
               ignore (Sdl.joystick_get_attached j);
               begin match Sdl.joystick_num_axes j with 
-              | `Error -> log_err " Could not get num axes" 
+              | `Error e -> log_err " Could not get num axes: %s" e 
               | `Ok acount -> 
                   for i = 0 to acount - 1 do 
                     ignore (Sdl.joystick_get_axis j i); 
                   done;
               end;
               begin match Sdl.joystick_num_balls j with 
-              | `Error -> log_err " Could not get num balls" 
+              | `Error e -> log_err " Could not get num balls: %s" e 
               | `Ok bcount -> 
                   for i = 0 to bcount - 1 do 
                     ignore (Sdl.joystick_get_ball j i); 
                   done;
               end;
               begin match Sdl.joystick_num_buttons j with 
-              | `Error -> log_err " Could not get num buttons" 
+              | `Error e -> log_err " Could not get num buttons: %s" e 
               | `Ok bcount -> 
                   for i = 0 to bcount - 1 do ignore 
                       (Sdl.joystick_get_button j i); 
                   done;
               end;
               begin match Sdl.joystick_num_hats j with 
-              | `Error -> log_err " Could not get num hats" 
+              | `Error e -> log_err " Could not get num hats: %s" e 
               | `Ok bcount -> 
                   for i = 0 to bcount - 1 do 
                     ignore (Sdl.joystick_get_hat j i); 
@@ -1069,7 +1070,7 @@ let test_joysticks () =
 let test_game_controllers () = 
   log "Testing game controllers";
   match Sdl.create_window "Controllers" ~w:640 ~h:480 Sdl.Window.shown with  
-  | `Error -> log_err " Could not create window"
+  | `Error e -> log_err " Could not create window: %s" e
   | `Ok w ->
       ignore (Sdl.game_controller_set_event_state Sdl.enable);
       assert (Sdl.game_controller_get_event_state () = `Ok (Sdl.enable));
@@ -1079,15 +1080,16 @@ let test_game_controllers () =
                 Sdl.Controller.button_a);
       Sdl.game_controller_update ();
       begin match Sdl.num_joysticks () with 
-      | `Error -> log_err " Could not get number of joysticks"
+      | `Error e -> log_err " Could not get number of joysticks: %s" e
       | `Ok count -> 
           for i = 0 to count - 1 do 
             if not (Sdl.is_game_controller i) then () else
             match Sdl.game_controller_open i with 
-            | `Error -> log_err " Could not open game controller"
+            | `Error e -> log_err " Could not open game controller: %s" e
             | `Ok c -> 
                 let name = match Sdl.game_controller_name c with 
-                | `Error -> log_err "Could not get controller name"; "unknown" 
+                | `Error e -> 
+                    log_err "Could not get controller name: %s" e; "unknown" 
                 | `Ok n -> n 
                 in
                 log " Controller %d %s" i name;
@@ -1113,7 +1115,7 @@ let test_game_controllers () =
 let test_events () = 
   log "Testing events";
   match Sdl.create_window "Events" ~w:640 ~h:480 Sdl.Window.resizable with  
-  | `Error -> log_err " Could not create window"
+  | `Error e -> log_err " Could not create window: %s" e
   | `Ok w ->
       assert (Sdl.Event.(enum first_event) = `Unknown);
       assert (Sdl.Event.(enum quit) = `Quit);
@@ -1133,7 +1135,7 @@ let test_events () =
       | Some id -> 
           Sdl.Event.set e Sdl.Event.typ id; 
           begin match Sdl.push_event e with 
-          | `Error -> log_err " Could not push event"
+          | `Error e -> log_err " Could not push event: %s" e
           | `Ok false -> log " Pushed event filtered" 
           | `Ok true -> 
               assert (Sdl.has_event id); 
@@ -1142,16 +1144,16 @@ let test_events () =
               Sdl.flush_events Sdl.Event.first_event Sdl.Event.last_event;
           end;
           begin match Sdl.push_event e with 
-          | `Error -> log_err " Could not push event" 
+          | `Error e -> log_err " Could not push event: %s" e
           | `Ok false -> log " Event pushed filtered" 
           | `Ok true -> 
               assert (Sdl.has_event id);
               begin match Sdl.wait_event None with 
-              | `Error -> log_err " Could not wait event" 
+              | `Error e -> log_err " Could not wait event: %s" e 
               | `Ok () -> ()
               end;
               begin match Sdl.wait_event (Some e) with 
-              | `Error -> log_err " Could not wait event"
+              | `Error e -> log_err " Could not wait event: %s" e
               | `Ok () -> assert (Sdl.Event.(get e typ) = id)
               end;
           end;
@@ -1162,25 +1164,25 @@ let test_events () =
 let test_haptic () = 
   log "Testing haptic"; 
   begin match Sdl.mouse_is_haptic () with 
-  | `Error -> log_err " Could not determine if mouse is haptic" 
+  | `Error e -> log_err " Could not determine if mouse is haptic: %s" e 
   | `Ok mouse -> 
       if not mouse then () else 
       begin match Sdl.haptic_open_from_mouse () with 
-      | `Error -> log_err " Could not open haptic from the mouse"
+      | `Error e -> log_err " Could not open haptic from the mouse: %s" e
       | `Ok h -> Sdl.haptic_close h; 
       end;
   end;
   begin match Sdl.num_haptics () with 
-  | `Error -> log_err " Could not get the number of haptic devices" 
+  | `Error e -> log_err " Could not get the number of haptic devices: %s" e 
   | `Ok count -> 
       for d = 0 to count - 1 do
         let name = match Sdl.haptic_name d with 
-        | `Error -> log_err " Could not get haptic name"; "unknown" 
+        | `Error e -> log_err " Could not get haptic name: %s" e; "unknown" 
         | `Ok name -> name 
         in
         log " Haptic device %d: %s" d name;
         begin match Sdl.haptic_open d with 
-        | `Error -> log_err " Could not open device"
+        | `Error e -> log_err " Could not open device: %s" e
         | `Ok h -> 
             assert (Sdl.haptic_opened d);
             assert (Sdl.haptic_index h = `Ok d);
@@ -1189,7 +1191,7 @@ let test_haptic () =
             ignore (Sdl.haptic_num_effects_playing h);
             ignore (Sdl.haptic_query h);
             begin match Sdl.haptic_rumble_supported h with 
-            | `Error | `Ok false -> ()
+            | `Error _ | `Ok false -> ()
             | `Ok true -> 
                 ignore (Sdl.haptic_rumble_init h); 
                 ignore (Sdl.haptic_rumble_play h 0.5 3000l); 
@@ -1223,12 +1225,12 @@ let test_audio_drivers () =
   let driver = Sdl.get_current_audio_driver () in 
   log " Current audio driver: %a" (Fmts.pp_opt Fmts.pp_str) driver; 
   begin match Sdl.get_num_audio_drivers () with 
-  | `Error -> log_err " Could not get number of audio drivers" 
+  | `Error e -> log_err " Could not get number of audio drivers: %s" e 
   | `Ok count -> 
       log " Number of audio drivers: %d" count;
       for d = 0 to count - 1 do 
         begin match Sdl.get_audio_driver d with 
-        | `Error -> log_err " Driver %d: error" d 
+        | `Error e -> log_err " Driver %d: error: %s" d e
         | `Ok name -> log " Driver %d: %s" d name 
         end;
       done
@@ -1237,7 +1239,7 @@ let test_audio_drivers () =
   Sdl.audio_quit (); 
   log " Init audio with: %a" (Fmts.pp_opt Fmts.pp_str) driver;
   begin match Sdl.audio_init driver with 
-  | `Error -> log_err " Could not init audio" 
+  | `Error e -> log_err " Could not init audio: %s" e 
   | `Ok () -> ()
   end;
   ()
@@ -1245,13 +1247,13 @@ let test_audio_drivers () =
 let test_audio_devices () = 
   log "Testing audio devices";
   begin match Sdl.get_num_audio_devices false with 
-  | `Error -> log_err " Could not get number of audio devices" 
+  | `Error e -> log_err " Could not get number of audio devices: %s" e 
   | `Ok count ->
       log " Number of audio devices: %d" count;
       for i = 0 to count - 1 do 
         log " Audio device %d %s" i
           begin match Sdl.get_audio_device_name i false with 
-          | `Error -> log " Could not get audio device name"; "unknown"
+          | `Error e -> log " Could not get audio device name: %s" e; "unknown"
           | `Ok name -> name
           end;
       done;
@@ -1275,7 +1277,7 @@ let test_audio_devices () =
       in       
       begin match Sdl.open_audio_device None false spec 
                     Sdl.Audio.allow_any_change with 
-      | `Error -> log_err " Could not open audio device" 
+      | `Error e -> log_err " Could not open audio device: %s" e 
       | `Ok (dev, obtained) -> 
           if not (obtained.Sdl.as_channels = 1 && obtained.Sdl.as_freq = 44100)
           then log " Did not obtain expected audio device, will not play"
@@ -1313,7 +1315,7 @@ let test_platform_cpu_info () =
   log "Testing platform and CPU information functions"; 
   log " Platform: %s" (Sdl.get_platform ());
   let cache_line_size = match Sdl.get_cpu_cache_line_size () with 
-  | `Error -> Sdl.get_error ()
+  | `Error e -> e
   | `Ok s -> Printf.sprintf "%d" s
   in
   log " CPU: @[count:%d@ RAM:%d@ cache-line-size:%s@ 3DNow:%b@ AltiVec:%b@ \
@@ -1350,7 +1352,7 @@ let test_power_info () =
   log " Power: %s%s%s" state dur pct
 
 let tests human = match Sdl.init Sdl.Init.everything with 
-| `Error -> log_err " Could not initialize SDL"; exit 1
+| `Error e -> log_err " Could not initialize SDL: %s" e; exit 1
 | `Ok () ->
     test_init ();
     test_hints ();
