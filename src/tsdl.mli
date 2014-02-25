@@ -2029,6 +2029,12 @@ module System_cursor : sig
 end
 
 module Button : sig
+  val left : int
+  val middle : int 
+  val right : int 
+  val x1 : int 
+  val x2 : int 
+
   val lmask : uint32
   val mmask : uint32
   val rmask : uint32

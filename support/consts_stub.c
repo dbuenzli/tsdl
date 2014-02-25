@@ -738,6 +738,12 @@ void consts (FILE *fd)
   int_v (SDL_SYSTEM_CURSOR_NO);
   int_v (SDL_SYSTEM_CURSOR_HAND);
 
+  int_v (SDL_BUTTON_LEFT);
+  int_v (SDL_BUTTON_MIDDLE);
+  int_v (SDL_BUTTON_RIGHT);
+  int_v (SDL_BUTTON_X1);
+  int_v (SDL_BUTTON_X2);
+
   int_v (SDL_BUTTON_LMASK);
   int_v (SDL_BUTTON_MMASK);
   int_v (SDL_BUTTON_RMASK);

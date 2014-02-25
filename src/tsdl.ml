@@ -2795,6 +2795,12 @@ module System_cursor = struct
 end
 
 module Button = struct
+  let left = sdl_button_left
+  let right = sdl_button_right
+  let middle = sdl_button_middle
+  let x1 = sdl_button_x1
+  let x2 = sdl_button_x2 
+  
   let i = Int32.of_int
   let lmask = i sdl_button_lmask 
   let mmask = i sdl_button_mmask 
