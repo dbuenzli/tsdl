@@ -1689,11 +1689,12 @@ module Scancode : sig
   val app2 : scancode
 end
 
-type keycode = int32
+type keycode = int
 (** {{:http://wiki.libsdl.org/SDL_Keycode}SDL_Keycode} *)
 
 (** Constants for {!keycode} *)
 module K : sig
+  val scancode_mask : int
   val unknown : keycode
   val return : keycode
   val escape : keycode

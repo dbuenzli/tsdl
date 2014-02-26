@@ -2451,10 +2451,11 @@ module Scancode = struct
     `Unknown 
 end
 
-type keycode = int32
-let keycode = int32_t
+type keycode = int
+let keycode = int
 
 module K = struct
+  let scancode_mask = sdlk_scancode_mask
   let unknown = sdlk_unknown
   let return = sdlk_return
   let escape = sdlk_escape
