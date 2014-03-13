@@ -1257,7 +1257,6 @@ module Gl : sig
   val multisamplebuffers : attr
   val multisamplesamples : attr
   val accelerated_visual : attr
-  val retained_backing : attr
   val context_major_version : attr
   val context_minor_version : attr
   val context_egl : attr

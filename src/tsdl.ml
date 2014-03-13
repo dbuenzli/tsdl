@@ -1921,7 +1921,6 @@ module Gl = struct
   let multisamplebuffers = sdl_gl_multisamplebuffers
   let multisamplesamples = sdl_gl_multisamplesamples
   let accelerated_visual = sdl_gl_accelerated_visual
-  let retained_backing = sdl_gl_retained_backing
   let context_major_version = sdl_gl_context_major_version
   let context_minor_version = sdl_gl_context_minor_version
   let context_egl = sdl_gl_context_egl
