@@ -1064,6 +1064,7 @@ module Window : sig
   val input_focus : flags
   val mouse_focus : flags
   val foreign : flags
+  val allow_highdpi : flags
 end
 
 val create_window : string -> ?x:int -> ?y:int -> w:int -> h:int -> 

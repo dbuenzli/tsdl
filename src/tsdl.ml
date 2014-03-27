@@ -1672,6 +1672,7 @@ module Window = struct
   let input_focus = i sdl_window_input_focus
   let mouse_focus = i sdl_window_mouse_focus
   let foreign = i sdl_window_foreign
+  let allow_highdpi = i sdl_window_allow_highdpi
 end
 
 let create_window = 
