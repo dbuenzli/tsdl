@@ -2,7 +2,7 @@ true: thread
 <**/*.{ml,mli}> : bin_annot
 
 <support> : include
-<support/consts_stub.c> : use_sdl2
+<support/consts_stub.c> : use_sdl2, use_SDL2_image, use_SDL2_ttf
 <support/consts.{ml,native,byte}> : custom, link_consts_stub
 
 
@@ -10,12 +10,12 @@ true: thread
 <src/tsdl.{ml,mli}> : package(ctypes)
 <src/tsdl.ml> : sdl_consts_dep
 <src/tsdl.{cma,cmxa,cmxs}> : custom, thread, \
- package(ctypes), package(ctypes.foreign), use_sdl2
+ package(ctypes), package(ctypes.foreign), use_sdl2, use_SDL2_image, use_SDL2_ttf
 
 <src/libtsdl.*> : use_sdl2
 <src/tsdl_top.*> : package(compiler-libs.toplevel)
 
 <test> : include
 <test/{sdlevents,test,min}.{native,byte}> : package(ctypes), \
-  package(ctypes.foreign), use_sdl2
+  package(ctypes.foreign), use_sdl2, use_SDL2_image, use_SDL2_ttf
 <test/test.byte> : custom

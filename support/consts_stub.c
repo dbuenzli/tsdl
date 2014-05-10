@@ -128,6 +128,12 @@ void consts (FILE *fd)
   int32_v (SDL_PIXELFORMAT_UYVY);
   int32_v (SDL_PIXELFORMAT_YVYU);
 
+  /* SAN */
+  /* Surfaces */
+
+  int_v (SDL_RLEACCEL);
+
+
   /* Renderer */ 
 
   int_v (SDL_FLIP_NONE);
