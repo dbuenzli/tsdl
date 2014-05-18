@@ -3403,8 +3403,8 @@ module Event = struct
     let which = field t "which" int32_as_uint32_t
     let button = field t "button" int_as_uint8_t
     let state = field t "state" int_as_uint8_t
+    let clicks = field t "clicks" int_as_uint8_t
     let _ = field t "padding1" int_as_uint8_t
-    let _ = field t "padding2" int_as_uint8_t
     let x = field t "x" int_as_int32_t
     let y = field t "y" int_as_int32_t
     let () = seal t
@@ -3724,6 +3724,7 @@ module Event = struct
   let mouse_button_which = F (mouse_button_event, Mouse_button_event.which)
   let mouse_button_state = F (mouse_button_event, Mouse_button_event.state)
   let mouse_button_button = F (mouse_button_event, Mouse_button_event.button)
+  let mouse_button_clicks = F (mouse_button_event, Mouse_button_event.clicks)
   let mouse_button_x = F (mouse_button_event, Mouse_button_event.x)
   let mouse_button_y = F (mouse_button_event, Mouse_button_event.y)
 

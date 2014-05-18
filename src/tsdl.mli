@@ -2611,6 +2611,7 @@ module Event : sig
   val mouse_button_which : uint32 field 
   val mouse_button_button : uint8 field 
   val mouse_button_state : button_state field 
+  val mouse_button_clicks : uint8 field (** SDL 2.0.2 *)
   val mouse_button_x : int field 
   val mouse_button_y : int field 
 
