@@ -2301,10 +2301,13 @@ val game_controller_add_mapping : string -> bool result
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerAddMapping}
      SDL_GameControllerAddMapping} *)
 
-(* SDL 2.0.2 
 val game_controller_add_mapping_from_file : string -> int result
 (** {{:https://wiki.libsdl.org/SDL_GameControllerAddMappingsFromFile}
-    SDL_GameControllerAddMappingsFromFile} *) *)
+    SDL_GameControllerAddMappingsFromFile} (SDL 2.0.2). *)
+
+val game_controller_add_mapping_from_rw : rw_ops -> bool -> int result
+(** {{:https://wiki.libsdl.org/SDL_GameControllerAddMappingsFromRW}
+    SDL_GameControllerAddMappingsFromFile} (SDL 2.0.2). *)
 
 val game_controller_close : game_controller -> unit
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerClose}

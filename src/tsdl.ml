@@ -3152,10 +3152,13 @@ end
 let game_controller_add_mapping = 
   foreign "SDL_GameControllerAddMapping" (string @-> returning bool_to_ok)
 
-(* SDL 2.0.2 
 let game_controller_add_mapping_from_file = 
   foreign "SDL_GameControllerAddMappingsFromFile" 
-    (string @-> returning nat_to_ok) *)
+    ~stub (string @-> returning nat_to_ok)
+
+let game_controller_add_mapping_from_rw = 
+  foreign "SDL_GameControllerAddMappingsFromRW" 
+    ~stub (rw_ops @-> bool @-> returning nat_to_ok)
 
 let game_controller_close = 
   foreign "SDL_GameControllerClose" (game_controller @-> returning void)
