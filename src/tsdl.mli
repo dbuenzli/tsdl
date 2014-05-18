@@ -1305,6 +1305,10 @@ val gl_set_swap_interval : int -> unit result
 val gl_swap_window : window -> unit
 (** {{:http://wiki.libsdl.org/SDL_GL_SwapWindow}SDL_GL_SwapWindow} *)
 
+val gl_reset_attributes : unit -> unit 
+(** {{:http://wiki.libsdl.org/SDL_GL_ResetAttributes}SDL_GL_ResetAttributes} 
+    (SDL 2.0.2). *)
+
 val gl_unbind_texture : texture -> unit result
 (** {{:http://wiki.libsdl.org/SDL_GL_UnbindTexture}SDL_GL_UnbindTexture} 
     {b Warning} Segfaults on SDL 2.0.1 

@@ -747,6 +747,7 @@ let test_windows () =
 
 let test_opengl_contexts () = 
   log "Testing OpenGL contexts";
+  Sdl.gl_reset_attributes ();
   assert (Sdl.gl_set_attribute Sdl.Gl.doublebuffer 1 = `Ok ());
   let flags = Sdl.Window.(opengl) in
   match Sdl.create_window "OpenGL" ~w:640 ~h:480 flags with  

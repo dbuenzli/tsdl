@@ -113,6 +113,8 @@ let () =
   let set_main_ready = foreign "SDL_SetMainReady" (void @-> returning void) in
   set_main_ready ()
 
+let stub = true
+
 (* SDL results *) 
 
 type 'a result = [ `Ok of 'a | `Error of string ]
@@ -1979,7 +1981,10 @@ let gl_get_swap_interval =
 let gl_make_current = 
   foreign "SDL_GL_MakeCurrent" 
     (window @-> gl_context @-> returning zero_to_ok)
-    
+
+let gl_reset_attributes = 
+  foreign "SDL_GL_ResetAttributes" ~stub (void @-> returning void)
+
 let gl_set_attribute = 
   foreign "SDL_GL_SetAttribute" (int @-> int @-> returning zero_to_ok)
     
