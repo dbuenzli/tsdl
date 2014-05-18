@@ -2139,7 +2139,19 @@ let show_simple_message_box t ~title msg w =
 (* Clipboard *)
 
 let get_clipboard_text = 
-  foreign "SDL_GetClipboardText" (void @-> returning (some_to_ok string_opt))
+  foreign "SDL_GetClipboardText" (void @-> returning (ptr char))
+
+let get_clipboard_text () = 
+  let p = get_clipboard_text () in 
+  if (to_voidp p) = null then error () else 
+  let b = Buffer.create 255 in
+  let ptr = ref p in
+  while (!@ !ptr) <> '\000' do 
+    Buffer.add_char b (!@ !ptr); 
+    ptr := !ptr +@ 1;
+  done;
+  sdl_free (to_voidp p); 
+  `Ok (Buffer.contents b)
 
 let has_clipboard_text = 
   foreign "SDL_HasClipboardText" (void @-> returning bool)
