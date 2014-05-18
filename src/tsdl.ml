@@ -4608,6 +4608,9 @@ let has_3d_now =
 let has_altivec = 
   foreign "SDL_HasAltiVec" (void @-> returning bool)
 
+let has_avx = 
+  foreign ~stub "SDL_HasAVX" (void @-> returning bool)
+
 let has_mmx = 
   foreign "SDL_HasMMX" (void @-> returning bool)
 

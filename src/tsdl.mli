@@ -3244,6 +3244,9 @@ val has_3d_now : unit -> bool
 val has_altivec : unit -> bool
 (** {{:http://wiki.libsdl.org/SDL_HasAltiVec}SDL_HasAltiVec} *)
 
+val has_avx : unit -> bool 
+(** {{:https://wiki.libsdl.org/SDL_HasAVX}SDL_HasAVX} (SDL 2.0.2) *)
+
 val has_mmx : unit -> bool
 (** {{:http://wiki.libsdl.org/SDL_HasMMX}SDL_HasMMX} *)
 
