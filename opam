@@ -1,9 +1,9 @@
 opam-version: "1"
 maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
 homepage: "http://erratique.ch/software/tsdl"
-authors: ["Daniel Bünzli <daniel.buenzli i@erratique.ch>"]
+authors: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
 doc: "http://erratique.ch/software/tsdl/doc/Tsdl"
-tags: [ "audio" "bindings" "graphics" "media" "opengl" ]
+tags: [ "audio" "bindings" "graphics" "media" "opengl" "input" "hci" ]
 license: "BSD3"
 ocaml-version: [>= "4.00.1"]
 depends: [ "ocamlfind" "ctypes" ]
@@ -14,7 +14,8 @@ depexts: [
 ]
 build: 
 [
-  ["./pkg/pkg-git" ] 
-  ["./pkg/build" "true" ]
+  [ "ocaml" "pkg/git.ml" ]
+  [ "ocaml" "pkg/build.ml" "native=%{ocaml-native}%"
+                           "native-dynlink=%{ocaml-native}%" ] # TODO fixme
 ]
 
