@@ -6,7 +6,7 @@ doc: "http://erratique.ch/software/tsdl/doc/Tsdl"
 tags: [ "audio" "bindings" "graphics" "media" "opengl" "input" "hci" ]
 license: "BSD3"
 ocaml-version: [>= "4.00.1"]
-depends: [ "ocamlfind" "ctypes" ]
+depends: [ "ocamlfind" "ctypes" {>= "0.3"}]
 depexts: [
  [["debian"] ["libsdl2-dev"]]
  [["ubuntu"] ["libsdl2-dev"]]
