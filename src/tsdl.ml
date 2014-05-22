@@ -61,20 +61,20 @@ let int32_as_uint32_t =
 let string_as_char_array n = (* FIXME: drop this if ctypes proposes better *)
   let n_array = array n char in
   let read a =
-    let len = Array.length a in
+    let len = CArray.length a in
     let b = Buffer.create len in 
     try 
       for i = 0 to len - 1 do 
-        let c = Array.get a i in 
+        let c = CArray.get a i in 
         if c = '\000' then raise Exit else Buffer.add_char b c
       done;
       Buffer.contents b
     with Exit -> Buffer.contents b
   in
   let write s = 
-    let a = Array.make char n in 
-    let len = min (Array.length a) (String.length s) in
-    for i = 0 to len - 1 do Array.set a i (s.[i]) done;
+    let a = CArray.make char n in 
+    let len = min (CArray.length a) (String.length s) in
+    for i = 0 to len - 1 do CArray.set a i (s.[i]) done;
     a
   in
   view ~read ~write n_array
@@ -514,7 +514,7 @@ let enclose_points_ba ?clip ps =
 
 let enclose_points ?clip ps =
   let count = List.length ps in
-  let ps = to_voidp (Array.start (Array.of_list point ps)) in
+  let ps = to_voidp (CArray.start (CArray.of_list point ps)) in
   let res = make rect in
   if enclose_points ps count (Rect.opt_addr clip) (addr res)
   then Some res 
@@ -595,19 +595,19 @@ let get_palette_ncolors p =
 
 let get_palette_colors p = 
   let ps = !@ p in
-  Array.to_list 
-    (Array.from_ptr (getf ps palette_colors) (getf ps palette_ncolors))
+  CArray.to_list 
+    (CArray.from_ptr (getf ps palette_colors) (getf ps palette_ncolors))
   
 let get_palette_colors_ba p = 
   let ps = !@ p in 
-  (* FIXME: ctypes should have an Array.copy function *)
+  (* FIXME: ctypes should have a CArray.copy function *)
   let n = getf ps palette_ncolors in
   let ba = Bigarray.(Array1.create int8_unsigned c_layout (n * 4)) in
   let ba_ptr = 
-    Array.from_ptr (coerce (ptr int) (ptr color) (bigarray_start array1 ba)) n
+    CArray.from_ptr (coerce (ptr int) (ptr color) (bigarray_start array1 ba)) n
   in
-  let ca = Array.from_ptr (getf ps palette_colors) n in 
-  for i = 0 to n - 1 do Array.set ba_ptr i (Array.get ca i) done;
+  let ca = CArray.from_ptr (getf ps palette_colors) n in 
+  for i = 0 to n - 1 do CArray.set ba_ptr i (CArray.get ca i) done;
   ba
   
 let set_palette_colors = 
@@ -623,8 +623,8 @@ let set_palette_colors_ba p cs ~fst =
 
 let set_palette_colors p cs ~fst =
   let count = List.length cs in
-  let a = Array.of_list color cs in
-  set_palette_colors p (to_voidp (Array.start a)) fst count
+  let a = CArray.of_list color cs in
+  set_palette_colors p (to_voidp (CArray.start a)) fst count
 
 (* Pixel formats *)
 
@@ -907,8 +907,8 @@ let fill_rects_ba s rs col =
 
 let fill_rects s rs col =
   let count = List.length rs in
-  let a = Array.of_list rect rs in
-  fill_rects s (to_voidp (Array.start a)) count col
+  let a = CArray.of_list rect rs in
+  fill_rects s (to_voidp (CArray.start a)) count col
 
 let free_surface = 
   foreign "SDL_FreeSurface" (surface @-> returning void)
@@ -1112,7 +1112,7 @@ let renderer_info_of_c c =
   let tfs = getf c ri_tfs in
   let ri_texture_formats = 
     let acc = ref [] in
-    for i = 0 to num_tf - 1 do acc := (Array.get tfs i) :: !acc done; 
+    for i = 0 to num_tf - 1 do acc := (CArray.get tfs i) :: !acc done; 
     List.rev !acc
   in
   let ri_max_texture_width = getf c ri_max_texture_width in
@@ -1230,8 +1230,8 @@ let render_draw_lines_ba r ps =
 
 let render_draw_lines r ps =
   let count = List.length ps in
-  let a = Array.of_list point ps in
-  render_draw_lines r (to_voidp (Array.start a)) count
+  let a = CArray.of_list point ps in
+  render_draw_lines r (to_voidp (CArray.start a)) count
 
 let render_draw_point = 
   foreign "SDL_RenderDrawPoint"
@@ -1250,8 +1250,8 @@ let render_draw_points_ba r ps =
 
 let render_draw_points r ps =
   let count = List.length ps in
-  let a = Array.of_list point ps in
-  render_draw_points r (to_voidp (Array.start a)) count
+  let a = CArray.of_list point ps in
+  render_draw_points r (to_voidp (CArray.start a)) count
 
 let render_draw_rect = 
   foreign "SDL_RenderDrawRect" 
@@ -1273,8 +1273,8 @@ let render_draw_rects_ba r rs =
 
 let render_draw_rects r rs =
   let count = List.length rs in
-  let a = Array.of_list rect rs in
-  render_draw_rects r (to_voidp (Array.start a)) count
+  let a = CArray.of_list rect rs in
+  render_draw_rects r (to_voidp (CArray.start a)) count
 
 let render_fill_rect =
   foreign "SDL_RenderFillRect"
@@ -1296,8 +1296,8 @@ let render_fill_rects_ba r rs =
 
 let render_fill_rects r rs =
   let count = List.length rs in
-  let a = Array.of_list rect rs in
-  render_fill_rects r (to_voidp (Array.start a)) count
+  let a = CArray.of_list rect rs in
+  render_fill_rects r (to_voidp (CArray.start a)) count
 
 let render_get_clip_rect =
   foreign "SDL_RenderGetClipRect" 
@@ -1886,7 +1886,7 @@ let update_window_surface_rects_ba w rs =
 
 let update_window_surface_rects w rs = 
   let count = List.length rs in 
-  let rs = to_voidp (Array.start (Array.of_list rect rs)) in 
+  let rs = to_voidp (CArray.start (CArray.of_list rect rs)) in 
   update_window_surface_rects w rs count
 
 (* OpenGL contexts *)
@@ -2085,13 +2085,13 @@ module Message_box = struct
       setf bt button_text b.button_text;
       bt
     in
-    Array.start (Array.of_list button_data (List.map button_data_to_c bl))
+    CArray.start (CArray.of_list button_data (List.map button_data_to_c bl))
 
   let color_scheme_to_c s =
     let st = make color_scheme in 
     let colors = getf st colors in
     let set i (rv, gv, bv) = 
-      let ct = Array.get colors i in 
+      let ct = CArray.get colors i in 
       setf ct color_r (Unsigned.UInt8.of_int rv); 
       setf ct color_g (Unsigned.UInt8.of_int rv); 
       setf ct color_b (Unsigned.UInt8.of_int rv); 
@@ -3063,7 +3063,7 @@ let joystick_get_guid_string =
 
 let joystick_get_guid_string guid = 
   let len = 33 in
-  let s = Array.start (Array.make char 33) in 
+  let s = CArray.start (CArray.make char 33) in 
   joystick_get_guid_string guid s len; 
   coerce (ptr char) string s
 
@@ -4108,8 +4108,8 @@ module Haptic = struct
       let read _ = invalid_arg err_read_field in
       let write l = 
         let l = List.map Unsigned.UInt16.of_int l in
-        let a = Array.of_list uint16_t l in 
-        Array.start a
+        let a = CArray.of_list uint16_t l in 
+        CArray.start a
       in
       view ~read ~write (ptr uint16_t)
       
