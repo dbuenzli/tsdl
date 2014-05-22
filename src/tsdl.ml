@@ -2911,7 +2911,7 @@ let warp_mouse_in_window w ~x ~y =
 
 type touch_id = int64
 let touch_id = int64_t
-let touch_mouse_id = Int64.of_int (sdl_touch_mouseid)
+let touch_mouse_id = Int64.of_int32 (sdl_touch_mouseid)
 
 type gesture_id = int64 
 let gesture_id = int64_t 
