@@ -6,7 +6,7 @@ archive(byte, plugin) = "tsdl.cma"
 archive(native) = "tsdl.cmxa"
 archive(native, plugin) = "tsdl.cmxs"
 archive(byte, toploop) += "tsdl_top.cma"
-archive(native, toploop) += "tsdl_top.cmxa"
+archive(native, toploop) += "tsdl_top.cmxs"
 exists_if = "tsdl.cma"
 
 package "top" (
