@@ -299,6 +299,10 @@ val rw_from_file : string -> string -> rw_ops result
 val rw_close : rw_ops -> unit result
 (** {{:https://wiki.libsdl.org/SDL_RWclose}SDL_RWclose} *)
 
+(**/**)
+val unsafe_rw_ops_of_ptr : int64 -> rw_ops
+(**/**)
+
 (** {1:fspaths {{:https://wiki.libsdl.org/CategoryFilesystem}Filesystem 
     Paths}} *)
 
@@ -312,6 +316,10 @@ val get_pref_path : org:string -> app:string -> string result
 
 type window
 (** SDL_Window *)
+
+(**/**)
+val unsafe_window_of_ptr : int64 -> window
+(**/**)
 
 (** {2:colors Colors} *)
 
@@ -417,6 +425,10 @@ val set_palette_colors_ba : palette ->
     color. The data is copied. 
     @raise Invalid_argument if the length of the array is not 
     a multiple of 4. *)
+
+(**/**)
+val unsafe_palette_of_ptr : int64 -> palette
+(**/**)
 
 (** {2:pixel_formats {{:http://wiki.libsdl.org/CategoryPixels}Pixels 
     formats}} *)
@@ -530,6 +542,10 @@ val set_pixel_format_palette : pixel_format -> palette -> unit result
     
     {b Note} If you allocated the palette with {!alloc_palette} you 
     can {!free_palette} after. *)
+
+(**/**)
+val unsafe_pixel_format_of_ptr : int64 -> pixel_format
+(**/**)
 
 (** {2:surfaces
     {{:http://wiki.libsdl.org/CategorySurface}Surface}} *)
@@ -683,6 +699,10 @@ val set_surface_rle : surface -> bool -> unit result
 val unlock_surface : surface -> unit
 (** {{:http://wiki.libsdl.org/SDL_UnlockSurface}SDL_UnlockSurface} *)
 
+(**/**)
+val unsafe_surface_of_ptr : int64 -> surface
+(**/**)
+
 (** {2:renderers {{:http://wiki.libsdl.org/CategoryRender}Renderers}} *)
 
 type flip 
@@ -700,7 +720,16 @@ end
 type texture 
 (** SDL_Texture *)
 
+(**/**)
+val unsafe_texture_of_ptr : int64 -> texture
+(**/**)
+
 type renderer
+
+(**/**)
+val unsafe_renderer_of_ptr : int64 -> renderer
+(**/**)
+
 (** SDL_Renderer *)
 
 module Renderer : sig
@@ -1215,6 +1244,11 @@ val update_window_surface_rects_ba : window ->
 (** {2:opengl {{:http://wiki.libsdl.org/CategoryVideo}OpenGL contexts}} *)
 
 type gl_context
+
+(**/**)
+val unsafe_gl_context_of_ptr : int64 -> gl_context
+(**/**)
+
 (** SDL_GLContext *) 
 
 module Gl : sig
@@ -2016,6 +2050,11 @@ val stop_text_input : unit -> unit
 (** {2:mouse {{:http://wiki.libsdl.org/CategoryMouse}Mouse}} *)
 
 type cursor 
+
+(**/**)
+val unsafe_cursor_of_ptr : int64 -> cursor
+(**/**)
+
 (** SDL_Cursor *)
 
 module System_cursor : sig
@@ -2159,6 +2198,11 @@ type joystick_id = int32
 (** SDL_JoystickID *)
 
 type joystick
+
+(**/**)
+val unsafe_joystick_of_ptr : int64 -> joystick
+(**/**)
+
 (** SDL_Joystick *)
 
 module Hat : sig
@@ -2251,6 +2295,11 @@ val num_joysticks : unit -> int result
   {{:http://wiki.libsdl.org/CategoryGameController}Game controller}} *)
 
 type game_controller
+
+(**/**)
+val unsafe_game_controller_of_ptr : int64 -> game_controller
+(**/**)
+
 (** SDL_GameController *)
 
 module Controller : sig
