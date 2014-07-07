@@ -392,6 +392,9 @@ let rw_close ops =
   let close = getf (!@ ops) rw_ops_close in
   if close ops = 0 then `Ok () else (error ())
 
+let unsafe_rw_ops_of_ptr addr : rw_ops =
+  from_voidp rw_ops_struct (ptr_of_raw_address addr)
+
 (* File system paths *)
 
 let get_base_path = 
@@ -417,6 +420,9 @@ let get_pref_path ~org ~app =
 type window = unit ptr
 let window : window typ = ptr void
 let window_opt : window option typ = ptr_opt void
+
+let unsafe_window_of_ptr addr : window =
+  ptr_of_raw_address addr
 
 (* Colors *)
 
@@ -583,6 +589,9 @@ type palette = palette_struct ptr
 let palette : palette typ = ptr palette_struct 
 let palette_opt : palette option typ = ptr_opt palette_struct
 
+let unsafe_palette_of_ptr addr : palette =
+  from_voidp palette_struct (ptr_of_raw_address addr)
+
 let alloc_palette =
   foreign "SDL_AllocPalette" 
     (int @-> returning (some_to_ok palette_opt))
@@ -722,6 +731,9 @@ type pixel_format = pixel_format_struct ptr
 let pixel_format : pixel_format typ = ptr pixel_format_struct 
 let pixel_format_opt : pixel_format option typ = ptr_opt pixel_format_struct
 
+let unsafe_pixel_format_of_ptr addr : pixel_format =
+  from_voidp pixel_format_struct (ptr_of_raw_address addr)
+
 let alloc_format = 
   foreign "SDL_AllocFormat" 
     (uint32_t @-> returning (some_to_ok pixel_format_opt))
@@ -820,6 +832,9 @@ let () = seal surface_struct
 type surface = surface_struct ptr
 let surface : surface typ = ptr surface_struct 
 let surface_opt : surface option typ = ptr_opt surface_struct
+
+let unsafe_surface_of_ptr addr : surface =
+  from_voidp surface_struct (ptr_of_raw_address addr)
 
 let blit_scaled = 
   (* SDL_BlitScaled is #ifdef'd to SDL_UpperBlitScaled *)
@@ -1072,9 +1087,15 @@ type texture = unit ptr
 let texture : texture typ = ptr void
 let texture_opt : texture option typ = ptr_opt void
 
+let unsafe_texture_of_ptr addr : texture =
+  ptr_of_raw_address addr
+
 type renderer = unit ptr
 let renderer : renderer typ = ptr void
 let renderer_opt : renderer option typ = ptr_opt void
+
+let unsafe_renderer_of_ptr addr : renderer =
+  ptr_of_raw_address addr
 
 module Renderer = struct
   type flags = Unsigned.uint32
@@ -1894,6 +1915,9 @@ let update_window_surface_rects w rs =
 type gl_context = unit ptr
 let gl_context : unit ptr typ = ptr void
 let gl_context_opt : unit ptr option typ = ptr_opt void
+
+let unsafe_gl_context_of_ptr addr : gl_context =
+  ptr_of_raw_address addr
 
 module Gl = struct
   type context_flags = int
@@ -2797,6 +2821,9 @@ type cursor = unit ptr
 let cursor : cursor typ = ptr void
 let cursor_opt : cursor option typ = ptr_opt void
 
+let unsafe_cursor_of_ptr addr : cursor =
+  ptr_of_raw_address addr
+
 module System_cursor = struct
   type t = int
   let arrow = sdl_system_cursor_arrow
@@ -3003,6 +3030,9 @@ type joystick = unit ptr
 let joystick : joystick typ = ptr void
 let joystick_opt : joystick option typ = ptr_opt void
 
+let unsafe_joystick_of_ptr addr : joystick =
+  ptr_of_raw_address addr
+
 module Hat = struct
   type t = int
   let centered = sdl_hat_centered
@@ -3109,6 +3139,9 @@ let num_joysticks =
 type game_controller = unit ptr
 let game_controller : game_controller typ = ptr void
 let game_controller_opt : game_controller option typ = ptr_opt void
+
+let unsafe_game_controller_of_ptr addr : game_controller =
+  ptr_of_raw_address addr
 
 type _button_bind
 let button_bind : _button_bind structure typ = 
@@ -3957,6 +3990,9 @@ let wait_event_timeout e t =
 type haptic = unit ptr
 let haptic : haptic typ = ptr void
 let haptic_opt : haptic option typ = ptr_opt void
+
+let unsafe_haptic_of_ptr addr : haptic =
+  ptr_of_raw_address addr
     
 module Haptic = struct
   let infinity = -1l
