@@ -353,6 +353,7 @@ type rect
 
 module Rect : sig
   val create : x:int -> y:int -> w:int -> h:int -> rect
+  val modify : rect -> x:int -> y:int -> w:int -> h:int -> rect
   val x : rect -> int
   val y : rect -> int 
   val w : rect -> int 
