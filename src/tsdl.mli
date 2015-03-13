@@ -290,8 +290,9 @@ val get_revision_number : unit -> int
 
 (** {2:io {{:https://wiki.libsdl.org/CategoryIO}IO abstraction}} *) 
 
-type rw_ops 
+type rw_ops
 (** {{:https://wiki.libsdl.org/SDL_RWops}SDL_RWops} *)
+val rw_ops : rw_ops Ctypes.typ
 
 val rw_from_file : string -> string -> rw_ops result
 (** {{:https://wiki.libsdl.org/SDL_RWFromFile}SDL_RWFromFile} *)
