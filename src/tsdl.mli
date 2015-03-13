@@ -550,8 +550,10 @@ val unsafe_pixel_format_of_ptr : int64 -> pixel_format
 (** {2:surfaces
     {{:http://wiki.libsdl.org/CategorySurface}Surface}} *)
 
-type surface 
+type surface
 (** {{:https://wiki.libsdl.org/SDL_Surface}SDL_Surface} *)
+val surface : surface Ctypes.typ
+val surface_opt : surface option Ctypes.typ
 
 val blit_scaled : src:surface -> rect -> dst:surface -> rect option -> 
   unit result
@@ -717,14 +719,19 @@ module Flip : sig
   val vertical : flip
 end
 
-type texture 
+type texture
 (** SDL_Texture *)
+
+val texture : texture Ctypes.typ
+val texture_opt : texture option Ctypes.typ
 
 (**/**)
 val unsafe_texture_of_ptr : int64 -> texture
 (**/**)
 
 type renderer
+val renderer : renderer Ctypes.typ
+val renderer_opt : renderer option Ctypes.typ
 
 (**/**)
 val unsafe_renderer_of_ptr : int64 -> renderer
