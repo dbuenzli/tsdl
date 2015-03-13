@@ -494,6 +494,13 @@ module Rect = struct
     setf r rect_h h; 
     r
 
+  let modify r ~x ~y ~w ~h =
+    setf r rect_x x;
+    setf r rect_y y;
+    setf r rect_w w;
+    setf r rect_h h;
+    r
+
   let x r = getf r rect_x 
   let y r = getf r rect_y
   let w r = getf r rect_w 
