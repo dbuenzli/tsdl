@@ -300,7 +300,7 @@ val rw_close : rw_ops -> unit result
 (** {{:https://wiki.libsdl.org/SDL_RWclose}SDL_RWclose} *)
 
 (**/**)
-val unsafe_rw_ops_of_ptr : int64 -> rw_ops
+val unsafe_rw_ops_of_ptr : nativeint -> rw_ops
 (**/**)
 
 (** {1:fspaths {{:https://wiki.libsdl.org/CategoryFilesystem}Filesystem 
@@ -318,7 +318,7 @@ type window
 (** SDL_Window *)
 
 (**/**)
-val unsafe_window_of_ptr : int64 -> window
+val unsafe_window_of_ptr : nativeint -> window
 (**/**)
 
 (** {2:colors Colors} *)
@@ -427,7 +427,7 @@ val set_palette_colors_ba : palette ->
     a multiple of 4. *)
 
 (**/**)
-val unsafe_palette_of_ptr : int64 -> palette
+val unsafe_palette_of_ptr : nativeint -> palette
 (**/**)
 
 (** {2:pixel_formats {{:http://wiki.libsdl.org/CategoryPixels}Pixels 
@@ -544,7 +544,7 @@ val set_pixel_format_palette : pixel_format -> palette -> unit result
     can {!free_palette} after. *)
 
 (**/**)
-val unsafe_pixel_format_of_ptr : int64 -> pixel_format
+val unsafe_pixel_format_of_ptr : nativeint -> pixel_format
 (**/**)
 
 (** {2:surfaces
@@ -700,7 +700,7 @@ val unlock_surface : surface -> unit
 (** {{:http://wiki.libsdl.org/SDL_UnlockSurface}SDL_UnlockSurface} *)
 
 (**/**)
-val unsafe_surface_of_ptr : int64 -> surface
+val unsafe_surface_of_ptr : nativeint -> surface
 (**/**)
 
 (** {2:renderers {{:http://wiki.libsdl.org/CategoryRender}Renderers}} *)
@@ -721,13 +721,13 @@ type texture
 (** SDL_Texture *)
 
 (**/**)
-val unsafe_texture_of_ptr : int64 -> texture
+val unsafe_texture_of_ptr : nativeint -> texture
 (**/**)
 
 type renderer
 
 (**/**)
-val unsafe_renderer_of_ptr : int64 -> renderer
+val unsafe_renderer_of_ptr : nativeint -> renderer
 (**/**)
 
 (** SDL_Renderer *)
@@ -1246,7 +1246,7 @@ val update_window_surface_rects_ba : window ->
 type gl_context
 
 (**/**)
-val unsafe_gl_context_of_ptr : int64 -> gl_context
+val unsafe_gl_context_of_ptr : nativeint -> gl_context
 (**/**)
 
 (** SDL_GLContext *) 
@@ -2052,7 +2052,7 @@ val stop_text_input : unit -> unit
 type cursor 
 
 (**/**)
-val unsafe_cursor_of_ptr : int64 -> cursor
+val unsafe_cursor_of_ptr : nativeint -> cursor
 (**/**)
 
 (** SDL_Cursor *)
@@ -2200,7 +2200,7 @@ type joystick_id = int32
 type joystick
 
 (**/**)
-val unsafe_joystick_of_ptr : int64 -> joystick
+val unsafe_joystick_of_ptr : nativeint -> joystick
 (**/**)
 
 (** SDL_Joystick *)
@@ -2297,7 +2297,7 @@ val num_joysticks : unit -> int result
 type game_controller
 
 (**/**)
-val unsafe_game_controller_of_ptr : int64 -> game_controller
+val unsafe_game_controller_of_ptr : nativeint -> game_controller
 (**/**)
 
 (** SDL_GameController *)
@@ -3530,5 +3530,3 @@ v}
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   ---------------------------------------------------------------------------*)
-
-
