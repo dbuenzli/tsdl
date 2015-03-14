@@ -9,7 +9,7 @@ let exec s =
   let ph = !Toploop.parse_toplevel_phrase l in
   assert(Toploop.execute_phrase false Format.err_formatter ph)
 
-let setup () = 
+let setup () =
   exec "open Tsdl;;"
 
 let () = setup ()
@@ -21,7 +21,7 @@ let () = setup ()
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-     
+
    1. Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
 

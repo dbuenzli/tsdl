@@ -8,69 +8,69 @@
 
 open Tsdl;;
 
-let button_state_str = function 
+let button_state_str = function
 | s when s = Sdl.pressed -> "pressed"
-| s when s = Sdl.released -> "released" 
+| s when s = Sdl.released -> "released"
 | _ -> assert false
 
-let pp = Format.fprintf 
 let pp = Format.fprintf
-let pp_int = Format.pp_print_int 
-let pp_str = Format.pp_print_string 
-let pp_ipair ppf (x, y) = pp ppf "(%d %d)" x y 
-let pp_opt pp_v ppf v = match v with 
+let pp = Format.fprintf
+let pp_int = Format.pp_print_int
+let pp_str = Format.pp_print_string
+let pp_ipair ppf (x, y) = pp ppf "(%d %d)" x y
+let pp_opt pp_v ppf v = match v with
 | None -> pp ppf "None" | Some v -> pp ppf "(Some %a)" pp_v v
 
-let rec pp_list ?(pp_sep = Format.pp_print_cut) pp_v ppf = function 
+let rec pp_list ?(pp_sep = Format.pp_print_cut) pp_v ppf = function
 | [] -> ()
-| v :: vs -> 
+| v :: vs ->
     pp_v ppf v; if vs <> [] then (pp_sep ppf (); pp_list ~pp_sep pp_v ppf vs)
 
-let pp_unknown pp_v ppf v = match v with 
+let pp_unknown pp_v ppf v = match v with
 | None -> pp ppf "unknown" | Some v -> pp_v ppf v
 
-let pp_point ppf p = 
+let pp_point ppf p =
   pp ppf "@[<1>(%d %d)>@]" (Sdl.Point.x p) (Sdl.Point.y p)
 
-let pp_rect ppf r = 
+let pp_rect ppf r =
   pp ppf "@[<1><rect (%d %d) (%d %d)>@]"
     (Sdl.Rect.x r) (Sdl.Rect.y r) (Sdl.Rect.w r) (Sdl.Rect.h r)
 
-let pp_color ppf c = 
-  pp ppf "@[<1><color %d %d %d %d>@]" 
+let pp_color ppf c =
+  pp ppf "@[<1><color %d %d %d %d>@]"
     (Sdl.Color.r c) (Sdl.Color.g c) (Sdl.Color.b c) (Sdl.Color.a c)
 
-let pp_render_info ppf i = 
+let pp_render_info ppf i =
   pp ppf "@[<v>@[%s@]@,%a@,@[max tex size %dx%d@]@]"
-    i.Sdl.ri_name (pp_list Format.pp_print_string) 
+    i.Sdl.ri_name (pp_list Format.pp_print_string)
     (List.map Sdl.get_pixel_format_name i.Sdl.ri_texture_formats)
-    i.Sdl.ri_max_texture_width 
+    i.Sdl.ri_max_texture_width
     i.Sdl.ri_max_texture_height
 
 let pp_hz ppf v = pp ppf "%dHz" v
-let pp_display_mode ppf m = 
-  pp ppf "@[<1>format:%s@ %dx%d@ @@ %a@]" 
-    (Sdl.get_pixel_format_name m.Sdl.dm_format) 
-    m.Sdl.dm_w m.Sdl.dm_h (pp_unknown pp_hz) 
+let pp_display_mode ppf m =
+  pp ppf "@[<1>format:%s@ %dx%d@ @@ %a@]"
+    (Sdl.get_pixel_format_name m.Sdl.dm_format)
+    m.Sdl.dm_w m.Sdl.dm_h (pp_unknown pp_hz)
     m.Sdl.dm_refresh_rate
 
-let pp_controller_axis_event ppf e = 
+let pp_controller_axis_event ppf e =
   pp ppf "@[<1>controller_axis_event which:%ld@ axis:%d value:%d@]"
     Sdl.Event.(get e controller_axis_which)
     Sdl.Event.(get e controller_axis_axis)
     Sdl.Event.(get e controller_axis_value)
 
-let pp_controller_button_event ppf e = 
+let pp_controller_button_event ppf e =
   pp ppf "@[<1>controller_button_event which:%ld@ button:%d state:%s@]"
     Sdl.Event.(get e controller_button_which)
     Sdl.Event.(get e controller_button_button)
     (button_state_str Sdl.Event.(get e controller_button_state))
 
-let pp_controller_device_event ppf e = 
+let pp_controller_device_event ppf e =
   pp ppf "@[<1>controller_device_event %s which:%ld@ @]"
     Sdl.Event.(if get e typ = controller_device_added then "add" else
                if get e typ = controller_device_remapped then "remap" else
-               if get e typ = controller_device_removed then "rem" else 
+               if get e typ = controller_device_removed then "rem" else
                assert false)
     Sdl.Event.(get e controller_device_which)
 
@@ -80,19 +80,19 @@ let pp_dollar_gesture_event ppf e =
     Sdl.Event.(get e dollar_gesture_touch_id)
     Sdl.Event.(get e dollar_gesture_gesture_id)
     Sdl.Event.(get e dollar_gesture_num_fingers)
-    Sdl.Event.(get e dollar_gesture_error)    
+    Sdl.Event.(get e dollar_gesture_error)
     Sdl.Event.(get e dollar_gesture_x)
     Sdl.Event.(get e dollar_gesture_y)
 
-let pp_drop_event ppf e = 
-  pp ppf "@[<1>drop_event file:%s@]" 
+let pp_drop_event ppf e =
+  pp ppf "@[<1>drop_event file:%s@]"
     Sdl.Event.(drop_file_file e)
 
-let pp_touch_finger_event ppf e = 
+let pp_touch_finger_event ppf e =
   pp ppf "@[<1>touch_finger_event %s touch_id:%Ld@ finger_id:%Ld@ (%g,%g)@ \
                rel:(%g,%g)@ pressure:%g"
-    Sdl.Event.(if get e typ = finger_down then "down" else 
-               if get e typ = finger_motion then "motion" else 
+    Sdl.Event.(if get e typ = finger_down then "down" else
+               if get e typ = finger_motion then "motion" else
                if get e typ = finger_up then "up" else assert false)
     Sdl.Event.(get e touch_finger_touch_id)
     Sdl.Event.(get e touch_finger_finger_id)
@@ -102,37 +102,37 @@ let pp_touch_finger_event ppf e =
     Sdl.Event.(get e touch_finger_dy)
     Sdl.Event.(get e touch_finger_pressure)
 
-let pp_joy_axis_event ppf e = 
+let pp_joy_axis_event ppf e =
   pp ppf "@[<1>joy_axis_event which:%ld@ axis:%d value:%d@]"
     Sdl.Event.(get e joy_axis_which)
     Sdl.Event.(get e joy_axis_axis)
     Sdl.Event.(get e joy_axis_value)
 
-let pp_joy_ball_event ppf e = 
+let pp_joy_ball_event ppf e =
   pp ppf "@[<1>joy_ball_event which:%ld@ ball:%d (%d,%d)@]"
     Sdl.Event.(get e joy_ball_which)
     Sdl.Event.(get e joy_ball_ball)
     Sdl.Event.(get e joy_ball_xrel)
     Sdl.Event.(get e joy_ball_yrel)
 
-let pp_joy_button_event ppf e = 
+let pp_joy_button_event ppf e =
   pp ppf "@[<1>joy_button_event which:%ld@ button:%d state:%s@]"
     Sdl.Event.(get e joy_button_which)
     Sdl.Event.(get e joy_button_button)
     (button_state_str Sdl.Event.(get e joy_button_state))
-  
-let pp_joy_device_event ppf e = 
+
+let pp_joy_device_event ppf e =
   pp ppf "@[<1>joy_device_event %s which:%ld@ @]"
     Sdl.Event.(if get e typ = joy_device_added then "add" else "rem")
     Sdl.Event.(get e joy_device_which)
 
-let pp_joy_hat_event ppf e = 
+let pp_joy_hat_event ppf e =
   pp ppf "@[<1>joy_hat_event which:%ld@ hat:%d value:%d@]"
     Sdl.Event.(get e joy_hat_which)
     Sdl.Event.(get e joy_hat_hat)
     Sdl.Event.(get e joy_hat_value)
 
-let pp_keyboard_event ppf e = 
+let pp_keyboard_event ppf e =
   pp ppf "@[<1>keyboard_event@ window_id:%d@ state:%s@ repeat:%b@ \
                scancode:%s@ keycode:%s@ keymod:%d@]"
     Sdl.Event.(get e keyboard_window_id)
@@ -142,7 +142,7 @@ let pp_keyboard_event ppf e =
     Sdl.(get_key_name Event.(get e keyboard_keycode))
     Sdl.Event.(get e keyboard_keymod)
 
-let pp_mouse_button_event ppf e = 
+let pp_mouse_button_event ppf e =
   pp ppf "@[<1>mouse_button_event window_id:%d@ which:%ld@ button:%d@ \
                state:%s@ (%d,%d)@]"
     Sdl.Event.(get e mouse_button_window_id)
@@ -152,7 +152,7 @@ let pp_mouse_button_event ppf e =
     Sdl.Event.(get e mouse_button_x)
     Sdl.Event.(get e mouse_button_y)
 
-let pp_mouse_motion_event ppf e = 
+let pp_mouse_motion_event ppf e =
   pp ppf "@[<1>mouse_motion_event window_id:%d@ which:%ld@ state:%ld@ \
                (%d,%d)@ rel:(%d,%d)@]"
     Sdl.Event.(get e mouse_motion_window_id)
@@ -163,43 +163,43 @@ let pp_mouse_motion_event ppf e =
     Sdl.Event.(get e mouse_motion_xrel)
     Sdl.Event.(get e mouse_motion_yrel)
 
-let pp_mouse_wheel_event ppf e = 
+let pp_mouse_wheel_event ppf e =
   pp ppf "@[<1>mouse_wheel_event window_id:%d@ which:%ld@ (%d,%d)@]"
     Sdl.Event.(get e mouse_wheel_window_id)
     Sdl.Event.(get e mouse_wheel_which)
     Sdl.Event.(get e mouse_wheel_x)
     Sdl.Event.(get e mouse_wheel_y)
 
-let pp_multi_gesture_event ppf e = 
+let pp_multi_gesture_event ppf e =
   pp ppf "@[<1>multi_gesture_event touch_id:%Ld@ dtheta:%f@ ddist:%f@ \
                (%f,%f)@ num_fingers:%d@]"
     Sdl.Event.(get e multi_gesture_touch_id)
     Sdl.Event.(get e multi_gesture_dtheta)
-    Sdl.Event.(get e multi_gesture_ddist)    
+    Sdl.Event.(get e multi_gesture_ddist)
     Sdl.Event.(get e multi_gesture_x)
     Sdl.Event.(get e multi_gesture_y)
     Sdl.Event.(get e multi_gesture_num_fingers)
 
-let pp_text_editing_event ppf e = 
+let pp_text_editing_event ppf e =
   pp ppf "@[<1>text_editing_event window_id:%d@ text:'%s'@ start:%d @len:%d@]"
     Sdl.Event.(get e text_editing_window_id)
     Sdl.Event.(get e text_editing_text)
-    Sdl.Event.(get e text_editing_start)    
+    Sdl.Event.(get e text_editing_start)
     Sdl.Event.(get e text_editing_length)
 
-let pp_text_input_event ppf e = 
+let pp_text_input_event ppf e =
   pp ppf "@[<1>text_input_event window_id:%d@ text:'%s'@]"
     Sdl.Event.(get e text_input_window_id)
     Sdl.Event.(get e text_input_text)
-  
-let pp_user_event ppf e = 
-  pp ppf "@[<1>user_event window_id:%d code:%d@]" 
+
+let pp_user_event ppf e =
+  pp ppf "@[<1>user_event window_id:%d code:%d@]"
     Sdl.Event.(get e user_window_id)
     Sdl.Event.(get e user_code)
 
-let pp_window_event ppf e = 
-  let event_id_str id = 
-    try List.assoc id [ 
+let pp_window_event ppf e =
+  let event_id_str id =
+    try List.assoc id [
         Sdl.Event.window_event_shown, "window_event_shown";
         Sdl.Event.window_event_hidden, "window_event_hidden";
         Sdl.Event.window_event_exposed, "window_event_exposed";
@@ -223,7 +223,7 @@ let pp_window_event ppf e =
     Sdl.Event.(get e window_data2)
 
 let cst s ppf e = pp ppf "%s" s
-let event_pp e = 
+let event_pp e =
   try List.assoc (Sdl.Event.(get e typ)) [
       Sdl.Event.app_did_enter_background, cst "app_did_enter_background";
       Sdl.Event.app_did_enter_foreground, cst "app_did_enter_foreground";
@@ -250,7 +250,7 @@ let event_pp e =
       Sdl.Event.joy_button_up, pp_joy_button_event;
       Sdl.Event.joy_device_added, pp_joy_device_event;
       Sdl.Event.joy_device_removed, pp_joy_device_event;
-      Sdl.Event.joy_hat_motion, pp_joy_hat_event; 
+      Sdl.Event.joy_hat_motion, pp_joy_hat_event;
       Sdl.Event.key_down, pp_keyboard_event;
       Sdl.Event.key_up, pp_keyboard_event;
       Sdl.Event.mouse_button_down, pp_mouse_button_event;
@@ -269,7 +269,7 @@ let event_pp e =
   with Not_found -> cst "unknown"
 
 let pp_event ppf e = pp ppf "%a" (event_pp e) e
-  
+
 (*---------------------------------------------------------------------------
    Copyright (c) 2013 Daniel C. Bünzli.
    All rights reserved.
@@ -277,7 +277,7 @@ let pp_event ppf e = pp ppf "%a" (event_pp e) e
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-     
+
    1. Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
 

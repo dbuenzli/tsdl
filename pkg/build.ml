@@ -1,8 +1,8 @@
-#!/usr/bin/env ocaml 
+#!/usr/bin/env ocaml
 #directory "pkg";;
 #use "topkg.ml";;
 
-let () = 
+let () =
   Pkg.describe "tsdl" ~builder:`OCamlbuild [
     Pkg.lib "pkg/META";
     Pkg.lib ~exts:Exts.module_library "src/tsdl";

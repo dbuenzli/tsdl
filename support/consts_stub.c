@@ -14,7 +14,7 @@
 void let (FILE *fd, const char *symb)
 {
   int i;
-  fprintf (fd, "let "); 
+  fprintf (fd, "let ");
   for (i = 0; i < strlen(symb); i++) { fprintf (fd, "%c", tolower (symb[i])); }
 }
 
@@ -41,20 +41,20 @@ void consts (FILE *fd)
   /* Check that a C int is 32 bits. We rely on that when we pass
      arrays of Point or Rect structs as bigarrays (e.g. see
      Sdl.enclose_points_ba */
-     
+
   assert(sizeof(int) == 4);
 
   /* Init */
-  
+
   int_v (SDL_INIT_TIMER);
-  int_v (SDL_INIT_AUDIO); 
-  int_v (SDL_INIT_VIDEO); 
-  int_v (SDL_INIT_JOYSTICK); 
-  int_v (SDL_INIT_HAPTIC); 
-  int_v (SDL_INIT_GAMECONTROLLER); 
-  int_v (SDL_INIT_EVENTS); 
-  int_v (SDL_INIT_EVERYTHING); 
-  int_v (SDL_INIT_NOPARACHUTE); 
+  int_v (SDL_INIT_AUDIO);
+  int_v (SDL_INIT_VIDEO);
+  int_v (SDL_INIT_JOYSTICK);
+  int_v (SDL_INIT_HAPTIC);
+  int_v (SDL_INIT_GAMECONTROLLER);
+  int_v (SDL_INIT_EVENTS);
+  int_v (SDL_INIT_EVERYTHING);
+  int_v (SDL_INIT_NOPARACHUTE);
 
   /* Hint */
 
@@ -65,7 +65,7 @@ void consts (FILE *fd)
   str_v (SDL_HINT_RENDER_OPENGL_SHADERS);
   str_v (SDL_HINT_RENDER_SCALE_QUALITY);
   str_v (SDL_HINT_RENDER_VSYNC);
-  
+
   int_v (SDL_HINT_DEFAULT);
   int_v (SDL_HINT_NORMAL);
   int_v (SDL_HINT_OVERRIDE);
@@ -132,12 +132,12 @@ void consts (FILE *fd)
   int32_v (SDL_PIXELFORMAT_UYVY);
   int32_v (SDL_PIXELFORMAT_YVYU);
 
-  /* Renderer */ 
+  /* Renderer */
 
   int_v (SDL_FLIP_NONE);
   int_v (SDL_FLIP_HORIZONTAL);
   int_v (SDL_FLIP_VERTICAL);
-   
+
   int_v (SDL_RENDERER_SOFTWARE);
   int_v (SDL_RENDERER_ACCELERATED);
   int_v (SDL_RENDERER_PRESENTVSYNC);
@@ -218,7 +218,7 @@ void consts (FILE *fd)
 
   int_v (SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT);
   int_v (SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT);
-  
+
   int_v (SDL_MESSAGEBOX_COLOR_BACKGROUND);
   int_v (SDL_MESSAGEBOX_COLOR_TEXT);
   int_v (SDL_MESSAGEBOX_COLOR_BUTTON_BORDER);
@@ -756,12 +756,12 @@ void consts (FILE *fd)
   int_v (SDL_BUTTON_X1MASK);
   int_v (SDL_BUTTON_X2MASK);
 
-  /* Touch */ 
+  /* Touch */
 
   int32_v (SDL_TOUCH_MOUSEID);
 
-  /* Joystick */ 
-  
+  /* Joystick */
+
   int_v (SDL_HAT_CENTERED);
   int_v (SDL_HAT_UP);
   int_v (SDL_HAT_RIGHT);
@@ -778,7 +778,7 @@ void consts (FILE *fd)
   int_v (SDL_CONTROLLER_BINDTYPE_BUTTON);
   int_v (SDL_CONTROLLER_BINDTYPE_AXIS);
   int_v (SDL_CONTROLLER_BINDTYPE_HAT);
-  
+
   int_v (SDL_CONTROLLER_AXIS_INVALID);
   int_v (SDL_CONTROLLER_AXIS_LEFTX);
   int_v (SDL_CONTROLLER_AXIS_LEFTY);
@@ -787,7 +787,7 @@ void consts (FILE *fd)
   int_v (SDL_CONTROLLER_AXIS_TRIGGERLEFT);
   int_v (SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
   int_v (SDL_CONTROLLER_AXIS_MAX);
-  
+
   int_v (SDL_CONTROLLER_BUTTON_INVALID);
   int_v (SDL_CONTROLLER_BUTTON_A);
   int_v (SDL_CONTROLLER_BUTTON_B);
@@ -805,14 +805,14 @@ void consts (FILE *fd)
   int_v (SDL_CONTROLLER_BUTTON_DPAD_LEFT);
   int_v (SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
   int_v (SDL_CONTROLLER_BUTTON_MAX);
-    
+
   assert (sizeof(SDL_GameControllerButtonBind) == 12);
 
-  /* Event */ 
+  /* Event */
 
   int_v (SDL_QUERY);
-  int_v (SDL_DISABLE); 
-  int_v (SDL_ENABLE); 
+  int_v (SDL_DISABLE);
+  int_v (SDL_ENABLE);
   int_v (SDL_PRESSED);
   int_v (SDL_RELEASED);
 
@@ -858,14 +858,14 @@ void consts (FILE *fd)
   int_v (SDL_USEREVENT);
   int_v (SDL_LASTEVENT);
 
-  int tsdl_sdl_event_size = sizeof (SDL_Event); 
+  int tsdl_sdl_event_size = sizeof (SDL_Event);
   int_v (tsdl_sdl_event_size);
 
   int_v (SDL_TEXTEDITINGEVENT_TEXT_SIZE);
   int_v (SDL_TEXTINPUTEVENT_TEXT_SIZE);
 
   /* SDL_WindowEventID */
-  
+
   int_v (SDL_WINDOWEVENT_SHOWN);
   int_v (SDL_WINDOWEVENT_HIDDEN);
   int_v (SDL_WINDOWEVENT_EXPOSED);
@@ -956,11 +956,11 @@ CAMLprim value output_consts (value fname)
   FILE *fd;
   if (strlen(outf) == 0) { fd = stdout; }
   else
-    { 
+    {
       fd = fopen (outf, "w");
       if (!fd) { perror(outf); exit (1); }
     }
-  
+
   consts(fd);
   fflush(fd);
   if (fd != stdout) { fclose (fd); }
@@ -974,7 +974,7 @@ CAMLprim value output_consts (value fname)
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-     
+
    1. Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
 

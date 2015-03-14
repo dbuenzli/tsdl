@@ -6,7 +6,7 @@
 
 open Tsdl;;
 
-let log fmt = Format.printf (fmt ^^ "@.") 
+let log fmt = Format.printf (fmt ^^ "@.")
 let log_err fmt = Format.eprintf (fmt ^^ "@.")
 
 let close_joysticks joysticks = List.iter Sdl.joystick_close joysticks
@@ -40,25 +40,25 @@ let event_loop () =
   in
   Sdl.start_text_input ();
   loop ()
-    
-let main () = 
+
+let main () =
   let inits = Sdl.Init.(video + joystick + gamecontroller + events) in
-  match Sdl.init inits with 
+  match Sdl.init inits with
   | `Error e -> log_err " SDL init: %s" e
   | `Ok () ->
       let flags = Sdl.Window.(shown + mouse_focus + resizable) in
-      match Sdl.create_window ~w:640 ~h:480 "SDL events" flags with 
+      match Sdl.create_window ~w:640 ~h:480 "SDL events" flags with
       | `Error e -> log_err " Create window: %s" e
-      | `Ok w -> 
+      | `Ok w ->
           let joysticks = open_joysticks () in
           event_loop ();
           close_joysticks joysticks;
           Sdl.destroy_window w;
           Sdl.quit ();
           exit 0
-                             
-let () = main () 
-    
+
+let () = main ()
+
 (*---------------------------------------------------------------------------
    Copyright (c) 2013 Daniel C. Bünzli.
    All rights reserved.
@@ -66,7 +66,7 @@ let () = main ()
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-     
+
    1. Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
 

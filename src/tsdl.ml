@@ -9,30 +9,30 @@ let unsafe_get = Array.unsafe_get
 open Ctypes
 open Foreign
 
-module Sdl = struct 
-  
+module Sdl = struct
+
 (* Enum cases and #ifdef'd constants, see support/ in the distribution *)
 
 open Tsdl_consts
 
 (* Formatting with continuation. *)
 
-let kpp k fmt = 
-  let k fmt = k (Format.flush_str_formatter ()) in 
+let kpp k fmt =
+  let k fmt = k (Format.flush_str_formatter ()) in
   Format.kfprintf k Format.str_formatter fmt
 
 (* Invalid_argument strings *)
 
-let str = Printf.sprintf 
+let str = Printf.sprintf
 let err_index i = str "invalid index: %d" i
 let err_length_mul l mul = str "invalid length: %d not a multiple of %d" l mul
 let err_drop_file = "null file name (drop_file_free already called ?)"
-let err_read_field = "cannot read field" 
-let err_bigarray_pitch pitch ba_el_size = 
+let err_read_field = "cannot read field"
+let err_bigarray_pitch pitch ba_el_size =
   "invalid bigarray kind: pitch (%d bytes) not a multiple of bigarray element \
    byte size (%d)"
 
-let err_bigarray_data len ba_el_size = 
+let err_bigarray_data len ba_el_size =
   "invalid bigarray kind: data (%d bytes) not a multiple of bigarray element \
    byte size (%d)"
 
@@ -40,68 +40,68 @@ let err_bigarray_data len ba_el_size =
 
 let write_never _ = assert false
 
-let bool = 
+let bool =
   view ~read:((<>)0) ~write:(fun b -> compare b false) int;;
 
-let int_as_uint8_t = 
+let int_as_uint8_t =
   view ~read:Unsigned.UInt8.to_int ~write:Unsigned.UInt8.of_int uint8_t
 
-let int_as_uint16_t = 
+let int_as_uint16_t =
   view ~read:Unsigned.UInt16.to_int ~write:Unsigned.UInt16.of_int uint16_t
 
 let int_as_uint32_t =
   view ~read:Unsigned.UInt32.to_int ~write:Unsigned.UInt32.of_int uint32_t
 
-let int_as_int32_t = 
+let int_as_int32_t =
   view ~read:Signed.Int32.to_int ~write:Signed.Int32.of_int int32_t
 
-let int32_as_uint32_t = 
+let int32_as_uint32_t =
   view ~read:Unsigned.UInt32.to_int32 ~write:Unsigned.UInt32.of_int32 uint32_t
 
 let string_as_char_array n = (* FIXME: drop this if ctypes proposes better *)
   let n_array = array n char in
   let read a =
     let len = CArray.length a in
-    let b = Buffer.create len in 
-    try 
-      for i = 0 to len - 1 do 
-        let c = CArray.get a i in 
+    let b = Buffer.create len in
+    try
+      for i = 0 to len - 1 do
+        let c = CArray.get a i in
         if c = '\000' then raise Exit else Buffer.add_char b c
       done;
       Buffer.contents b
     with Exit -> Buffer.contents b
   in
-  let write s = 
-    let a = CArray.make char n in 
+  let write s =
+    let a = CArray.make char n in
     let len = min (CArray.length a) (String.length s) in
     for i = 0 to len - 1 do CArray.set a i (s.[i]) done;
     a
   in
   view ~read ~write n_array
 
-let get_error = 
+let get_error =
   foreign "SDL_GetError" (void @-> returning string)
 
 let error () = `Error (get_error ())
-  
-let zero_to_ok = 
-  let read = function 0 -> `Ok () | err -> error () in 
+
+let zero_to_ok =
+  let read = function 0 -> `Ok () | err -> error () in
   view ~read ~write:write_never int
 
-let one_to_ok = 
-  let read = function 1 -> `Ok () | err -> error () in 
+let one_to_ok =
+  let read = function 1 -> `Ok () | err -> error () in
   view ~read ~write:write_never int
 
-let bool_to_ok = 
-  let read = function 0 -> `Ok false | 1 -> `Ok true | _ -> error () in 
+let bool_to_ok =
+  let read = function 0 -> `Ok false | 1 -> `Ok true | _ -> error () in
   view ~read ~write:write_never int
 
-let nat_to_ok = 
-  let read = function n when n < 0 -> error () | n -> `Ok n in 
+let nat_to_ok =
+  let read = function n when n < 0 -> error () | n -> `Ok n in
   view ~read ~write:write_never int
 
-let some_to_ok t = 
-  let read = function Some v -> `Ok v | None -> error () in 
+let some_to_ok t =
+  let read = function Some v -> `Ok v | None -> error () in
   view ~read ~write:write_never t
 
 let sdl_free = foreign "SDL_free" (ptr void @-> returning void)
@@ -109,13 +109,13 @@ let sdl_free = foreign "SDL_free" (ptr void @-> returning void)
 (* Since we never let SDL redefine our main make sure this is always
    called. *)
 
-let () = 
+let () =
   let set_main_ready = foreign "SDL_SetMainReady" (void @-> returning void) in
   set_main_ready ()
 
 let stub = true
 
-(* SDL results *) 
+(* SDL results *)
 
 type 'a result = [ `Ok of 'a | `Error of string ]
 
@@ -128,26 +128,26 @@ type uint32 = int32
 type uint64 = int64
 
 module Int = struct type t = int let compare : int -> int -> int = compare end
-module Imap = Map.Make(Int) 
+module Imap = Map.Make(Int)
 
-(* Bigarrays *) 
+(* Bigarrays *)
 
 type ('a, 'b) bigarray = ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
 
 let ba_create k len = Bigarray.Array1.create k Bigarray.c_layout len
-let ba_kind_byte_size :  ('a, 'b) Bigarray.kind -> int = fun k -> 
+let ba_kind_byte_size :  ('a, 'b) Bigarray.kind -> int = fun k ->
   let open Bigarray in
   (* FIXME: see http://caml.inria.fr/mantis/view.php?id=6263 *)
-  match Obj.magic k with 
+  match Obj.magic k with
   | k when k = char || k = int8_signed || k = int8_unsigned -> 1
   | k when k = int16_signed || k = int16_unsigned -> 2
   | k when k = int32 || k = float32 -> 4
-  | k when k = float64 || k = int64 || k = complex32 -> 8 
+  | k when k = float64 || k = int64 || k = complex32 -> 8
   | k when k = complex64 -> 16
   | k when k = int || k = nativeint -> Sys.word_size / 8
   | k -> assert false
 
-let access_ptr_typ_of_ba_kind : ('a, 'b) Bigarray.kind -> 'a ptr typ = fun k -> 
+let access_ptr_typ_of_ba_kind : ('a, 'b) Bigarray.kind -> 'a ptr typ = fun k ->
   let open Bigarray in
   (* FIXME: use typ_of_bigarray_kind when ctypes support it. *)
   match Obj.magic k with
@@ -165,14 +165,14 @@ let access_ptr_typ_of_ba_kind : ('a, 'b) Bigarray.kind -> 'a ptr typ = fun k ->
   | k when k = nativeint -> Obj.magic (ptr Ctypes.nativeint)
   | k when k = char -> Obj.magic (ptr Ctypes.char)
   | _ -> assert false
-        
-let ba_byte_size ba = 
-  let el_size = ba_kind_byte_size (Bigarray.Array1.kind ba) in 
-  el_size * Bigarray.Array1.dim ba 
+
+let ba_byte_size ba =
+  let el_size = ba_kind_byte_size (Bigarray.Array1.kind ba) in
+  el_size * Bigarray.Array1.dim ba
 
 (* Basics *)
 
-(* Initialization and shutdown *) 
+(* Initialization and shutdown *)
 
 module Init = struct
   type t = Unsigned.uint32
@@ -191,23 +191,23 @@ module Init = struct
   let noparachute = i sdl_init_noparachute
 end
 
-let init = 
+let init =
   foreign "SDL_Init" (uint32_t @-> returning zero_to_ok)
 
-let init_sub_system = 
+let init_sub_system =
   foreign "SDL_InitSubSystem" (uint32_t @-> returning zero_to_ok)
 
-let quit = 
+let quit =
   foreign "SDL_Quit" (void @-> returning void)
 
-let quit_sub_system = 
+let quit_sub_system =
   foreign "SDL_QuitSubSystem" (uint32_t @-> returning void)
 
-let was_init = 
+let was_init =
   foreign "SDL_WasInit" (uint32_t @-> returning uint32_t)
 
 let was_init = function
-| None -> was_init (Unsigned.UInt32.of_int 0) 
+| None -> was_init (Unsigned.UInt32.of_int 0)
 | Some m -> was_init m
 
 (* Hints *)
@@ -224,35 +224,35 @@ module Hint = struct
 
   type priority = int
   let default = sdl_hint_default
-  let normal = sdl_hint_normal  
+  let normal = sdl_hint_normal
   let override = sdl_hint_override
 end
 
-let clear_hints = 
+let clear_hints =
   foreign "SDL_ClearHints" (void @-> returning void)
 
-let get_hint = 
-  foreign "SDL_GetHint" (string @-> returning string_opt) 
+let get_hint =
+  foreign "SDL_GetHint" (string @-> returning string_opt)
 
-let set_hint = 
+let set_hint =
   foreign "SDL_SetHint" (string @-> string @-> returning bool)
 
-let set_hint_with_priority = 
-  foreign "SDL_SetHintWithPriority" 
+let set_hint_with_priority =
+  foreign "SDL_SetHintWithPriority"
     (string @-> string @-> int @-> returning bool)
 
 (* Errors *)
 
-let clear_error = 
+let clear_error =
   foreign "SDL_ClearError" (void @-> returning void)
 
-let set_error = 
+let set_error =
   foreign "SDL_SetError" (string @-> returning int)
 
-let set_error fmt = 
-  kpp (fun s -> ignore (set_error s)) fmt 
+let set_error fmt =
+  kpp (fun s -> ignore (set_error s)) fmt
 
-(* Log *) 
+(* Log *)
 
 module Log = struct
   type category = int
@@ -263,10 +263,10 @@ module Log = struct
   let category_video = sdl_log_category_video
   let category_render = sdl_log_category_render
   let category_input = sdl_log_category_input
-  let category_custom = sdl_log_category_custom 
+  let category_custom = sdl_log_category_custom
 
   type priority = int
-  let priority_compare : int -> int -> int = Pervasives.compare 
+  let priority_compare : int -> int -> int = Pervasives.compare
   let priority_verbose = sdl_log_priority_verbose
   let priority_debug = sdl_log_priority_debug
   let priority_info = sdl_log_priority_info
@@ -277,65 +277,65 @@ end
 
 let log_fun_t = (int @-> string @-> string @-> returning void)
 
-let log = 
+let log =
   foreign "SDL_Log" (string @-> string @-> returning void)
 
-let log fmt = 
+let log fmt =
   kpp (fun s -> ignore (log "%s" s)) fmt
 
-let log_critical = 
+let log_critical =
   foreign "SDL_LogCritical" log_fun_t
 
-let log_critical c fmt = 
+let log_critical c fmt =
   kpp (fun s -> ignore (log_critical c "%s" s)) fmt
 
-let log_debug = 
+let log_debug =
   foreign "SDL_LogDebug" log_fun_t
 
-let log_debug c fmt = 
+let log_debug c fmt =
   kpp (fun s -> ignore (log_debug c "%s" s)) fmt
 
-let log_error = 
+let log_error =
   foreign "SDL_LogError" log_fun_t
 
-let log_error c fmt = 
+let log_error c fmt =
   kpp (fun s -> ignore (log_error c "%s" s)) fmt
 
-let log_info = 
+let log_info =
   foreign "SDL_LogInfo" log_fun_t
 
-let log_info c fmt = 
+let log_info c fmt =
   kpp (fun s -> ignore (log_info c "%s" s)) fmt
 
-let log_verbose = 
+let log_verbose =
   foreign "SDL_LogVerbose" log_fun_t
 
-let log_verbose c fmt = 
+let log_verbose c fmt =
   kpp (fun s -> ignore (log_verbose c "%s" s)) fmt
 
-let log_warn = 
+let log_warn =
   foreign "SDL_LogWarn" log_fun_t
 
-let log_warn c fmt = 
+let log_warn c fmt =
   kpp (fun s -> ignore (log_warn c "%s" s)) fmt
 
 let log_get_priority =
   foreign "SDL_LogGetPriority" (int @-> returning int)
 
-let log_message = 
-  foreign "SDL_LogMessage" 
+let log_message =
+  foreign "SDL_LogMessage"
     (int @-> int @-> string @-> string @-> returning void)
 
-let log_message c p fmt = 
+let log_message c p fmt =
   kpp (fun s -> ignore (log_message c p "%s" s)) fmt
 
-let log_reset_priorities = 
+let log_reset_priorities =
   foreign "SDL_LogResetPriorities" (void @-> returning void)
 
-let log_set_all_priority = 
+let log_set_all_priority =
   foreign "SDL_LogSetAllPriority" (int @-> returning void)
 
-let log_set_priority = 
+let log_set_priority =
   foreign "SDL_LogSetPriority" (int @-> int @-> returning void)
 
 (* Version *)
@@ -347,7 +347,7 @@ let version_patch = field version "patch" uint8_t
 let () = seal version
 
 let get_version =
-  foreign "SDL_GetVersion" (ptr version @-> returning void) 
+  foreign "SDL_GetVersion" (ptr version @-> returning void)
 
 let get_version () =
   let get v f = Unsigned.UInt8.to_int (getf v f) in
@@ -355,28 +355,28 @@ let get_version () =
   get_version (addr v);
   (get v version_major), (get v version_minor), (get v version_patch)
 
-let get_revision = 
-  foreign "SDL_GetRevision" (void @-> returning string)  
+let get_revision =
+  foreign "SDL_GetRevision" (void @-> returning string)
 
-let get_revision_number = 
+let get_revision_number =
   foreign "SDL_GetRevisionNumber" (void @-> returning int)
 
-(* IO absraction *) 
+(* IO absraction *)
 
 type _rw_ops
-let rw_ops_struct : _rw_ops structure typ = structure "SDL_RWops" 
+let rw_ops_struct : _rw_ops structure typ = structure "SDL_RWops"
 let rw_ops : _rw_ops structure ptr typ = ptr rw_ops_struct
 let rw_ops_opt : _rw_ops structure ptr option typ = ptr_opt rw_ops_struct
 
-let rw_ops_size = field rw_ops_struct "size" 
+let rw_ops_size = field rw_ops_struct "size"
     (funptr (rw_ops @-> returning int64_t))
-let rw_ops_seek = field rw_ops_struct "seek" 
+let rw_ops_seek = field rw_ops_struct "seek"
     (funptr (rw_ops @-> int64_t @-> int @-> returning int64_t))
-let rw_ops_read = field rw_ops_struct "read" 
+let rw_ops_read = field rw_ops_struct "read"
     (funptr (rw_ops @-> ptr void @-> size_t @-> size_t @-> returning size_t))
-let rw_ops_write = field rw_ops_struct "write" 
+let rw_ops_write = field rw_ops_struct "write"
     (funptr (rw_ops @-> ptr void @-> size_t @-> size_t @-> returning size_t))
-let rw_ops_close = field rw_ops_struct "close" 
+let rw_ops_close = field rw_ops_struct "close"
     (funptr (rw_ops @-> returning int))
 let _ = field rw_ops_struct "type" uint32_t
 (* ... #ifdef'd union follows, we don't care we don't use Ctypes.make *)
@@ -384,8 +384,8 @@ let () = seal rw_ops_struct
 
 type rw_ops = _rw_ops structure ptr
 
-let rw_from_file = 
-  foreign "SDL_RWFromFile" 
+let rw_from_file =
+  foreign "SDL_RWFromFile"
     (string @-> string @-> returning (some_to_ok rw_ops_opt))
 
 let rw_close ops =
@@ -397,25 +397,25 @@ let unsafe_rw_ops_of_ptr addr : rw_ops =
 
 (* File system paths *)
 
-let get_base_path = 
+let get_base_path =
   foreign "SDL_GetBasePath" (void @-> returning (ptr char))
 
-let get_base_path () = 
+let get_base_path () =
   let p = get_base_path () in
-  let path = coerce (ptr char) (some_to_ok string_opt) p in 
-  sdl_free (coerce (ptr char) (ptr void) p); 
-  path
-
-let get_pref_path = 
-  foreign "SDL_GetPrefPath" (string @-> string @-> returning (ptr char))
-
-let get_pref_path ~org ~app =
-  let p = get_pref_path org app in 
-  let path = coerce (ptr char) (some_to_ok string_opt) p in 
+  let path = coerce (ptr char) (some_to_ok string_opt) p in
   sdl_free (coerce (ptr char) (ptr void) p);
   path
 
-(* Video *) 
+let get_pref_path =
+  foreign "SDL_GetPrefPath" (string @-> string @-> returning (ptr char))
+
+let get_pref_path ~org ~app =
+  let p = get_pref_path org app in
+  let path = coerce (ptr char) (some_to_ok string_opt) p in
+  sdl_free (coerce (ptr char) (ptr void) p);
+  path
+
+(* Video *)
 
 type window = unit ptr
 let window : window typ = ptr void
@@ -428,7 +428,7 @@ let unsafe_window_of_ptr addr : window =
 
 type _color
 type color = _color structure
-let color : color typ = structure "SDL_Color" 
+let color : color typ = structure "SDL_Color"
 let color_r = field color "r" uint8_t
 let color_g = field color "g" uint8_t
 let color_b = field color "b" uint8_t
@@ -438,19 +438,19 @@ let () = seal color
 module Color = struct
   let create ~r ~g ~b ~a =
     let c = make color in
-    setf c color_r (Unsigned.UInt8.of_int r); 
-    setf c color_g (Unsigned.UInt8.of_int g); 
-    setf c color_b (Unsigned.UInt8.of_int b);     
+    setf c color_r (Unsigned.UInt8.of_int r);
+    setf c color_g (Unsigned.UInt8.of_int g);
+    setf c color_b (Unsigned.UInt8.of_int b);
     setf c color_a (Unsigned.UInt8.of_int a);
     c
-    
+
   let r c = Unsigned.UInt8.to_int (getf c color_r)
   let g c = Unsigned.UInt8.to_int (getf c color_g)
   let b c = Unsigned.UInt8.to_int (getf c color_b)
   let a c = Unsigned.UInt8.to_int (getf c color_a)
 end
 
-(* Points *) 
+(* Points *)
 
 type _point
 type point = _point structure
@@ -460,13 +460,13 @@ let point_y = field point "y" int
 let () = seal point
 
 module Point = struct
-  let create ~x ~y = 
-    let p = make point in 
-    setf p point_x x; 
-    setf p point_y y; 
+  let create ~x ~y =
+    let p = make point in
+    setf p point_x x;
+    setf p point_y y;
     p
 
-  let x p = getf p point_x 
+  let x p = getf p point_x
   let y p = getf p point_y
 
   let opt_addr = function
@@ -474,48 +474,48 @@ module Point = struct
   | Some v -> addr v
 end
 
-(* Rectangle *) 
+(* Rectangle *)
 
 type _rect
 type rect = _rect structure
-let rect : rect typ = structure "SDL_Rect" 
-let rect_x = field rect "x" int 
-let rect_y = field rect "y" int 
-let rect_w = field rect "w" int 
-let rect_h = field rect "h" int 
+let rect : rect typ = structure "SDL_Rect"
+let rect_x = field rect "x" int
+let rect_y = field rect "y" int
+let rect_w = field rect "w" int
+let rect_h = field rect "h" int
 let () = seal rect
 
 module Rect = struct
-  let create ~x ~y ~w ~h = 
-    let r = make rect in 
+  let create ~x ~y ~w ~h =
+    let r = make rect in
     setf r rect_x x;
-    setf r rect_y y; 
-    setf r rect_w w; 
-    setf r rect_h h; 
+    setf r rect_y y;
+    setf r rect_w w;
+    setf r rect_h h;
     r
 
-  let x r = getf r rect_x 
+  let x r = getf r rect_x
   let y r = getf r rect_y
-  let w r = getf r rect_w 
-  let h r = getf r rect_h 
+  let w r = getf r rect_w
+  let h r = getf r rect_h
 
   let opt_addr = function
   | None -> coerce (ptr void) (ptr rect) null
   | Some v -> addr v
 end
 
-let enclose_points = 
-  foreign "SDL_EnclosePoints" 
+let enclose_points =
+  foreign "SDL_EnclosePoints"
     (ptr void @-> int @-> ptr rect @-> ptr rect @-> returning bool)
 
 let enclose_points_ba ?clip ps =
-  let len = Bigarray.Array1.dim ps in 
+  let len = Bigarray.Array1.dim ps in
   if len mod 2 <> 0 then invalid_arg (err_length_mul len 2) else
   let count = len / 2 in
   let ps = to_voidp (bigarray_start array1 ps) in
-  let res = make rect in 
+  let res = make rect in
   if enclose_points ps count (Rect.opt_addr clip) (addr res)
-  then Some res 
+  then Some res
   else None
 
 let enclose_points ?clip ps =
@@ -523,62 +523,62 @@ let enclose_points ?clip ps =
   let ps = to_voidp (CArray.start (CArray.of_list point ps)) in
   let res = make rect in
   if enclose_points ps count (Rect.opt_addr clip) (addr res)
-  then Some res 
+  then Some res
   else None
-    
-let has_intersection = 
-  foreign "SDL_HasIntersection" 
+
+let has_intersection =
+  foreign "SDL_HasIntersection"
     (ptr rect @-> ptr rect @-> returning bool)
 
-let has_intersection a b = 
+let has_intersection a b =
   has_intersection (addr a) (addr b)
 
-let intersect_rect = 
-  foreign "SDL_IntersectRect" 
+let intersect_rect =
+  foreign "SDL_IntersectRect"
     (ptr rect @-> ptr rect @-> ptr rect @-> returning bool)
 
-let intersect_rect a b = 
-  let res = make rect in 
+let intersect_rect a b =
+  let res = make rect in
   if intersect_rect (addr a) (addr b) (addr res) then Some res else None
 
-let intersect_rect_and_line = 
+let intersect_rect_and_line =
   foreign "SDL_IntersectRectAndLine"
-    (ptr rect @-> ptr int @-> ptr int @-> ptr int @-> ptr int @-> 
+    (ptr rect @-> ptr int @-> ptr int @-> ptr int @-> ptr int @->
      returning bool)
 
-let intersect_rect_and_line r x1 y1 x2 y2 = 
+let intersect_rect_and_line r x1 y1 x2 y2 =
   let alloc v = allocate int v in
-  let x1, y1 = alloc x1, alloc y1 in 
-  let x2, y2 = alloc x2, alloc y2 in 
-  if intersect_rect_and_line (addr r) x1 y1 x2 y2 
+  let x1, y1 = alloc x1, alloc y1 in
+  let x2, y2 = alloc x2, alloc y2 in
+  if intersect_rect_and_line (addr r) x1 y1 x2 y2
   then Some ((!@x1, !@y1), (!@x2, !@y2))
-  else None 
+  else None
 
-let rect_empty r = 
+let rect_empty r =
   (* symbol doesn't exist: SDL_FORCE_INLINE directive
      foreign "SDL_RectEmpty" (ptr rect @-> returning bool) *)
   Rect.w r <= 0 || Rect.h r <= 0
 
-let rect_equals a b = 
+let rect_equals a b =
   (* symbol doesn't exist: SDL_FORCE_INLINE directive
     foreign "SDL_RectEquals" (ptr rect @-> ptr rect @-> returning bool) *)
   (Rect.x a = Rect.x b) && (Rect.y a = Rect.y b) &&
   (Rect.w a = Rect.w b) && (Rect.h a = Rect.h b)
 
-let union_rect = 
-  foreign "SDL_UnionRect" 
+let union_rect =
+  foreign "SDL_UnionRect"
     (ptr rect @-> ptr rect @-> ptr rect @-> returning void)
 
-let union_rect a b = 
+let union_rect a b =
   let res = make rect in
-  union_rect (addr a) (addr b) (addr res); 
+  union_rect (addr a) (addr b) (addr res);
   res
 
-(* Palettes *) 
+(* Palettes *)
 
 type _palette
 type palette_struct = _palette structure
-let palette_struct : palette_struct typ = structure "SDL_Palette" 
+let palette_struct : palette_struct typ = structure "SDL_Palette"
 let palette_ncolors = field palette_struct "ncolors" int
 let palette_colors = field palette_struct "colors" (ptr color)
 let _ = field palette_struct "version" uint32_t
@@ -586,46 +586,46 @@ let _ = field palette_struct "refcount" int
 let () = seal palette_struct
 
 type palette = palette_struct ptr
-let palette : palette typ = ptr palette_struct 
+let palette : palette typ = ptr palette_struct
 let palette_opt : palette option typ = ptr_opt palette_struct
 
 let unsafe_palette_of_ptr addr : palette =
   from_voidp palette_struct (ptr_of_raw_address addr)
 
 let alloc_palette =
-  foreign "SDL_AllocPalette" 
+  foreign "SDL_AllocPalette"
     (int @-> returning (some_to_ok palette_opt))
 
 let free_palette =
   foreign "SDL_FreePalette" (palette @-> returning void)
 
-let get_palette_ncolors p = 
+let get_palette_ncolors p =
   getf (!@ p) palette_ncolors
 
-let get_palette_colors p = 
+let get_palette_colors p =
   let ps = !@ p in
-  CArray.to_list 
+  CArray.to_list
     (CArray.from_ptr (getf ps palette_colors) (getf ps palette_ncolors))
-  
-let get_palette_colors_ba p = 
-  let ps = !@ p in 
+
+let get_palette_colors_ba p =
+  let ps = !@ p in
   (* FIXME: ctypes should have a CArray.copy function *)
   let n = getf ps palette_ncolors in
   let ba = Bigarray.(Array1.create int8_unsigned c_layout (n * 4)) in
-  let ba_ptr = 
+  let ba_ptr =
     CArray.from_ptr (coerce (ptr int) (ptr color) (bigarray_start array1 ba)) n
   in
-  let ca = CArray.from_ptr (getf ps palette_colors) n in 
+  let ca = CArray.from_ptr (getf ps palette_colors) n in
   for i = 0 to n - 1 do CArray.set ba_ptr i (CArray.get ca i) done;
   ba
-  
-let set_palette_colors = 
-  foreign "SDL_SetPaletteColors" 
+
+let set_palette_colors =
+  foreign "SDL_SetPaletteColors"
     (palette @-> ptr void @-> int @-> int @-> returning zero_to_ok)
 
-let set_palette_colors_ba p cs ~fst = 
-  let len = Bigarray.Array1.dim cs in 
-  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else 
+let set_palette_colors_ba p cs ~fst =
+  let len = Bigarray.Array1.dim cs in
+  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else
   let count = len / 4 in
   let cs = to_voidp (bigarray_start array1 cs) in
   set_palette_colors p cs fst count
@@ -640,24 +640,24 @@ let set_palette_colors p cs ~fst =
 type gamma_ramp = (int, Bigarray.int16_unsigned_elt) bigarray
 
 let calculate_gamma_ramp =
-  foreign "SDL_CalculateGammaRamp" 
+  foreign "SDL_CalculateGammaRamp"
     (float @-> ptr void @-> returning void)
 
-let calculate_gamma_ramp g = 
+let calculate_gamma_ramp g =
   let ba = Bigarray.(Array1.create int16_unsigned c_layout 256) in
   calculate_gamma_ramp g (to_voidp (bigarray_start array1 ba));
   ba
 
 module Blend = struct
-  type mode = int 
-  let mode_none = sdl_blendmode_none  
-  let mode_blend = sdl_blendmode_blend  
+  type mode = int
+  let mode_none = sdl_blendmode_none
+  let mode_blend = sdl_blendmode_blend
   let mode_add = sdl_blendmode_add
-  let mode_mod = sdl_blendmode_mod  
+  let mode_mod = sdl_blendmode_mod
 end
 
 module Pixel = struct
-  type format_enum = Unsigned.UInt32.t 
+  type format_enum = Unsigned.UInt32.t
   let i = Unsigned.UInt32.of_int32
   let to_uint32 = Unsigned.UInt32.to_int32
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
@@ -728,93 +728,93 @@ let _ = field pixel_format_struct "next" (ptr pixel_format_struct)
 let () = seal pixel_format_struct
 
 type pixel_format = pixel_format_struct ptr
-let pixel_format : pixel_format typ = ptr pixel_format_struct 
+let pixel_format : pixel_format typ = ptr pixel_format_struct
 let pixel_format_opt : pixel_format option typ = ptr_opt pixel_format_struct
 
 let unsafe_pixel_format_of_ptr addr : pixel_format =
   from_voidp pixel_format_struct (ptr_of_raw_address addr)
 
-let alloc_format = 
-  foreign "SDL_AllocFormat" 
+let alloc_format =
+  foreign "SDL_AllocFormat"
     (uint32_t @-> returning (some_to_ok pixel_format_opt))
 
-let free_format = 
+let free_format =
   foreign "SDL_FreeFormat" (pixel_format @-> returning void)
 
-let get_pixel_format_name = 
+let get_pixel_format_name =
   foreign "SDL_GetPixelFormatName" (uint32_t @-> returning string)
 
-let get_pixel_format_format pf = 
-  getf (!@ pf) pf_format 
+let get_pixel_format_format pf =
+  getf (!@ pf) pf_format
 
-let get_pixel_format_bits_pp pf = 
+let get_pixel_format_bits_pp pf =
   Unsigned.UInt8.to_int (getf (!@ pf) pf_bits_per_pixel)
 
-let get_pixel_format_bytes_pp pf = 
+let get_pixel_format_bytes_pp pf =
   Unsigned.UInt8.to_int (getf (!@ pf) pf_bytes_per_pixel)
 
-let get_rgb = 
-  foreign "SDL_GetRGB" 
-    (int32_as_uint32_t @-> pixel_format @-> ptr uint8_t @-> 
+let get_rgb =
+  foreign "SDL_GetRGB"
+    (int32_as_uint32_t @-> pixel_format @-> ptr uint8_t @->
      ptr uint8_t @-> ptr uint8_t @-> returning void)
 
-let get_rgb pf p = 
+let get_rgb pf p =
   let alloc () = allocate uint8_t Unsigned.UInt8.zero in
   let to_int = Unsigned.UInt8.to_int in
   let r, g, b = alloc (), alloc (), alloc () in
-  get_rgb p pf r g b; 
+  get_rgb p pf r g b;
    to_int (!@ r), to_int (!@ g), to_int (!@ b)
-  
-let get_rgba = 
-  foreign "SDL_GetRGBA" 
-    (int32_as_uint32_t @-> pixel_format @-> ptr uint8_t @-> 
+
+let get_rgba =
+  foreign "SDL_GetRGBA"
+    (int32_as_uint32_t @-> pixel_format @-> ptr uint8_t @->
      ptr uint8_t @-> ptr uint8_t @-> ptr uint8_t @-> returning void)
 
-let get_rgba pf p = 
+let get_rgba pf p =
   let alloc () = allocate uint8_t Unsigned.UInt8.zero in
   let to_int = Unsigned.UInt8.to_int in
   let r, g, b, a = alloc (), alloc (), alloc (), alloc () in
-  get_rgba p pf r g b a; 
+  get_rgba p pf r g b a;
    to_int (!@ r), to_int (!@ g), to_int (!@ b), to_int (!@ a)
 
-let map_rgb = 
-  foreign "SDL_MapRGB" 
-    (pixel_format @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @-> 
+let map_rgb =
+  foreign "SDL_MapRGB"
+    (pixel_format @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @->
      returning int32_as_uint32_t)
 
-let map_rgba = 
-  foreign "SDL_MapRGBA" 
-    (pixel_format @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @-> 
+let map_rgba =
+  foreign "SDL_MapRGBA"
+    (pixel_format @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @->
      int_as_uint8_t @-> returning int32_as_uint32_t)
 
-let masks_to_pixel_format_enum = 
-  foreign "SDL_MasksToPixelFormatEnum" 
-    (int @-> int32_as_uint32_t @-> int32_as_uint32_t @-> int32_as_uint32_t @-> 
+let masks_to_pixel_format_enum =
+  foreign "SDL_MasksToPixelFormatEnum"
+    (int @-> int32_as_uint32_t @-> int32_as_uint32_t @-> int32_as_uint32_t @->
      int32_as_uint32_t @-> returning uint32_t)
 
-let pixel_format_enum_to_masks = 
-  foreign "SDL_PixelFormatEnumToMasks" 
-    (uint32_t @-> ptr int @-> 
-     ptr uint32_t @-> ptr uint32_t @-> ptr uint32_t @-> ptr uint32_t @-> 
+let pixel_format_enum_to_masks =
+  foreign "SDL_PixelFormatEnumToMasks"
+    (uint32_t @-> ptr int @->
+     ptr uint32_t @-> ptr uint32_t @-> ptr uint32_t @-> ptr uint32_t @->
      returning bool)
 
-let pixel_format_enum_to_masks pf = 
-  let ui () = allocate uint32_t (Unsigned.UInt32.of_int 0) in 
+let pixel_format_enum_to_masks pf =
+  let ui () = allocate uint32_t (Unsigned.UInt32.of_int 0) in
   let get iptr = Unsigned.UInt32.to_int32 (!@ iptr) in
-  let bpp = allocate int 0 in 
-  let rm, gm, bm, am = ui (), ui (), ui (), ui () in 
-  if not (pixel_format_enum_to_masks pf bpp rm gm bm am) then error () else 
+  let bpp = allocate int 0 in
+  let rm, gm, bm, am = ui (), ui (), ui (), ui () in
+  if not (pixel_format_enum_to_masks pf bpp rm gm bm am) then error () else
   `Ok (!@ bpp, get rm, get gm, get bm, get am)
-  
-let set_pixel_format_palette = 
-  foreign "SDL_SetPixelFormatPalette" 
+
+let set_pixel_format_palette =
+  foreign "SDL_SetPixelFormatPalette"
     (pixel_format @-> palette @-> returning zero_to_ok)
 
 (* Surface *)
 
 type _surface
 type surface_struct = _surface structure
-let surface_struct : surface_struct typ = structure "SDL_Surface" 
+let surface_struct : surface_struct typ = structure "SDL_Surface"
 let _ = field surface_struct "flags" uint32_t
 let surface_format = field surface_struct "format" pixel_format
 let surface_w = field surface_struct "w" int
@@ -824,98 +824,98 @@ let surface_pixels = field surface_struct "pixels" (ptr void)
 let _ = field surface_struct "userdata" (ptr void)
 let _ = field surface_struct "locked" int
 let _ = field surface_struct "lock_data" (ptr void)
-let _ = field surface_struct "clip_rect" rect 
+let _ = field surface_struct "clip_rect" rect
 let _ = field surface_struct "map" (ptr void)
 let _ = field surface_struct "refcount" int
 let () = seal surface_struct
 
 type surface = surface_struct ptr
-let surface : surface typ = ptr surface_struct 
+let surface : surface typ = ptr surface_struct
 let surface_opt : surface option typ = ptr_opt surface_struct
 
 let unsafe_surface_of_ptr addr : surface =
   from_voidp surface_struct (ptr_of_raw_address addr)
 
-let blit_scaled = 
+let blit_scaled =
   (* SDL_BlitScaled is #ifdef'd to SDL_UpperBlitScaled *)
   foreign "SDL_UpperBlitScaled"
-    (surface @-> ptr rect @-> surface @-> ptr rect @-> returning zero_to_ok) 
+    (surface @-> ptr rect @-> surface @-> ptr rect @-> returning zero_to_ok)
 
-let blit_scaled ~src sr ~dst dr = 
+let blit_scaled ~src sr ~dst dr =
   blit_scaled src (addr sr) dst (Rect.opt_addr dr)
 
-let blit_surface = 
+let blit_surface =
   (* SDL_BlitSurface is #ifdef'd to SDL_UpperBlit *)
   foreign "SDL_UpperBlit"
     (surface @-> ptr rect @-> surface @-> ptr rect @-> returning zero_to_ok)
 
-let blit_surface ~src sr ~dst dr = 
+let blit_surface ~src sr ~dst dr =
   blit_surface src (addr sr) dst (addr dr)
 
-let convert_pixels = 
+let convert_pixels =
   foreign "SDL_ConvertPixels"
-    (int @-> int @-> uint32_t @-> ptr void @-> int @-> uint32_t @-> 
+    (int @-> int @-> uint32_t @-> ptr void @-> int @-> uint32_t @->
      ptr void @-> int @-> returning zero_to_ok)
 
-let convert_pixels ~w ~h ~src sp spitch ~dst dp dpitch = 
-  (* FIXME: we could try check bounds. *) 
+let convert_pixels ~w ~h ~src sp spitch ~dst dp dpitch =
+  (* FIXME: we could try check bounds. *)
   let spitch = ba_kind_byte_size (Bigarray.Array1.kind sp) * spitch in
   let dpitch = ba_kind_byte_size (Bigarray.Array1.kind dp) * dpitch in
-  let sp = to_voidp (bigarray_start array1 sp) in 
-  let dp = to_voidp (bigarray_start array1 dp) in 
+  let sp = to_voidp (bigarray_start array1 sp) in
+  let dp = to_voidp (bigarray_start array1 dp) in
   convert_pixels w h src sp spitch dst dp dpitch
 
-let convert_surface = 
-  foreign "SDL_ConvertSurface" 
-    (surface @-> pixel_format @-> uint32_t @-> 
+let convert_surface =
+  foreign "SDL_ConvertSurface"
+    (surface @-> pixel_format @-> uint32_t @->
      returning (some_to_ok surface_opt))
 
-let convert_surface s pf = 
+let convert_surface s pf =
   convert_surface s pf Unsigned.UInt32.zero
 
-let convert_surface_format = 
+let convert_surface_format =
   foreign "SDL_ConvertSurfaceFormat"
     (surface @-> uint32_t @-> uint32_t @-> returning (some_to_ok surface_opt))
 
-let convert_surface_format s pf = 
+let convert_surface_format s pf =
   convert_surface_format s pf Unsigned.UInt32.zero
 
-let create_rgb_surface = 
+let create_rgb_surface =
   foreign "SDL_CreateRGBSurface"
-    (uint32_t @-> int @-> int @-> int @-> int32_as_uint32_t @-> 
-     int32_as_uint32_t @-> int32_as_uint32_t @-> int32_as_uint32_t @-> 
+    (uint32_t @-> int @-> int @-> int @-> int32_as_uint32_t @->
+     int32_as_uint32_t @-> int32_as_uint32_t @-> int32_as_uint32_t @->
      returning (some_to_ok surface_opt))
 
-let create_rgb_surface ~w ~h ~depth rmask gmask bmask amask = 
+let create_rgb_surface ~w ~h ~depth rmask gmask bmask amask =
   create_rgb_surface Unsigned.UInt32.zero w h depth rmask gmask bmask amask
 
 let create_rgb_surface_from =
   foreign "SDL_CreateRGBSurfaceFrom"
-    (ptr void @-> int @-> int @-> int @-> int @-> int32_as_uint32_t @-> 
-     int32_as_uint32_t @-> int32_as_uint32_t @-> int32_as_uint32_t @-> 
+    (ptr void @-> int @-> int @-> int @-> int @-> int32_as_uint32_t @->
+     int32_as_uint32_t @-> int32_as_uint32_t @-> int32_as_uint32_t @->
      returning (some_to_ok surface_opt))
 
-let create_rgb_surface_from p ~w ~h ~depth ~pitch rmask gmask bmask amask = 
-  (* FIXME: we could try check bounds. *) 
+let create_rgb_surface_from p ~w ~h ~depth ~pitch rmask gmask bmask amask =
+  (* FIXME: we could try check bounds. *)
   let pitch = ba_kind_byte_size (Bigarray.Array1.kind p) * pitch in
   let p = to_voidp (bigarray_start array1 p) in
   create_rgb_surface_from p w h depth pitch rmask gmask bmask amask
 
 let fill_rect =
-  foreign "SDL_FillRect" 
+  foreign "SDL_FillRect"
     (surface @-> ptr rect @-> int32_as_uint32_t @-> returning zero_to_ok)
 
-let fill_rect s r c = 
-  fill_rect s (Rect.opt_addr r) c 
+let fill_rect s r c =
+  fill_rect s (Rect.opt_addr r) c
 
-let fill_rects = 
-  foreign "SDL_FillRects" 
-    (surface @-> ptr void @-> int @-> int32_as_uint32_t @-> 
+let fill_rects =
+  foreign "SDL_FillRects"
+    (surface @-> ptr void @-> int @-> int32_as_uint32_t @->
      returning zero_to_ok)
-    
+
 let fill_rects_ba s rs col =
-  let len = Bigarray.Array1.dim rs in 
-  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else 
+  let len = Bigarray.Array1.dim rs in
+  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else
   let count = len / 4 in
   let rs = to_voidp (bigarray_start array1 rs) in
   fill_rects s rs count col
@@ -925,149 +925,149 @@ let fill_rects s rs col =
   let a = CArray.of_list rect rs in
   fill_rects s (to_voidp (CArray.start a)) count col
 
-let free_surface = 
+let free_surface =
   foreign "SDL_FreeSurface" (surface @-> returning void)
 
-let get_clip_rect = 
+let get_clip_rect =
   foreign "SDL_GetClipRect" (surface @-> ptr rect @-> returning void)
 
-let get_clip_rect s = 
-  let r = make rect in 
+let get_clip_rect s =
+  let r = make rect in
   (get_clip_rect s (addr r); r)
 
-let get_color_key = 
+let get_color_key =
   foreign "SDL_GetColorKey"
     (surface @-> ptr uint32_t @-> returning zero_to_ok)
 
-let get_color_key s = 
-  let key = allocate uint32_t Unsigned.UInt32.zero in 
-  match get_color_key s key with 
+let get_color_key s =
+  let key = allocate uint32_t Unsigned.UInt32.zero in
+  match get_color_key s key with
   | `Ok () -> `Ok (Unsigned.UInt32.to_int32 (!@ key)) | `Error _ as e -> e
 
 let get_surface_alpha_mod =
-  foreign "SDL_GetSurfaceAlphaMod" 
+  foreign "SDL_GetSurfaceAlphaMod"
     (surface @-> ptr uint8_t @-> returning zero_to_ok)
 
-let get_surface_alpha_mod s = 
-  let alpha = allocate uint8_t Unsigned.UInt8.zero in 
-  match get_surface_alpha_mod s alpha with 
+let get_surface_alpha_mod s =
+  let alpha = allocate uint8_t Unsigned.UInt8.zero in
+  match get_surface_alpha_mod s alpha with
   | `Ok () -> `Ok (Unsigned.UInt8.to_int (!@ alpha)) | `Error _ as e -> e
 
-let get_surface_blend_mode = 
+let get_surface_blend_mode =
   foreign "SDL_GetSurfaceBlendMode"
     (surface @-> ptr int @-> returning zero_to_ok)
 
-let get_surface_blend_mode s = 
-  let mode = allocate int 0 in 
-  match get_surface_blend_mode s mode with 
+let get_surface_blend_mode s =
+  let mode = allocate int 0 in
+  match get_surface_blend_mode s mode with
   `Ok () -> `Ok (!@ mode) | `Error _ as e -> e
 
-let get_surface_color_mod = 
+let get_surface_color_mod =
   foreign "SDL_GetSurfaceColorMod"
-    (surface @-> ptr uint8_t @-> ptr uint8_t @-> ptr uint8_t @-> 
+    (surface @-> ptr uint8_t @-> ptr uint8_t @-> ptr uint8_t @->
      returning zero_to_ok)
 
-let get_surface_color_mod s = 
-  let alloc () = allocate uint8_t Unsigned.UInt8.zero in 
+let get_surface_color_mod s =
+  let alloc () = allocate uint8_t Unsigned.UInt8.zero in
   let get v = Unsigned.UInt8.to_int (!@ v) in
-  let r, g, b = alloc (), alloc (), alloc () in 
-  match get_surface_color_mod s r g b with 
+  let r, g, b = alloc (), alloc (), alloc () in
+  match get_surface_color_mod s r g b with
   | `Ok () -> `Ok (get r, get g, get b) | `Error _ as e -> e
 
-let get_surface_format_enum s = 
-  (* We don't give direct access to the format field. This prevents 
+let get_surface_format_enum s =
+  (* We don't give direct access to the format field. This prevents
      memory ownership problems. *)
   get_pixel_format_format (getf (!@ s) surface_format)
 
-let get_surface_pitch s = 
+let get_surface_pitch s =
   getf (!@ s) surface_pitch
 
 let get_surface_pixels s kind =
   let pitch = get_surface_pitch s in
-  let kind_size = ba_kind_byte_size kind in 
-  if pitch mod kind_size <> 0 
+  let kind_size = ba_kind_byte_size kind in
+  if pitch mod kind_size <> 0
   then invalid_arg (err_bigarray_pitch pitch kind_size)
   else
   let h = getf (!@ s) surface_h in
   let ba_size = (pitch * h) / kind_size in
-  let pixels = getf (!@ s) surface_pixels in 
+  let pixels = getf (!@ s) surface_pixels in
   let pixels = coerce (ptr void) (access_ptr_typ_of_ba_kind kind) pixels in
   bigarray_of_ptr array1 ba_size kind pixels
 
-let get_surface_size s = 
+let get_surface_size s =
   getf (!@ s) surface_w, getf (!@ s) surface_h
 
-let load_bmp_rw = 
-  foreign "SDL_LoadBMP_RW" 
+let load_bmp_rw =
+  foreign "SDL_LoadBMP_RW"
     (rw_ops @-> bool @-> returning (some_to_ok surface_opt))
 
-let load_bmp_rw rw ~close = 
-  load_bmp_rw rw close 
+let load_bmp_rw rw ~close =
+  load_bmp_rw rw close
 
-let load_bmp file = 
-  (* SDL_LoadBMP is cpp based *) 
-  match rw_from_file file "rb" with 
+let load_bmp file =
+  (* SDL_LoadBMP is cpp based *)
+  match rw_from_file file "rb" with
   | `Error _ as e -> e
   | `Ok rw -> load_bmp_rw rw ~close:true
 
-let lock_surface = 
+let lock_surface =
   foreign "SDL_LockSurface" (surface @-> returning zero_to_ok)
 
-let lower_blit = 
+let lower_blit =
   foreign "SDL_LowerBlit"
     (surface @-> ptr rect @-> surface @-> ptr rect @-> returning zero_to_ok)
 
-let lower_blit ~src sr ~dst dr = 
+let lower_blit ~src sr ~dst dr =
   lower_blit src (addr sr) dst (addr dr)
 
-let lower_blit_scaled = 
+let lower_blit_scaled =
   foreign "SDL_LowerBlitScaled"
     (surface @-> ptr rect @-> surface @-> ptr rect @-> returning zero_to_ok)
 
-let lower_blit_scaled ~src sr ~dst dr = 
+let lower_blit_scaled ~src sr ~dst dr =
   lower_blit_scaled src (addr sr) dst (addr dr)
 
-let save_bmp_rw = 
-  foreign "SDL_SaveBMP_RW" 
+let save_bmp_rw =
+  foreign "SDL_SaveBMP_RW"
     (surface @-> rw_ops @-> bool @-> returning zero_to_ok)
 
-let save_bmp_rw s rw ~close = 
+let save_bmp_rw s rw ~close =
   save_bmp_rw s rw close
 
-let save_bmp s file = 
-  (* SDL_SaveBMP is cpp based *) 
-  match rw_from_file file "wb" with 
+let save_bmp s file =
+  (* SDL_SaveBMP is cpp based *)
+  match rw_from_file file "wb" with
   | `Error _ as e -> e
   | `Ok rw -> save_bmp_rw s rw ~close:true
 
-let set_clip_rect = 
+let set_clip_rect =
   foreign "SDL_SetClipRect" (surface @-> ptr rect @-> returning bool)
 
-let set_clip_rect s r = 
+let set_clip_rect s r =
   set_clip_rect s (addr r)
 
-let set_color_key = 
-  foreign "SDL_SetColorKey" 
+let set_color_key =
+  foreign "SDL_SetColorKey"
     (surface @-> bool @-> int32_as_uint32_t @-> returning zero_to_ok)
 
-let set_surface_alpha_mod = 
-  foreign "SDL_SetSurfaceAlphaMod" 
+let set_surface_alpha_mod =
+  foreign "SDL_SetSurfaceAlphaMod"
     (surface @-> int_as_uint8_t @-> returning zero_to_ok)
 
-let set_surface_blend_mode = 
-  foreign "SDL_SetSurfaceBlendMode" 
+let set_surface_blend_mode =
+  foreign "SDL_SetSurfaceBlendMode"
     (surface @-> int @-> returning zero_to_ok)
 
-let set_surface_color_mod = 
-  foreign "SDL_SetSurfaceColorMod" 
-    (surface @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @-> 
+let set_surface_color_mod =
+  foreign "SDL_SetSurfaceColorMod"
+    (surface @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @->
      returning zero_to_ok)
 
-let set_surface_palette = 
-  foreign "SDL_SetSurfacePalette" 
+let set_surface_palette =
+  foreign "SDL_SetSurfacePalette"
     (surface @-> palette @-> returning zero_to_ok)
 
-let set_surface_rle = 
+let set_surface_rle =
   foreign "SDL_SetSurfaceRLE" (surface @-> bool @-> returning zero_to_ok)
 
 let unlock_surface =
@@ -1075,7 +1075,7 @@ let unlock_surface =
 
 (* Renderers *)
 
-type flip = int 
+type flip = int
 module Flip = struct
   let ( + ) = ( lor )
   let none = sdl_flip_none
@@ -1105,146 +1105,146 @@ module Renderer = struct
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
   let none = Unsigned.UInt32.zero
   let software = i sdl_renderer_software
-  let accelerated = i sdl_renderer_accelerated 
+  let accelerated = i sdl_renderer_accelerated
   let presentvsync = i sdl_renderer_presentvsync
   let targettexture = i sdl_renderer_targettexture
 end
 
-type renderer_info = 
+type renderer_info =
   { ri_name : string;
-    ri_flags : Renderer.flags; 
-    ri_texture_formats : Pixel.format_enum list; 
-    ri_max_texture_width : int; 
+    ri_flags : Renderer.flags;
+    ri_texture_formats : Pixel.format_enum list;
+    ri_max_texture_width : int;
     ri_max_texture_height : int; }
 
 let renderer_info = structure "SDL_RendererInfo"
 let ri_name = field renderer_info "name" string
 let ri_flags = field renderer_info "flags" uint32_t
-let ri_num_tf = field renderer_info "num_texture_formats" uint32_t 
+let ri_num_tf = field renderer_info "num_texture_formats" uint32_t
 let ri_tfs = field renderer_info "texture_formats" (array 16 uint32_t)
-let ri_max_texture_width = field renderer_info "max_texture_width" int 
-let ri_max_texture_height = field renderer_info "max_texture_height" int 
+let ri_max_texture_width = field renderer_info "max_texture_width" int
+let ri_max_texture_height = field renderer_info "max_texture_height" int
 let () = seal renderer_info
 
 let renderer_info_of_c c =
   let ri_name = getf c ri_name in
   let ri_flags = getf c ri_flags in
-  let num_tf = Unsigned.UInt32.to_int (getf c ri_num_tf) in 
+  let num_tf = Unsigned.UInt32.to_int (getf c ri_num_tf) in
   let tfs = getf c ri_tfs in
-  let ri_texture_formats = 
+  let ri_texture_formats =
     let acc = ref [] in
-    for i = 0 to num_tf - 1 do acc := (CArray.get tfs i) :: !acc done; 
+    for i = 0 to num_tf - 1 do acc := (CArray.get tfs i) :: !acc done;
     List.rev !acc
   in
   let ri_max_texture_width = getf c ri_max_texture_width in
-  let ri_max_texture_height = getf c ri_max_texture_height in  
-  { ri_name; ri_flags; ri_texture_formats; ri_max_texture_width; 
+  let ri_max_texture_height = getf c ri_max_texture_height in
+  { ri_name; ri_flags; ri_texture_formats; ri_max_texture_width;
     ri_max_texture_height }
 
-let create_renderer = 
-  foreign "SDL_CreateRenderer" 
+let create_renderer =
+  foreign "SDL_CreateRenderer"
     (window @-> int @-> uint32_t @-> returning (some_to_ok renderer_opt))
 
 let create_renderer ?(index = -1) ?(flags = Unsigned.UInt32.zero) w =
   create_renderer w index flags
 
-let create_software_renderer = 
-  foreign "SDL_CreateSoftwareRenderer" 
+let create_software_renderer =
+  foreign "SDL_CreateSoftwareRenderer"
     (surface @-> returning (some_to_ok renderer_opt))
 
-let destroy_renderer = 
+let destroy_renderer =
   foreign "SDL_DestroyRenderer" (renderer @-> returning void)
-    
+
 let get_num_render_drivers =
   foreign "SDL_GetNumRenderDrivers" (void @-> returning nat_to_ok)
 
 let get_render_draw_blend_mode =
-  foreign "SDL_GetRenderDrawBlendMode" 
+  foreign "SDL_GetRenderDrawBlendMode"
     (renderer @-> ptr int @-> returning zero_to_ok)
 
-let get_render_draw_blend_mode r = 
-  let m = allocate int 0 in 
-  match get_render_draw_blend_mode r m with 
+let get_render_draw_blend_mode r =
+  let m = allocate int 0 in
+  match get_render_draw_blend_mode r m with
   | `Ok () -> `Ok !@m | `Error _ as e -> e
 
-let get_render_draw_color = 
-  foreign "SDL_GetRenderDrawColor" 
-    (renderer @-> ptr uint8_t @-> ptr uint8_t @-> ptr uint8_t @-> 
+let get_render_draw_color =
+  foreign "SDL_GetRenderDrawColor"
+    (renderer @-> ptr uint8_t @-> ptr uint8_t @-> ptr uint8_t @->
      ptr uint8_t @-> returning zero_to_ok)
 
-let get_render_draw_color rend = 
-  let alloc () = allocate uint8_t Unsigned.UInt8.zero in 
-  let get v = Unsigned.UInt8.to_int (!@ v) in 
+let get_render_draw_color rend =
+  let alloc () = allocate uint8_t Unsigned.UInt8.zero in
+  let get v = Unsigned.UInt8.to_int (!@ v) in
   let r, g, b, a = alloc (), alloc (), alloc (), alloc () in
-  match get_render_draw_color rend r g b a with 
+  match get_render_draw_color rend r g b a with
   | `Ok () -> `Ok (get r, get g, get b, get a) | `Error _ as e -> e
 
-let get_render_driver_info = 
-  foreign "SDL_GetRenderDriverInfo" 
+let get_render_driver_info =
+  foreign "SDL_GetRenderDriverInfo"
     (int @-> ptr renderer_info @-> returning zero_to_ok)
 
-let get_render_driver_info i = 
-  let info = make renderer_info in 
-  match get_render_driver_info i (addr info) with 
+let get_render_driver_info i =
+  let info = make renderer_info in
+  match get_render_driver_info i (addr info) with
   | `Ok () -> `Ok (renderer_info_of_c info) | `Error _ as e -> e
 
-let get_render_target = 
+let get_render_target =
   foreign "SDL_GetRenderTarget" (renderer @-> returning texture_opt)
 
 let get_renderer =
-  foreign "SDL_GetRenderer" 
+  foreign "SDL_GetRenderer"
     (window @-> returning (some_to_ok renderer_opt))
 
 let get_renderer_info =
-  foreign "SDL_GetRendererInfo" 
+  foreign "SDL_GetRendererInfo"
     (renderer @-> ptr renderer_info @-> returning zero_to_ok)
 
-let get_renderer_info r = 
+let get_renderer_info r =
   let info = make renderer_info in
-  match get_renderer_info r (addr info) with 
+  match get_renderer_info r (addr info) with
   | `Ok () -> `Ok (renderer_info_of_c info) | `Error _ as e -> e
 
-let get_renderer_output_size = 
-  foreign "SDL_GetRendererOutputSize" 
+let get_renderer_output_size =
+  foreign "SDL_GetRendererOutputSize"
     (renderer @-> ptr int @-> ptr int @-> returning zero_to_ok)
 
 let get_renderer_output_size r =
-  let w = allocate int 0 in 
-  let h = allocate int 0 in 
-  match get_renderer_output_size r w h with 
+  let w = allocate int 0 in
+  let h = allocate int 0 in
+  match get_renderer_output_size r w h with
   | `Ok () -> `Ok (!@ w, !@ h) | `Error _ as e -> e
 
-let render_clear = 
+let render_clear =
   foreign "SDL_RenderClear" (renderer @-> returning zero_to_ok)
 
-let render_copy = 
-  foreign "SDL_RenderCopy" 
-    (renderer @-> texture @-> ptr rect @-> ptr rect @-> 
+let render_copy =
+  foreign "SDL_RenderCopy"
+    (renderer @-> texture @-> ptr rect @-> ptr rect @->
      returning zero_to_ok)
- 
-let render_copy ?src ?dst r t = 
+
+let render_copy ?src ?dst r t =
   render_copy r t (Rect.opt_addr src) (Rect.opt_addr dst)
 
-let render_copy_ex = 
-  foreign "SDL_RenderCopyEx" 
-    (renderer @-> texture @-> ptr rect @-> ptr rect @-> double @-> 
+let render_copy_ex =
+  foreign "SDL_RenderCopyEx"
+    (renderer @-> texture @-> ptr rect @-> ptr rect @-> double @->
      ptr point @-> int @-> returning zero_to_ok)
 
-let render_copy_ex ?src ?dst r t angle c flip = 
-  render_copy_ex r t (Rect.opt_addr src) (Rect.opt_addr dst) angle 
+let render_copy_ex ?src ?dst r t angle c flip =
+  render_copy_ex r t (Rect.opt_addr src) (Rect.opt_addr dst) angle
     (Point.opt_addr c) flip
 
-let render_draw_line = 
-  foreign "SDL_RenderDrawLine" 
+let render_draw_line =
+  foreign "SDL_RenderDrawLine"
     (renderer @-> int @-> int @-> int @-> int @-> returning zero_to_ok)
-                                
-let render_draw_lines =
-  foreign "SDL_RenderDrawLines" 
-    (renderer @-> ptr void @-> int @-> returning zero_to_ok) 
 
-let render_draw_lines_ba r ps = 
-  let len = Bigarray.Array1.dim ps in 
-  if len mod 2 <> 0 then invalid_arg (err_length_mul len 2) else 
+let render_draw_lines =
+  foreign "SDL_RenderDrawLines"
+    (renderer @-> ptr void @-> int @-> returning zero_to_ok)
+
+let render_draw_lines_ba r ps =
+  let len = Bigarray.Array1.dim ps in
+  if len mod 2 <> 0 then invalid_arg (err_length_mul len 2) else
   let count = len / 2 in
   let ps = to_voidp (bigarray_start array1 ps) in
   render_draw_lines r ps count
@@ -1254,17 +1254,17 @@ let render_draw_lines r ps =
   let a = CArray.of_list point ps in
   render_draw_lines r (to_voidp (CArray.start a)) count
 
-let render_draw_point = 
+let render_draw_point =
   foreign "SDL_RenderDrawPoint"
     (renderer @-> int @-> int @-> returning zero_to_ok)
 
-let render_draw_points = 
+let render_draw_points =
   foreign "SDL_RenderDrawPoints"
     (renderer @-> ptr void @-> int @-> returning zero_to_ok)
 
-let render_draw_points_ba r ps = 
-  let len = Bigarray.Array1.dim ps in 
-  if len mod 2 <> 0 then invalid_arg (err_length_mul len 2) else 
+let render_draw_points_ba r ps =
+  let len = Bigarray.Array1.dim ps in
+  if len mod 2 <> 0 then invalid_arg (err_length_mul len 2) else
   let count = len / 2 in
   let ps = to_voidp (bigarray_start array1 ps) in
   render_draw_points r ps count
@@ -1274,20 +1274,20 @@ let render_draw_points r ps =
   let a = CArray.of_list point ps in
   render_draw_points r (to_voidp (CArray.start a)) count
 
-let render_draw_rect = 
-  foreign "SDL_RenderDrawRect" 
+let render_draw_rect =
+  foreign "SDL_RenderDrawRect"
     (renderer @-> ptr rect @-> returning zero_to_ok)
 
-let render_draw_rect rend r = 
+let render_draw_rect rend r =
   render_draw_rect rend (Rect.opt_addr r)
 
-let render_draw_rects = 
-  foreign "SDL_RenderDrawRects" 
+let render_draw_rects =
+  foreign "SDL_RenderDrawRects"
     (renderer @-> ptr void @-> int @-> returning zero_to_ok)
 
-let render_draw_rects_ba r rs = 
-  let len = Bigarray.Array1.dim rs in 
-  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else 
+let render_draw_rects_ba r rs =
+  let len = Bigarray.Array1.dim rs in
+  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else
   let count = len / 4 in
   let rs = to_voidp (bigarray_start array1 rs) in
   render_draw_rects r rs count
@@ -1304,13 +1304,13 @@ let render_fill_rect =
 let render_fill_rect rend r =
   render_fill_rect rend (Rect.opt_addr r)
 
-let render_fill_rects = 
-  foreign "SDL_RenderFillRects" 
+let render_fill_rects =
+  foreign "SDL_RenderFillRects"
     (renderer @-> ptr void @-> int @-> returning zero_to_ok)
 
-let render_fill_rects_ba r rs = 
-  let len = Bigarray.Array1.dim rs in 
-  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else 
+let render_fill_rects_ba r rs =
+  let len = Bigarray.Array1.dim rs in
+  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else
   let count = len / 4 in
   let rs = to_voidp (bigarray_start array1 rs) in
   render_fill_rects r rs count
@@ -1321,104 +1321,104 @@ let render_fill_rects r rs =
   render_fill_rects r (to_voidp (CArray.start a)) count
 
 let render_get_clip_rect =
-  foreign "SDL_RenderGetClipRect" 
-    (renderer @-> ptr rect @-> returning void) 
+  foreign "SDL_RenderGetClipRect"
+    (renderer @-> ptr rect @-> returning void)
 
-let render_get_clip_rect rend = 
-  let r = make rect in 
-  render_get_clip_rect rend (addr r); 
+let render_get_clip_rect rend =
+  let r = make rect in
+  render_get_clip_rect rend (addr r);
   r
 
 let render_get_logical_size =
-  foreign "SDL_RenderGetLogicalSize" 
+  foreign "SDL_RenderGetLogicalSize"
     (renderer @-> ptr int @-> ptr int @-> returning void)
 
-let render_get_logical_size r = 
-  let w = allocate int 0 in 
-  let h = allocate int 0 in 
-  render_get_logical_size r w h; 
+let render_get_logical_size r =
+  let w = allocate int 0 in
+  let h = allocate int 0 in
+  render_get_logical_size r w h;
   !@ w, !@ h
 
-let render_get_scale = 
-  foreign "SDL_RenderGetScale" 
+let render_get_scale =
+  foreign "SDL_RenderGetScale"
     (renderer @-> ptr float @-> ptr float @-> returning void)
 
-let render_get_scale r = 
-  let x = allocate float 0. in 
-  let y = allocate float 0. in 
-  render_get_scale r x y; 
+let render_get_scale r =
+  let x = allocate float 0. in
+  let y = allocate float 0. in
+  render_get_scale r x y;
   !@ x, !@ y
 
-let render_get_viewport = 
-  foreign "SDL_RenderGetViewport" 
+let render_get_viewport =
+  foreign "SDL_RenderGetViewport"
     (renderer @-> ptr rect @-> returning void)
 
-let render_get_viewport rend = 
-  let r = make rect in 
-  render_get_viewport rend (addr r); 
+let render_get_viewport rend =
+  let r = make rect in
+  render_get_viewport rend (addr r);
   r
 
-let render_present = 
+let render_present =
   foreign "SDL_RenderPresent" (renderer @-> returning void)
 
-let render_read_pixels = 
-  foreign "SDL_RenderReadPixels" 
-    (renderer @-> ptr rect @-> uint32_t @-> ptr void @-> int @-> 
+let render_read_pixels =
+  foreign "SDL_RenderReadPixels"
+    (renderer @-> ptr rect @-> uint32_t @-> ptr void @-> int @->
      returning zero_to_ok)
 
-let render_read_pixels r rect format pixels pitch = 
-  let format = match format with None -> Unsigned.UInt32.zero | Some f -> f in 
+let render_read_pixels r rect format pixels pitch =
+  let format = match format with None -> Unsigned.UInt32.zero | Some f -> f in
   let pixels = to_voidp (bigarray_start array1 pixels) in
-  render_read_pixels r (Rect.opt_addr rect) format pixels pitch 
+  render_read_pixels r (Rect.opt_addr rect) format pixels pitch
 
 let render_set_clip_rect =
-  foreign "SDL_RenderSetClipRect" 
+  foreign "SDL_RenderSetClipRect"
     (renderer @-> ptr rect @-> returning zero_to_ok)
 
-let render_set_clip_rect rend r = 
+let render_set_clip_rect rend r =
   render_set_clip_rect rend (Rect.opt_addr r)
 
-let render_set_logical_size = 
+let render_set_logical_size =
   foreign "SDL_RenderSetLogicalSize"
     (renderer @-> int @-> int @-> returning zero_to_ok)
 
 let render_set_scale =
-  foreign "SDL_RenderSetScale" 
+  foreign "SDL_RenderSetScale"
     (renderer @-> float @-> float @-> returning zero_to_ok)
 
-let render_set_viewport = 
+let render_set_viewport =
   foreign "SDL_RenderSetViewport"
     (renderer @-> ptr rect @-> returning zero_to_ok)
 
-let render_set_viewport rend r = 
+let render_set_viewport rend r =
   render_set_viewport rend (Rect.opt_addr r)
 
-let render_target_supported = 
+let render_target_supported =
   foreign "SDL_RenderTargetSupported" (renderer @-> returning bool)
 
-let set_render_draw_blend_mode = 
-  foreign "SDL_SetRenderDrawBlendMode" 
+let set_render_draw_blend_mode =
+  foreign "SDL_SetRenderDrawBlendMode"
     (renderer @-> int @-> returning zero_to_ok)
 
-let set_render_draw_color = 
-  foreign "SDL_SetRenderDrawColor" 
-    (renderer @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @-> 
+let set_render_draw_color =
+  foreign "SDL_SetRenderDrawColor"
+    (renderer @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @->
      int_as_uint8_t @-> returning zero_to_ok)
 
 let set_render_target =
   foreign "SDL_SetRenderTarget"
     (renderer @-> texture @-> returning zero_to_ok)
 
-let set_render_target r t = 
-  let t = match t with None -> null | Some t -> t in 
+let set_render_target r t =
+  let t = match t with None -> null | Some t -> t in
   set_render_target r t
 
-(* Textures *) 
+(* Textures *)
 
 module Texture = struct
   type access = int
   let access_static = sdl_textureaccess_static
-  let access_streaming = sdl_textureaccess_streaming  
+  let access_streaming = sdl_textureaccess_streaming
   let access_target = sdl_textureaccess_target
 
   let i = Unsigned.UInt32.of_int
@@ -1430,12 +1430,12 @@ end
 
 let create_texture =
   foreign "SDL_CreateTexture"
-    (renderer @-> uint32_t @-> int @-> int @-> int @-> 
+    (renderer @-> uint32_t @-> int @-> int @-> int @->
      returning (some_to_ok renderer_opt))
 
-let create_texture r pf access ~w ~h = 
-  create_texture r pf access w h 
-  
+let create_texture r pf access ~w ~h =
+  create_texture r pf access w h
+
 let create_texture_from_surface =
   foreign "SDL_CreateTextureFromSurface"
     (renderer @-> surface @-> returning (some_to_ok texture_opt))
@@ -1443,147 +1443,147 @@ let create_texture_from_surface =
 let destroy_texture =
   foreign "SDL_DestroyTexture" (texture @-> returning void)
 
-let get_texture_alpha_mod = 
-  foreign "SDL_GetTextureAlphaMod" 
+let get_texture_alpha_mod =
+  foreign "SDL_GetTextureAlphaMod"
     (texture @-> ptr uint8_t @-> returning zero_to_ok)
 
-let get_texture_alpha_mod t = 
-  let alpha = allocate uint8_t Unsigned.UInt8.zero in 
+let get_texture_alpha_mod t =
+  let alpha = allocate uint8_t Unsigned.UInt8.zero in
   match get_texture_alpha_mod t alpha with
   | `Ok () -> `Ok (Unsigned.UInt8.to_int (!@ alpha)) | `Error _ as e -> e
 
-let get_texture_blend_mode = 
-  foreign "SDL_GetTextureBlendMode" 
+let get_texture_blend_mode =
+  foreign "SDL_GetTextureBlendMode"
     (texture @-> ptr int @-> returning zero_to_ok)
 
-let get_texture_blend_mode t = 
-  let m = allocate int 0 in 
-  match get_texture_blend_mode t m with 
+let get_texture_blend_mode t =
+  let m = allocate int 0 in
+  match get_texture_blend_mode t m with
   | `Ok () -> `Ok (!@ m) | `Error _ as e -> e
 
 let get_texture_color_mod =
-  foreign "SDL_GetTextureColorMod" 
-    (renderer @-> ptr uint8_t @-> ptr uint8_t @-> ptr uint8_t @-> 
+  foreign "SDL_GetTextureColorMod"
+    (renderer @-> ptr uint8_t @-> ptr uint8_t @-> ptr uint8_t @->
      returning zero_to_ok)
 
-let get_texture_color_mod t = 
-  let alloc () = allocate uint8_t Unsigned.UInt8.zero in 
-  let get v = Unsigned.UInt8.to_int (!@ v) in 
+let get_texture_color_mod t =
+  let alloc () = allocate uint8_t Unsigned.UInt8.zero in
+  let get v = Unsigned.UInt8.to_int (!@ v) in
   let r, g, b = alloc (), alloc (), alloc () in
-  match get_texture_color_mod t r g b with 
+  match get_texture_color_mod t r g b with
   | `Ok () -> `Ok (get r, get g, get b) | `Error _ as e -> e
 
 let query_texture =
-  foreign "SDL_QueryTexture" 
-    (texture @-> ptr uint32_t @-> ptr int @-> ptr int @-> ptr int @-> 
+  foreign "SDL_QueryTexture"
+    (texture @-> ptr uint32_t @-> ptr int @-> ptr int @-> ptr int @->
      returning zero_to_ok)
 
-let _texture_height t = 
+let _texture_height t =
   let h = allocate int 0 in
-  let unull = coerce (ptr void) (ptr uint32_t) null in 
+  let unull = coerce (ptr void) (ptr uint32_t) null in
   let inull = coerce (ptr void) (ptr int) null in
-  match query_texture t unull inull inull h with 
+  match query_texture t unull inull inull h with
   | `Ok () -> `Ok (!@ h) | `Error _ as e -> e
 
-let lock_texture = 
-  foreign "SDL_LockTexture" 
-    (texture @-> ptr rect @-> ptr (ptr void) @-> ptr int @-> 
+let lock_texture =
+  foreign "SDL_LockTexture"
+    (texture @-> ptr rect @-> ptr (ptr void) @-> ptr int @->
      returning zero_to_ok)
 
 let lock_texture t r kind =
   match (match r with None -> _texture_height t | Some r -> `Ok (Rect.h r)) with
   | `Error _ as e -> e
-  | `Ok h -> 
-      let pitch = allocate int 0 in 
+  | `Ok h ->
+      let pitch = allocate int 0 in
       let p = allocate (ptr void) null in
-      match lock_texture t (Rect.opt_addr r) p pitch with 
+      match lock_texture t (Rect.opt_addr r) p pitch with
       | `Error _ as e -> e
-      | `Ok () -> 
-          let p = !@ p in 
+      | `Ok () ->
+          let p = !@ p in
           let pitch = !@ pitch in
-          let kind_size = ba_kind_byte_size kind in 
-          if pitch mod kind_size <> 0 
+          let kind_size = ba_kind_byte_size kind in
+          if pitch mod kind_size <> 0
           then invalid_arg (err_bigarray_pitch pitch kind_size)
           else
           let ba_size = (pitch * h) / kind_size in
           let pixels = coerce (ptr void) (access_ptr_typ_of_ba_kind kind) p in
           `Ok (bigarray_of_ptr array1 ba_size kind pixels, pitch / kind_size)
 
-let query_texture t = 
-  let pf = allocate uint32_t Unsigned.UInt32.zero in 
-  let access = allocate int 0 in 
-  let w = allocate int 0 in 
-  let h = allocate int 0 in 
-  match query_texture t pf access w h with 
+let query_texture t =
+  let pf = allocate uint32_t Unsigned.UInt32.zero in
+  let access = allocate int 0 in
+  let w = allocate int 0 in
+  let h = allocate int 0 in
+  match query_texture t pf access w h with
   | `Ok () -> `Ok (!@ pf, !@ access, (!@ w, !@ h)) | `Error _ as e -> e
 
-let set_texture_alpha_mod = 
-  foreign "SDL_SetTextureAlphaMod" 
+let set_texture_alpha_mod =
+  foreign "SDL_SetTextureAlphaMod"
     (texture @-> int_as_uint8_t @-> returning zero_to_ok)
 
 let set_texture_blend_mode =
-  foreign "SDL_SetTextureBlendMode" 
+  foreign "SDL_SetTextureBlendMode"
     (texture @-> int @-> returning zero_to_ok)
 
 let set_texture_color_mod =
-  foreign "SDL_SetTextureColorMod" 
-    (texture @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @-> 
+  foreign "SDL_SetTextureColorMod"
+    (texture @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @->
      returning zero_to_ok)
 
-let unlock_texture = 
+let unlock_texture =
   foreign "SDL_UnlockTexture" (texture @-> returning void)
 
-let update_texture = 
-  foreign "SDL_UpdateTexture" 
+let update_texture =
+  foreign "SDL_UpdateTexture"
     (texture @-> ptr rect @-> ptr void @-> int @-> returning zero_to_ok)
 
-let update_texture t rect pixels pitch = 
+let update_texture t rect pixels pitch =
   let pitch = pitch * (ba_kind_byte_size (Bigarray.Array1.kind pixels)) in
-  let pixels = to_voidp (bigarray_start array1 pixels) in 
+  let pixels = to_voidp (bigarray_start array1 pixels) in
   update_texture t (Rect.opt_addr rect) pixels pitch
-  
-let update_yuv_texture = 
-  foreign "SDL_UpdateYUVTexture" 
-    (texture @-> ptr rect @-> 
-     ptr void @-> int @-> ptr void @-> int @-> ptr void @-> int @-> 
+
+let update_yuv_texture =
+  foreign "SDL_UpdateYUVTexture"
+    (texture @-> ptr rect @->
+     ptr void @-> int @-> ptr void @-> int @-> ptr void @-> int @->
      returning zero_to_ok)
 
-let update_yuv_texture r rect ~y ypitch ~u upitch ~v vpitch = 
-  let yp = to_voidp (bigarray_start array1 y) in 
-  let up = to_voidp (bigarray_start array1 u) in 
-  let vp = to_voidp (bigarray_start array1 v) in 
+let update_yuv_texture r rect ~y ypitch ~u upitch ~v vpitch =
+  let yp = to_voidp (bigarray_start array1 y) in
+  let up = to_voidp (bigarray_start array1 u) in
+  let vp = to_voidp (bigarray_start array1 v) in
   update_yuv_texture r (Rect.opt_addr rect) yp ypitch up upitch vp vpitch
 
 (* Video drivers *)
 
-let get_current_video_driver = 
+let get_current_video_driver =
   foreign "SDL_GetCurrentVideoDriver" (void @-> returning string_opt)
 
 let get_num_video_drivers =
   foreign "SDL_GetNumVideoDrivers" (void @-> returning nat_to_ok)
 
-let get_video_driver = 
+let get_video_driver =
   foreign "SDL_GetVideoDriver" (int @-> returning (some_to_ok string_opt))
 
-let video_init = 
+let video_init =
   foreign "SDL_VideoInit" (string_opt @-> returning zero_to_ok)
 
-let video_quit = 
+let video_quit =
   foreign "SDL_VideoQuit" (void @-> returning void)
 
-(* Displays *) 
+(* Displays *)
 
 type driverdata = unit ptr
 let driverdata = ptr_opt void
 
-type display_mode = 
-  { dm_format : Pixel.format_enum; 
-    dm_w : int; 
-    dm_h : int; 
-    dm_refresh_rate : int option; 
+type display_mode =
+  { dm_format : Pixel.format_enum;
+    dm_w : int;
+    dm_h : int;
+    dm_refresh_rate : int option;
     dm_driverdata : driverdata option }
 
-type _display_mode 
+type _display_mode
 let display_mode : _display_mode structure typ = structure "SDL_DisplayMode"
 let dm_format = field display_mode "format" uint32_t
 let dm_w = field display_mode "w" int
@@ -1592,66 +1592,66 @@ let dm_refresh_rate = field display_mode "refresh_rate" int
 let dm_driverdata = field display_mode "driverdata" driverdata
 let () = seal display_mode
 
-let display_mode_to_c o = 
-  let c = make display_mode in 
+let display_mode_to_c o =
+  let c = make display_mode in
   let rate = match o.dm_refresh_rate with None -> 0 | Some r -> r in
-  setf c dm_format o.dm_format; 
-  setf c dm_w o.dm_w; 
-  setf c dm_h o.dm_h; 
-  setf c dm_refresh_rate rate; 
+  setf c dm_format o.dm_format;
+  setf c dm_w o.dm_w;
+  setf c dm_h o.dm_h;
+  setf c dm_refresh_rate rate;
   setf c dm_driverdata o.dm_driverdata;
   c
 
 let display_mode_of_c c =
-  let dm_format = getf c dm_format in 
-  let dm_w = getf c dm_w in 
-  let dm_h = getf c dm_h in 
-  let dm_refresh_rate = match getf c dm_refresh_rate with 
+  let dm_format = getf c dm_format in
+  let dm_w = getf c dm_w in
+  let dm_h = getf c dm_h in
+  let dm_refresh_rate = match getf c dm_refresh_rate with
   | 0 -> None | r -> Some r
-  in 
-  let dm_driverdata = getf c dm_driverdata in 
+  in
+  let dm_driverdata = getf c dm_driverdata in
   { dm_format; dm_w; dm_h; dm_refresh_rate; dm_driverdata }
 
-let get_closest_display_mode = 
-  foreign "SDL_GetClosestDisplayMode" 
-    (int @-> ptr display_mode @-> ptr display_mode @-> 
+let get_closest_display_mode =
+  foreign "SDL_GetClosestDisplayMode"
+    (int @-> ptr display_mode @-> ptr display_mode @->
        returning (ptr_opt void))
 
-let get_closest_display_mode i m = 
-  let mode = display_mode_to_c m in 
-  let closest = make display_mode in 
-  match get_closest_display_mode i (addr mode) (addr closest) with 
-  | None -> None 
+let get_closest_display_mode i m =
+  let mode = display_mode_to_c m in
+  let closest = make display_mode in
+  match get_closest_display_mode i (addr mode) (addr closest) with
+  | None -> None
   | Some _ -> Some (display_mode_of_c closest)
 
-let get_current_display_mode = 
-  foreign "SDL_GetCurrentDisplayMode" 
+let get_current_display_mode =
+  foreign "SDL_GetCurrentDisplayMode"
     (int @-> ptr display_mode @-> returning zero_to_ok)
 
 let get_current_display_mode i =
-  let mode = make display_mode in 
-  match get_current_display_mode i (addr mode) with 
+  let mode = make display_mode in
+  match get_current_display_mode i (addr mode) with
   | `Ok () -> `Ok (display_mode_of_c mode) | `Error _ as e -> e
 
-let get_desktop_display_mode = 
-  foreign "SDL_GetDesktopDisplayMode" 
+let get_desktop_display_mode =
+  foreign "SDL_GetDesktopDisplayMode"
     (int @-> ptr display_mode @-> returning zero_to_ok)
 
 let get_desktop_display_mode i =
-  let mode = make display_mode in 
-  match get_desktop_display_mode i (addr mode) with 
+  let mode = make display_mode in
+  match get_desktop_display_mode i (addr mode) with
   | `Ok () -> `Ok (display_mode_of_c mode) | `Error _ as e -> e
 
-let get_display_bounds = 
-  foreign "SDL_GetDisplayBounds" 
-    (int @-> ptr rect @-> returning zero_to_ok) 
-    
-let get_display_bounds i = 
+let get_display_bounds =
+  foreign "SDL_GetDisplayBounds"
+    (int @-> ptr rect @-> returning zero_to_ok)
+
+let get_display_bounds i =
   let r = make rect in
-  match get_display_bounds i (addr r) with 
-  | `Ok () -> `Ok r | `Error _ as e -> e 
-  
-let get_display_mode = 
+  match get_display_bounds i (addr r) with
+  | `Ok () -> `Ok r | `Error _ as e -> e
+
+let get_display_mode =
   foreign "SDL_GetDisplayMode"
     (int @-> int @-> ptr display_mode @-> returning zero_to_ok)
 
@@ -1660,13 +1660,13 @@ let get_display_mode d i =
   match get_display_mode d i (addr mode) with
   | `Ok () -> `Ok (display_mode_of_c mode) | `Error _ as e -> e
 
-let get_num_display_modes = 
+let get_num_display_modes =
   foreign "SDL_GetNumDisplayModes" (int @-> returning nat_to_ok)
 
 let get_display_name =
   foreign "SDL_GetDisplayName" (int @-> returning (some_to_ok string_opt))
 
-let get_num_video_displays = 
+let get_num_video_displays =
   foreign "SDL_GetNumVideoDisplays" (void @-> returning nat_to_ok)
 
 (* Windows *)
@@ -1680,7 +1680,7 @@ module Window = struct
   let ( + ) = Unsigned.UInt32.logor
   let test f m = Unsigned.UInt32.(compare (logand f m) zero <> 0)
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
-  let windowed = i 0 
+  let windowed = i 0
   let fullscreen = i sdl_window_fullscreen
   let fullscreen_desktop = i sdl_window_fullscreen_desktop
   let opengl = i sdl_window_opengl
@@ -1698,216 +1698,216 @@ module Window = struct
   let allow_highdpi = i sdl_window_allow_highdpi
 end
 
-let create_window = 
-  foreign "SDL_CreateWindow" 
-    (string @-> int @-> int @-> int @-> int @-> uint32_t @-> 
+let create_window =
+  foreign "SDL_CreateWindow"
+    (string @-> int @-> int @-> int @-> int @-> uint32_t @->
      returning (some_to_ok window_opt))
 
-let create_window t ?(x = Window.pos_undefined) ?(y = Window.pos_undefined) 
+let create_window t ?(x = Window.pos_undefined) ?(y = Window.pos_undefined)
     ~w ~h flags = create_window t x y w h flags
 
 let create_window_and_renderer =
   foreign "SDL_CreateWindowAndRenderer"
-    (int @-> int @-> uint32_t @-> ptr window @-> ptr renderer @-> 
+    (int @-> int @-> uint32_t @-> ptr window @-> ptr renderer @->
      (returning zero_to_ok))
 
 let create_window_and_renderer ~w ~h flags =
-  let win = allocate window null in 
+  let win = allocate window null in
   let r = allocate renderer null in
-  match create_window_and_renderer w h flags win r with 
+  match create_window_and_renderer w h flags win r with
   | `Ok () -> `Ok (!@ win, !@ r) | `Error _ as e -> e
 
 let destroy_window =
   foreign "SDL_DestroyWindow" (window @-> returning void)
-      
-let get_window_brightness = 
+
+let get_window_brightness =
   foreign "SDL_GetWindowBrightness" (window @-> returning float)
 
-let get_window_display_index = 
+let get_window_display_index =
   foreign "SDL_GetWindowDisplayIndex" (window @-> returning nat_to_ok)
-    
-let get_window_display_mode = 
-  foreign "SDL_GetWindowDisplayMode" 
+
+let get_window_display_mode =
+  foreign "SDL_GetWindowDisplayMode"
     (window @-> (ptr display_mode) @-> returning int)
 
-let get_window_display_mode w = 
-  let mode = make display_mode in 
-  match get_window_display_mode w (addr mode) with 
+let get_window_display_mode w =
+  let mode = make display_mode in
+  match get_window_display_mode w (addr mode) with
   | 0 -> `Ok (display_mode_of_c mode) | err -> error ()
-                                                 
-let get_window_flags = 
+
+let get_window_flags =
   foreign "SDL_GetWindowFlags" (window @-> returning uint32_t)
 
-let get_window_from_id = 
-  foreign "SDL_GetWindowFromID" 
+let get_window_from_id =
+  foreign "SDL_GetWindowFromID"
     (int_as_uint32_t @-> returning (some_to_ok window_opt))
 
 let get_window_gamma_ramp =
-  foreign "SDL_GetWindowGammaRamp" 
+  foreign "SDL_GetWindowGammaRamp"
     (window @-> ptr void @-> ptr void @-> ptr void @-> returning zero_to_ok)
 
-let get_window_gamma_ramp w = 
+let get_window_gamma_ramp w =
   let create_ramp () = ba_create Bigarray.int16_unsigned 256 in
-  let r, g, b = create_ramp (), create_ramp (), create_ramp () in 
+  let r, g, b = create_ramp (), create_ramp (), create_ramp () in
   let ramp_ptr r = to_voidp (bigarray_start array1 r) in
-  match get_window_gamma_ramp w (ramp_ptr r) (ramp_ptr g) (ramp_ptr b) with 
+  match get_window_gamma_ramp w (ramp_ptr r) (ramp_ptr g) (ramp_ptr b) with
   | `Ok () -> `Ok (r, g, b) | `Error _ as e -> e
 
-let get_window_grab = 
+let get_window_grab =
   foreign "SDL_GetWindowGrab" (window @-> returning bool)
 
-let get_window_id = 
+let get_window_id =
   foreign "SDL_GetWindowID" (window @-> returning int_as_uint32_t)
 
-let get_window_maximum_size = 
-  foreign "SDL_GetWindowMaximumSize" 
+let get_window_maximum_size =
+  foreign "SDL_GetWindowMaximumSize"
     (window @-> (ptr int) @-> (ptr int) @-> returning void)
 
-let get_window_maximum_size win = 
-  let w = allocate int 0 in 
+let get_window_maximum_size win =
+  let w = allocate int 0 in
   let h = allocate int 0 in
-  get_window_maximum_size win w h; 
+  get_window_maximum_size win w h;
   !@ w, !@ h
 
-let get_window_minimum_size = 
-  foreign "SDL_GetWindowMinimumSize" 
+let get_window_minimum_size =
+  foreign "SDL_GetWindowMinimumSize"
     (window @-> (ptr int) @-> (ptr int) @-> returning void)
-    
-let get_window_minimum_size win = 
-  let w = allocate int 0 in 
+
+let get_window_minimum_size win =
+  let w = allocate int 0 in
   let h = allocate int 0 in
-  get_window_minimum_size win w h; 
+  get_window_minimum_size win w h;
   !@ w, !@ h
-    
-let get_window_pixel_format = 
+
+let get_window_pixel_format =
   foreign "SDL_GetWindowPixelFormat" (window @-> returning uint32_t)
-    
-let get_window_position = 
-  foreign "SDL_GetWindowPosition" 
+
+let get_window_position =
+  foreign "SDL_GetWindowPosition"
     (window @-> (ptr int) @-> (ptr int) @-> returning void)
 
-let get_window_position win = 
-  let x = allocate int 0 in 
+let get_window_position win =
+  let x = allocate int 0 in
   let y = allocate int 0 in
-  get_window_position win x y; 
+  get_window_position win x y;
   !@ x, !@ y
 
-let get_window_size = 
-  foreign "SDL_GetWindowSize" 
+let get_window_size =
+  foreign "SDL_GetWindowSize"
     (window @-> (ptr int) @-> (ptr int) @-> returning void)
 
-let get_window_size win = 
-  let w = allocate int 0 in 
+let get_window_size win =
+  let w = allocate int 0 in
   let h = allocate int 0 in
-  get_window_size win w h; 
+  get_window_size win w h;
   !@ w, !@ h
 
-let get_window_surface = 
+let get_window_surface =
   foreign "SDL_GetWindowSurface"
     (window @-> returning (some_to_ok surface_opt))
 
-let get_window_title = 
+let get_window_title =
   foreign "SDL_GetWindowTitle" (window @-> returning string)
 
-let hide_window = 
+let hide_window =
   foreign "SDL_HideWindow" (window @-> returning void)
 
-let maximize_window = 
+let maximize_window =
   foreign "SDL_MaximizeWindow" (window @-> returning void)
 
-let minimize_window = 
+let minimize_window =
   foreign "SDL_MinimizeWindow" (window @-> returning void)
 
-let raise_window = 
+let raise_window =
   foreign "SDL_RaiseWindow" (window @-> returning void)
 
-let restore_window = 
+let restore_window =
   foreign "SDL_RestoreWindow" (window @-> returning void)
 
-let set_window_bordered = 
+let set_window_bordered =
   foreign "SDL_SetWindowBordered" (window @-> bool @-> returning void)
 
-let set_window_brightness = 
-  foreign "SDL_SetWindowBrightness" 
+let set_window_brightness =
+  foreign "SDL_SetWindowBrightness"
     (window @-> float @-> returning zero_to_ok)
 
-let set_window_display_mode = 
-  foreign "SDL_SetWindowDisplayMode" 
+let set_window_display_mode =
+  foreign "SDL_SetWindowDisplayMode"
     (window @-> (ptr display_mode) @-> returning zero_to_ok)
 
-let set_window_display_mode w m = 
-  let mode = display_mode_to_c m in 
+let set_window_display_mode w m =
+  let mode = display_mode_to_c m in
   set_window_display_mode w (addr mode)
 
-let set_window_fullscreen = 
-  foreign "SDL_SetWindowFullscreen" 
+let set_window_fullscreen =
+  foreign "SDL_SetWindowFullscreen"
     (window @-> uint32_t @-> returning zero_to_ok)
 
-let set_window_gamma_ramp = 
-  foreign "SDL_SetWindowGammaRamp" 
-    (window @-> ptr void @-> ptr void @-> ptr void @-> 
+let set_window_gamma_ramp =
+  foreign "SDL_SetWindowGammaRamp"
+    (window @-> ptr void @-> ptr void @-> ptr void @->
      returning zero_to_ok)
 
-let set_window_gamma_ramp w r g b = 
+let set_window_gamma_ramp w r g b =
   let ramp_ptr r = to_voidp (bigarray_start array1 r) in
-  set_window_gamma_ramp w (ramp_ptr r) (ramp_ptr g) (ramp_ptr b) 
+  set_window_gamma_ramp w (ramp_ptr r) (ramp_ptr g) (ramp_ptr b)
 
-let set_window_grab = 
+let set_window_grab =
   foreign "SDL_SetWindowGrab" (window @-> bool @-> returning void)
 
-let set_window_icon = 
+let set_window_icon =
   foreign "SDL_SetWindowIcon" (window @-> surface @-> returning void)
 
-let set_window_maximum_size = 
+let set_window_maximum_size =
   foreign "SDL_SetWindowMaximumSize"
     (window @-> int @-> int @-> returning void)
 
-let set_window_maximum_size win ~w ~h = 
+let set_window_maximum_size win ~w ~h =
   set_window_maximum_size win w h
 
-let set_window_minimum_size = 
-  foreign "SDL_SetWindowMinimumSize" 
+let set_window_minimum_size =
+  foreign "SDL_SetWindowMinimumSize"
     (window @-> int @-> int @-> returning void)
 
-let set_window_minimum_size win ~w ~h = 
+let set_window_minimum_size win ~w ~h =
   set_window_minimum_size win w h
 
-let set_window_position = 
-  foreign "SDL_SetWindowPosition" 
+let set_window_position =
+  foreign "SDL_SetWindowPosition"
     (window @-> int @-> int @-> returning void)
 
-let set_window_position win ~x ~y = 
+let set_window_position win ~x ~y =
   set_window_position win x y
 
-let set_window_size = 
+let set_window_size =
   foreign "SDL_SetWindowSize" (window @-> int @-> int @-> returning void)
 
-let set_window_size win ~w ~h = 
+let set_window_size win ~w ~h =
   set_window_size win w h
 
 let set_window_title =
   foreign "SDL_SetWindowTitle" (window @-> string @-> returning void)
 
-let show_window = 
+let show_window =
   foreign "SDL_ShowWindow" (window @-> returning void)
 
-let update_window_surface = 
+let update_window_surface =
   foreign "SDL_UpdateWindowSurface" (window @-> returning zero_to_ok)
 
-let update_window_surface_rects = 
-  foreign "SDL_UpdateWindowSurfaceRects" 
+let update_window_surface_rects =
+  foreign "SDL_UpdateWindowSurfaceRects"
     (window @-> ptr void @-> int @-> returning zero_to_ok)
 
 let update_window_surface_rects_ba w rs =
-  let len = Bigarray.Array1.dim rs in 
-  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else 
+  let len = Bigarray.Array1.dim rs in
+  if len mod 4 <> 0 then invalid_arg (err_length_mul len 4) else
   let count = len / 4 in
   let rs = to_voidp (bigarray_start array1 rs) in
   update_window_surface_rects w rs count
 
-let update_window_surface_rects w rs = 
-  let count = List.length rs in 
-  let rs = to_voidp (CArray.start (CArray.of_list rect rs)) in 
+let update_window_surface_rects w rs =
+  let count = List.length rs in
+  let rs = to_voidp (CArray.start (CArray.of_list rect rs)) in
   update_window_surface_rects w rs count
 
 (* OpenGL contexts *)
@@ -1926,10 +1926,10 @@ module Gl = struct
   let context_robust_access_flag = sdl_gl_context_robust_access_flag
   let context_reset_isolation_flag = sdl_gl_context_reset_isolation_flag
 
-  type profile = int  
+  type profile = int
   let context_profile_core = sdl_gl_context_profile_core
   let context_profile_compatibility = sdl_gl_context_profile_compatibility
-  let context_profile_es = sdl_gl_context_profile_es 
+  let context_profile_es = sdl_gl_context_profile_es
 
   type attr = int
   let red_size = sdl_gl_red_size
@@ -1957,79 +1957,79 @@ module Gl = struct
   let framebuffer_srgb_capable = sdl_gl_framebuffer_srgb_capable
 end
 
-let gl_bind_texture = 
-  foreign "SDL_GL_BindTexture" 
+let gl_bind_texture =
+  foreign "SDL_GL_BindTexture"
     (texture @-> ptr float @-> ptr float @-> returning zero_to_ok)
 
-let gl_bind_texture t = 
-  let w = allocate float 0. in 
-  let h = allocate float 0. in 
-  match gl_bind_texture t w h with 
+let gl_bind_texture t =
+  let w = allocate float 0. in
+  let h = allocate float 0. in
+  match gl_bind_texture t w h with
   | `Ok () -> `Ok (!@ w, !@ h) | `Error _ as e -> e
 
 let gl_create_context =
-  foreign "SDL_GL_CreateContext" 
+  foreign "SDL_GL_CreateContext"
     (window @-> returning (some_to_ok gl_context_opt))
 
-let gl_delete_context = 
+let gl_delete_context =
   foreign "SDL_GL_DeleteContext" (gl_context @-> returning void)
 
-let gl_extension_supported = 
+let gl_extension_supported =
   foreign "SDL_GL_ExtensionSupported" (string @-> returning bool)
 
-let gl_get_attribute = 
+let gl_get_attribute =
   foreign "SDL_GL_GetAttribute" (int @-> (ptr int) @-> returning int)
-  
-let gl_get_attribute att = 
+
+let gl_get_attribute att =
   let value = allocate int 0 in
-  match gl_get_attribute att value with 
+  match gl_get_attribute att value with
   | 0 -> `Ok (!@ value) | err -> error ()
-  
-let gl_get_current_context = 
-  foreign "SDL_GL_GetCurrentContext" 
+
+let gl_get_current_context =
+  foreign "SDL_GL_GetCurrentContext"
     (void @-> returning (some_to_ok gl_context_opt))
 
-let gl_get_drawable_size = 
-  foreign "SDL_GL_GetDrawableSize" 
+let gl_get_drawable_size =
+  foreign "SDL_GL_GetDrawableSize"
     (window @-> ptr int @-> ptr int @-> returning void)
 
-let gl_get_drawable_size win = 
-  let w = allocate int 0 in 
-  let h = allocate int 0 in 
-  gl_get_drawable_size win w h; 
+let gl_get_drawable_size win =
+  let w = allocate int 0 in
+  let h = allocate int 0 in
+  gl_get_drawable_size win w h;
   (!@ w, !@ h)
-  
-let gl_get_swap_interval = 
+
+let gl_get_swap_interval =
   foreign "SDL_GL_GetSwapInterval" (void @-> returning nat_to_ok)
 
-let gl_make_current = 
-  foreign "SDL_GL_MakeCurrent" 
+let gl_make_current =
+  foreign "SDL_GL_MakeCurrent"
     (window @-> gl_context @-> returning zero_to_ok)
 
-let gl_reset_attributes = 
+let gl_reset_attributes =
   foreign "SDL_GL_ResetAttributes" ~stub (void @-> returning void)
 
-let gl_set_attribute = 
+let gl_set_attribute =
   foreign "SDL_GL_SetAttribute" (int @-> int @-> returning zero_to_ok)
-    
-let gl_set_swap_interval = 
+
+let gl_set_swap_interval =
   foreign "SDL_GL_SetSwapInterval" (int @-> returning zero_to_ok)
-    
-let gl_swap_window = 
+
+let gl_swap_window =
   foreign "SDL_GL_SwapWindow" (window @-> returning void)
 
-let gl_unbind_texture = 
+let gl_unbind_texture =
   foreign "SDL_GL_UnbindTexture" (texture @-> returning zero_to_ok)
 
 (* Screen saver *)
 
-let disable_screen_saver = 
+let disable_screen_saver =
   foreign "SDL_DisableScreenSaver" (void @-> returning void)
 
-let enable_screen_saver = 
+let enable_screen_saver =
   foreign "SDL_EnableScreenSaver" (void @-> returning void)
 
-let is_screen_saver_enabled = 
+let is_screen_saver_enabled =
   foreign "SDL_IsScreenSaverEnabled" (void @-> returning bool)
 
 (* Message boxes *)
@@ -2041,29 +2041,29 @@ module Message_box = struct
   let button_returnkey_default = i sdl_messagebox_button_returnkey_default
   let button_escapekey_default = i sdl_messagebox_button_escapekey_default
 
-  type button_data = 
-    { button_flags : button_flags; 
+  type button_data =
+    { button_flags : button_flags;
       button_id : int;
-      button_text : string } 
+      button_text : string }
 
   let button_data = structure "SDL_MessageBoxButtonData"
   let button_flags = field button_data "flags" uint32_t
   let button_buttonid = field button_data "buttonid" int
   let button_text = field button_data "text" string
   let () = seal button_data
-  
+
   type flags = Unsigned.uint32
   let error = i sdl_messagebox_error
   let warning = i sdl_messagebox_warning
   let information = i sdl_messagebox_information
 
-  type color = int * int * int 
-  let color = structure "SDL_MessageBoxColor" 
-  let color_r = field color "r" uint8_t 
-  let color_g = field color "g" uint8_t 
-  let color_b = field color "b" uint8_t 
+  type color = int * int * int
+  let color = structure "SDL_MessageBoxColor"
+  let color_r = field color "r" uint8_t
+  let color_g = field color "g" uint8_t
+  let color_b = field color "b" uint8_t
   let () = seal color
-  
+
   type color_type = int
   let color_background = sdl_messagebox_color_background
   let color_text = sdl_messagebox_color_text
@@ -2072,53 +2072,53 @@ module Message_box = struct
   let color_button_selected = sdl_messagebox_color_button_selected
   let color_button_max = sdl_messagebox_color_max
 
-  type color_scheme = 
+  type color_scheme =
     { color_background : color;
-      color_text : color; 
-      color_button_border : color; 
-      color_button_background : color; 
+      color_text : color;
+      color_button_border : color;
+      color_button_background : color;
       color_button_selected : color; }
 
   let color_scheme = structure "SDL_MessageBoxColorScheme"
   let colors = field color_scheme "colors" (array color_button_max color)
   let () = seal color_scheme
 
-  type data = 
-    { flags : flags; 
-      window : window option; 
-      title : string; 
-      message : string; 
-      buttons : button_data list; 
+  type data =
+    { flags : flags;
+      window : window option;
+      title : string;
+      message : string;
+      buttons : button_data list;
       color_scheme : color_scheme option }
 
   let data = structure "SDL_MessageBoxData"
-  let d_flags = field data "flags" uint32_t 
-  let d_window = field data "window" window 
-  let d_title = field data "title" string 
-  let d_message = field data "message" string 
-  let d_numbuttons = field data "numbuttons" int 
+  let d_flags = field data "flags" uint32_t
+  let d_window = field data "window" window
+  let d_title = field data "title" string
+  let d_message = field data "message" string
+  let d_numbuttons = field data "numbuttons" int
   let d_buttons = field data "buttons" (ptr button_data)
   let d_color_scheme = field data "colorScheme" (ptr color_scheme)
   let () = seal data
 
-  let buttons_to_c bl = 
+  let buttons_to_c bl =
     let button_data_to_c b =
-      let bt = make button_data in 
-      setf bt button_flags b.button_flags; 
-      setf bt button_buttonid b.button_id; 
+      let bt = make button_data in
+      setf bt button_flags b.button_flags;
+      setf bt button_buttonid b.button_id;
       setf bt button_text b.button_text;
       bt
     in
     CArray.start (CArray.of_list button_data (List.map button_data_to_c bl))
 
   let color_scheme_to_c s =
-    let st = make color_scheme in 
+    let st = make color_scheme in
     let colors = getf st colors in
-    let set i (rv, gv, bv) = 
-      let ct = CArray.get colors i in 
-      setf ct color_r (Unsigned.UInt8.of_int rv); 
-      setf ct color_g (Unsigned.UInt8.of_int rv); 
-      setf ct color_b (Unsigned.UInt8.of_int rv); 
+    let set i (rv, gv, bv) =
+      let ct = CArray.get colors i in
+      setf ct color_r (Unsigned.UInt8.of_int rv);
+      setf ct color_g (Unsigned.UInt8.of_int rv);
+      setf ct color_b (Unsigned.UInt8.of_int rv);
     in
     set color_background s.color_background;
     set color_text s.color_text;
@@ -2128,65 +2128,65 @@ module Message_box = struct
     st
 
   let data_to_c d =
-    let dt = make data in 
-    setf dt d_flags d.flags; 
+    let dt = make data in
+    setf dt d_flags d.flags;
     setf dt d_window (match d.window with None -> null | Some w -> w);
-    setf dt d_title d.title; 
+    setf dt d_title d.title;
     setf dt d_message d.message;
-    setf dt d_numbuttons (List.length d.buttons); 
-    setf dt d_buttons (buttons_to_c d.buttons); 
-    setf dt d_color_scheme 
-      begin match d.color_scheme with 
+    setf dt d_numbuttons (List.length d.buttons);
+    setf dt d_buttons (buttons_to_c d.buttons);
+    setf dt d_color_scheme
+      begin match d.color_scheme with
       | None -> coerce (ptr void) (ptr color_scheme) null
       | Some s -> addr (color_scheme_to_c s)
       end;
     dt
 end
 
-let show_message_box = 
-  foreign "SDL_ShowMessageBox" 
+let show_message_box =
+  foreign "SDL_ShowMessageBox"
     (ptr Message_box.data @-> ptr int @-> returning zero_to_ok)
 
-let show_message_box d = 
-  let d = addr (Message_box.data_to_c d) in 
-  let ret = allocate int 0 in 
-  match show_message_box d ret with 
+let show_message_box d =
+  let d = addr (Message_box.data_to_c d) in
+  let ret = allocate int 0 in
+  match show_message_box d ret with
   | `Ok () -> `Ok (!@ ret) | `Error _ as e -> e
 
-let show_simple_message_box = 
-  foreign "SDL_ShowSimpleMessageBox" 
+let show_simple_message_box =
+  foreign "SDL_ShowSimpleMessageBox"
     (uint32_t @-> string @-> string @-> window_opt @-> returning zero_to_ok)
 
 let show_simple_message_box t ~title msg w =
-  show_simple_message_box t title msg w 
+  show_simple_message_box t title msg w
 
 (* Clipboard *)
 
-let get_clipboard_text = 
+let get_clipboard_text =
   foreign "SDL_GetClipboardText" (void @-> returning (ptr char))
 
-let get_clipboard_text () = 
-  let p = get_clipboard_text () in 
-  if (to_voidp p) = null then error () else 
+let get_clipboard_text () =
+  let p = get_clipboard_text () in
+  if (to_voidp p) = null then error () else
   let b = Buffer.create 255 in
   let ptr = ref p in
-  while (!@ !ptr) <> '\000' do 
-    Buffer.add_char b (!@ !ptr); 
+  while (!@ !ptr) <> '\000' do
+    Buffer.add_char b (!@ !ptr);
     ptr := !ptr +@ 1;
   done;
-  sdl_free (to_voidp p); 
+  sdl_free (to_voidp p);
   `Ok (Buffer.contents b)
 
-let has_clipboard_text = 
+let has_clipboard_text =
   foreign "SDL_HasClipboardText" (void @-> returning bool)
 
-let set_clipboard_text = 
+let set_clipboard_text =
   foreign "SDL_SetClipboardText" (string @-> returning zero_to_ok)
 
 (* Input *)
 
 type button_state = uint8
-let pressed = sdl_pressed 
+let pressed = sdl_pressed
 let released = sdl_released
 
 type toggle_state = uint8
@@ -2196,7 +2196,7 @@ let enable = sdl_enable
 (* Keyboard *)
 
 type scancode = int
-let scancode = int 
+let scancode = int
 
 module Scancode = struct
   let num_scancodes = sdl_num_scancodes
@@ -2440,8 +2440,8 @@ module Scancode = struct
   let sleep = sdl_scancode_sleep
   let app1 = sdl_scancode_app1
   let app2 = sdl_scancode_app2
-    
-  let enum_of_scancode = [| 
+
+  let enum_of_scancode = [|
     `Unknown; `Unknown; `Unknown; `Unknown; `A; `B; `C; `D; `E; `F;
     `G; `H; `I; `J; `K; `L; `M; `N; `O; `P; `Q; `R; `S; `T; `U; `V;
     `W; `X; `Y; `Z; `K1; `K2; `K3; `K4; `K5; `K6; `K7; `K8; `K9; `K0;
@@ -2488,9 +2488,9 @@ module Scancode = struct
     `Kbdillumtoggle; `Kbdillumdown; `Kbdillumup; `Eject; `Sleep;
     `App1; `App2; |]
 
-  let enum s = 
-    if 0 <= s && s <= app2 then unsafe_get enum_of_scancode s else 
-    `Unknown 
+  let enum s =
+    if 0 <= s && s <= app2 then unsafe_get enum_of_scancode s else
+    `Unknown
 end
 
 type keycode = int
@@ -2759,60 +2759,60 @@ module Kmod = struct
   let gui = kmod_gui
 end
 
-let get_keyboard_focus = 
+let get_keyboard_focus =
   foreign "SDL_GetKeyboardFocus" (void @-> returning window_opt)
 
-let get_keyboard_state = 
+let get_keyboard_state =
   foreign "SDL_GetKeyboardState" (ptr int @-> returning (ptr int))
 
-let get_keyboard_state () = 
-  let count = allocate int 0 in 
-  let p = get_keyboard_state count in 
-  bigarray_of_ptr array1 (!@ count) Bigarray.int8_unsigned p 
+let get_keyboard_state () =
+  let count = allocate int 0 in
+  let p = get_keyboard_state count in
+  bigarray_of_ptr array1 (!@ count) Bigarray.int8_unsigned p
 
-let get_key_from_name = 
+let get_key_from_name =
   foreign "SDL_GetKeyFromName" (string @-> returning keycode)
 
-let get_key_from_scancode = 
+let get_key_from_scancode =
   foreign "SDL_GetKeyFromScancode" (scancode @-> returning keycode)
 
-let get_key_name = 
+let get_key_name =
   foreign "SDL_GetKeyName" (keycode @-> returning string)
 
-let get_mod_state = 
+let get_mod_state =
   foreign "SDL_GetModState" (void @-> returning keymod)
 
-let get_scancode_from_key = 
+let get_scancode_from_key =
   foreign "SDL_GetScancodeFromKey" (keycode @-> returning scancode)
 
-let get_scancode_from_name = 
+let get_scancode_from_name =
   foreign "SDL_GetScancodeFromName" (string @-> returning scancode)
 
-let get_scancode_name = 
+let get_scancode_name =
   foreign "SDL_GetScancodeName" (scancode @-> returning string)
 
-let has_screen_keyboard_support = 
+let has_screen_keyboard_support =
   foreign "SDL_HasScreenKeyboardSupport" (void @-> returning bool)
 
-let is_screen_keyboard_shown = 
+let is_screen_keyboard_shown =
   foreign "SDL_IsScreenKeyboardShown" (window @-> returning bool)
 
-let is_text_input_active = 
+let is_text_input_active =
   foreign "SDL_IsTextInputActive" (void @-> returning bool)
 
-let set_mod_state = 
+let set_mod_state =
   foreign "SDL_SetModState" (keymod @-> returning void)
 
-let set_text_input_rect = 
+let set_text_input_rect =
   foreign "SDL_SetTextInputRect" (ptr rect @-> returning void)
 
-let set_text_input_rect r = 
+let set_text_input_rect r =
   set_text_input_rect (Rect.opt_addr r)
 
-let start_text_input = 
+let start_text_input =
   foreign "SDL_StartTextInput" (void @-> returning void)
 
-let stop_text_input = 
+let stop_text_input =
   foreign "SDL_StopTextInput" (void @-> returning void)
 
 (* Mouse *)
@@ -2845,93 +2845,93 @@ module Button = struct
   let right = sdl_button_right
   let middle = sdl_button_middle
   let x1 = sdl_button_x1
-  let x2 = sdl_button_x2 
-  
+  let x2 = sdl_button_x2
+
   let i = Int32.of_int
-  let lmask = i sdl_button_lmask 
-  let mmask = i sdl_button_mmask 
-  let rmask = i sdl_button_rmask 
-  let x1mask = i sdl_button_x1mask 
-  let x2mask = i sdl_button_x2mask 
+  let lmask = i sdl_button_lmask
+  let mmask = i sdl_button_mmask
+  let rmask = i sdl_button_rmask
+  let x1mask = i sdl_button_x1mask
+  let x2mask = i sdl_button_x2mask
 end
 
 let create_color_cursor =
-  foreign "SDL_CreateColorCursor" 
+  foreign "SDL_CreateColorCursor"
     (surface @-> int @-> int @-> returning (some_to_ok cursor_opt))
-    
-let create_color_cursor s ~hot_x ~hot_y = 
-  create_color_cursor s hot_x hot_y 
-    
+
+let create_color_cursor s ~hot_x ~hot_y =
+  create_color_cursor s hot_x hot_y
+
 let create_cursor =
-  foreign "SDL_CreateCursor" 
-    (ptr void @-> ptr void @-> int @-> int @-> int @-> int @-> 
+  foreign "SDL_CreateCursor"
+    (ptr void @-> ptr void @-> int @-> int @-> int @-> int @->
      returning (some_to_ok cursor_opt))
-    
-let create_cursor d m ~w ~h ~hot_x ~hot_y = 
+
+let create_cursor d m ~w ~h ~hot_x ~hot_y =
   (* FIXME: we could try to check bounds *)
-  let d = to_voidp (bigarray_start array1 d) in 
-  let m = to_voidp (bigarray_start array1 m) in 
+  let d = to_voidp (bigarray_start array1 d) in
+  let m = to_voidp (bigarray_start array1 m) in
   create_cursor d m w h hot_x hot_y
 
-let create_system_cursor = 
+let create_system_cursor =
   foreign "SDL_CreateSystemCursor"
     (int @-> returning (some_to_ok cursor_opt))
-    
+
 let free_cursor =
   foreign "SDL_FreeCursor" (cursor @-> returning void)
-    
+
 let get_cursor =
   foreign "SDL_GetCursor" (void @-> returning cursor_opt)
 
-let get_default_cursor = 
+let get_default_cursor =
   foreign "SDL_GetDefaultCursor" (void @-> returning cursor_opt)
-    
+
 let get_mouse_focus =
   foreign "SDL_GetMouseFocus" (void @-> returning window_opt)
-    
+
 let get_mouse_state =
-  foreign "SDL_GetMouseState" 
+  foreign "SDL_GetMouseState"
     (ptr int @-> ptr int @-> returning int32_as_uint32_t)
 
 let get_mouse_state () =
-  let x = allocate int 0 in 
-  let y = allocate int 0 in 
-  let s = get_mouse_state x y in 
+  let x = allocate int 0 in
+  let y = allocate int 0 in
+  let s = get_mouse_state x y in
   s, (!@ x, !@ y)
 
 let get_relative_mouse_mode =
   foreign "SDL_GetRelativeMouseMode" (void @-> returning bool)
 
 let get_relative_mouse_state =
-  foreign "SDL_GetRelativeMouseState" 
+  foreign "SDL_GetRelativeMouseState"
     (ptr int @-> ptr int @-> returning int32_as_uint32_t)
 
 let get_relative_mouse_state () =
-  let x = allocate int 0 in 
-  let y = allocate int 0 in 
-  let s = get_relative_mouse_state x y in 
+  let x = allocate int 0 in
+  let y = allocate int 0 in
+  let s = get_relative_mouse_state x y in
   s, (!@ x, !@ y)
 
-let show_cursor = 
-  foreign "SDL_ShowCursor" (int @-> returning bool_to_ok) 
-    
-let get_cursor_shown () = 
+let show_cursor =
+  foreign "SDL_ShowCursor" (int @-> returning bool_to_ok)
+
+let get_cursor_shown () =
   show_cursor (-1)
-    
+
 let set_cursor =
   foreign "SDL_SetCursor" (cursor_opt @-> returning void)
-    
+
 let set_relative_mouse_mode =
   foreign "SDL_SetRelativeMouseMode" (bool @-> returning zero_to_ok)
-    
+
 let show_cursor b =
-  show_cursor (if b then 1 else 0) 
-    
+  show_cursor (if b then 1 else 0)
+
 let warp_mouse_in_window =
-  foreign "SDL_WarpMouseInWindow" 
+  foreign "SDL_WarpMouseInWindow"
     (window_opt @-> int @-> int @-> returning void)
-    
-let warp_mouse_in_window w ~x ~y = 
+
+let warp_mouse_in_window w ~x ~y =
   warp_mouse_in_window w x y
 
 (* Touch *)
@@ -2940,17 +2940,17 @@ type touch_id = int64
 let touch_id = int64_t
 let touch_mouse_id = Int64.of_int32 (sdl_touch_mouseid)
 
-type gesture_id = int64 
-let gesture_id = int64_t 
+type gesture_id = int64
+let gesture_id = int64_t
 
-type finger_id = int64 
-let finger_id = int64_t 
+type finger_id = int64
+let finger_id = int64_t
 
 type _finger
 type finger = _finger structure
-let finger : finger typ = structure "SDL_Finger" 
+let finger : finger typ = structure "SDL_Finger"
 let finger_finger_id = field finger "id" finger_id
-let finger_x = field finger "x" float 
+let finger_x = field finger "x" float
 let finger_y = field finger "y" float
 let finger_pressure = field finger "pressure" float
 let () = seal finger
@@ -2962,39 +2962,39 @@ module Finger = struct
   let pressure f = getf f finger_pressure
 end
 
-let get_num_touch_devices = 
+let get_num_touch_devices =
   foreign "SDL_GetNumTouchDevices" (void @-> returning int)
 
-let get_num_touch_fingers = 
+let get_num_touch_fingers =
   foreign "SDL_GetNumTouchFingers" (touch_id @-> returning int)
 
-let get_touch_device = 
-  foreign "SDL_GetTouchDevice" (int @-> returning touch_id) 
+let get_touch_device =
+  foreign "SDL_GetTouchDevice" (int @-> returning touch_id)
 
-let get_touch_device i = 
-  match get_touch_device i with 
-  | 0L -> error () | id -> `Ok id 
+let get_touch_device i =
+  match get_touch_device i with
+  | 0L -> error () | id -> `Ok id
 
-let get_touch_finger = 
-  foreign "SDL_GetTouchFinger" 
+let get_touch_finger =
+  foreign "SDL_GetTouchFinger"
     (touch_id @-> int @-> returning (ptr_opt finger))
 
-let get_touch_finger id i = 
-  match get_touch_finger id i with 
+let get_touch_finger id i =
+  match get_touch_finger id i with
   | None -> None | Some p -> Some (!@ p)
 
-let load_dollar_templates = 
+let load_dollar_templates =
   foreign "SDL_LoadDollarTemplates"
     (touch_id @-> rw_ops @-> returning zero_to_ok)
 
-let record_gesture = 
+let record_gesture =
   foreign "SDL_RecordGesture" (touch_id @-> returning one_to_ok)
-    
-let save_dollar_template = 
+
+let save_dollar_template =
   foreign "SDL_SaveDollarTemplate"
     (gesture_id @-> rw_ops @-> returning zero_to_ok)
-    
-let save_all_dollar_templates = 
+
+let save_all_dollar_templates =
   foreign "SDL_SaveAllDollarTemplates" (rw_ops @-> returning zero_to_ok)
 
 (* Joystick *)
@@ -3046,65 +3046,65 @@ module Hat = struct
   let leftdown = sdl_hat_leftdown
 end
 
-let joystick_close = 
+let joystick_close =
   foreign "SDL_JoystickClose" (joystick @-> returning void)
 
-let joystick_event_state = 
+let joystick_event_state =
   foreign "SDL_JoystickEventState" (int @-> returning nat_to_ok)
 
-let joystick_get_event_state () = 
+let joystick_get_event_state () =
   joystick_event_state sdl_query
 
-let joystick_set_event_state s = 
+let joystick_set_event_state s =
   joystick_event_state s
 
-let joystick_get_attached = 
+let joystick_get_attached =
   foreign "SDL_JoystickGetAttached" (joystick @-> returning bool)
 
-let joystick_get_axis = 
+let joystick_get_axis =
   foreign "SDL_JoystickGetAxis" (joystick @-> int @-> returning int16_t)
 
-let joystick_get_ball = 
-  foreign "SDL_JoystickGetBall" 
+let joystick_get_ball =
+  foreign "SDL_JoystickGetBall"
     (joystick @-> int @-> (ptr int) @-> (ptr int) @-> returning int)
 
-let joystick_get_ball j i = 
-  let x = allocate int 0 in 
+let joystick_get_ball j i =
+  let x = allocate int 0 in
   let y = allocate int 0 in
-  match joystick_get_ball j i x y with 
+  match joystick_get_ball j i x y with
   | 0 -> `Ok (!@ x, !@ y) | _ -> error ()
 
-let joystick_get_button = 
-  foreign "SDL_JoystickGetButton" 
+let joystick_get_button =
+  foreign "SDL_JoystickGetButton"
     (joystick @-> int @-> returning int_as_uint8_t)
 
 let joystick_get_device_guid =
   foreign "SDL_JoystickGetDeviceGUID" (int @-> returning joystick_guid)
 
-let joystick_get_guid = 
+let joystick_get_guid =
   foreign "SDL_JoystickGetGUID" (joystick @-> returning joystick_guid)
 
 let joystick_get_guid_from_string =
   foreign "SDL_JoystickGetGUIDFromString" (string @-> returning joystick_guid)
 
 let joystick_get_guid_string =
-  foreign "SDL_JoystickGetGUIDString" 
+  foreign "SDL_JoystickGetGUIDString"
     (joystick_guid @-> ptr char @-> int @-> returning void)
 
-let joystick_get_guid_string guid = 
+let joystick_get_guid_string guid =
   let len = 33 in
-  let s = CArray.start (CArray.make char 33) in 
-  joystick_get_guid_string guid s len; 
+  let s = CArray.start (CArray.make char 33) in
+  joystick_get_guid_string guid s len;
   coerce (ptr char) string s
 
-let joystick_get_hat = 
+let joystick_get_hat =
   foreign "SDL_JoystickGetHat" (joystick @-> int @-> returning int_as_uint8_t)
 
-let joystick_instance_id = 
+let joystick_instance_id =
   foreign "SDL_JoystickInstanceID" (joystick @-> returning joystick_id)
 
-let joystick_instance_id j = 
-  match joystick_instance_id j with 
+let joystick_instance_id j =
+  match joystick_instance_id j with
   | n when n < 0l -> error () | n -> `Ok n
 
 let joystick_name =
@@ -3113,10 +3113,10 @@ let joystick_name =
 let joystick_name_for_index =
   foreign "SDL_JoystickNameForIndex" (int @-> returning (some_to_ok string_opt))
 
-let joystick_num_axes = 
+let joystick_num_axes =
   foreign "SDL_JoystickNumAxes" (joystick @-> returning nat_to_ok)
 
-let joystick_num_balls = 
+let joystick_num_balls =
   foreign "SDL_JoystickNumBalls" (joystick @-> returning nat_to_ok)
 
 let joystick_num_buttons =
@@ -3125,13 +3125,13 @@ let joystick_num_buttons =
 let joystick_num_hats =
   foreign "SDL_JoystickNumHats" (joystick @-> returning nat_to_ok)
 
-let joystick_open = 
+let joystick_open =
   foreign "SDL_JoystickOpen" (int @-> returning (some_to_ok joystick_opt))
 
 let joystick_update =
   foreign "SDL_JoystickUpdate" (void @-> returning void)
 
-let num_joysticks = 
+let num_joysticks =
   foreign "SDL_NumJoysticks" (void @-> returning nat_to_ok)
 
 (* Game controller *)
@@ -3144,20 +3144,20 @@ let unsafe_game_controller_of_ptr addr : game_controller =
   ptr_of_raw_address addr
 
 type _button_bind
-let button_bind : _button_bind structure typ = 
-  structure "SDL_GameControllerBindType" 
+let button_bind : _button_bind structure typ =
+  structure "SDL_GameControllerBindType"
 let button_bind_bind_type = field button_bind "bindType" int
-let button_bind_value1 = field button_bind "value1" int  (* simplified enum *) 
-let button_bind_value2 = field button_bind "value2" int  
+let button_bind_value1 = field button_bind "value1" int  (* simplified enum *)
+let button_bind_value2 = field button_bind "value2" int
 let () = seal button_bind
-    
+
 module Controller = struct
   type bind_type = int
   let bind_type_none = sdl_controller_bindtype_none
   let bind_type_button = sdl_controller_bindtype_button
   let bind_type_axis = sdl_controller_bindtype_axis
   let bind_type_hat = sdl_controller_bindtype_hat
-    
+
   type axis = int
   let axis_invalid = sdl_controller_axis_invalid
   let axis_left_x = sdl_controller_axis_leftx
@@ -3167,7 +3167,7 @@ module Controller = struct
   let axis_trigger_left = sdl_controller_axis_triggerleft
   let axis_trigger_right = sdl_controller_axis_triggerright
   let axis_max = sdl_controller_axis_max
-    
+
   type button = int
   let button_invalid = sdl_controller_button_invalid
   let button_a = sdl_controller_button_a
@@ -3187,96 +3187,96 @@ module Controller = struct
   let button_dpad_right = sdl_controller_button_dpad_right
   let button_max = sdl_controller_button_max
 
-  type button_bind = _button_bind structure 
-  let bind_type v = getf v button_bind_bind_type 
+  type button_bind = _button_bind structure
+  let bind_type v = getf v button_bind_bind_type
   let bind_button_value v = getf v button_bind_value1
   let bind_axis_value v = getf v button_bind_value1
-  let bind_hat_value v = getf v button_bind_value1, getf v button_bind_value2 
+  let bind_hat_value v = getf v button_bind_value1, getf v button_bind_value2
 end
 
-let game_controller_add_mapping = 
+let game_controller_add_mapping =
   foreign "SDL_GameControllerAddMapping" (string @-> returning bool_to_ok)
 
-let game_controller_add_mapping_from_file = 
-  foreign "SDL_GameControllerAddMappingsFromFile" 
+let game_controller_add_mapping_from_file =
+  foreign "SDL_GameControllerAddMappingsFromFile"
     ~stub (string @-> returning nat_to_ok)
 
-let game_controller_add_mapping_from_rw = 
-  foreign "SDL_GameControllerAddMappingsFromRW" 
+let game_controller_add_mapping_from_rw =
+  foreign "SDL_GameControllerAddMappingsFromRW"
     ~stub (rw_ops @-> bool @-> returning nat_to_ok)
 
-let game_controller_close = 
+let game_controller_close =
   foreign "SDL_GameControllerClose" (game_controller @-> returning void)
 
-let game_controller_event_state = 
+let game_controller_event_state =
   foreign "SDL_GameControllerEventState" (int @-> returning nat_to_ok)
 
-let game_controller_get_event_state () = 
-  game_controller_event_state sdl_query 
+let game_controller_get_event_state () =
+  game_controller_event_state sdl_query
 
-let game_controller_set_event_state t = 
+let game_controller_set_event_state t =
   game_controller_event_state t
 
-let game_controller_get_attached = 
+let game_controller_get_attached =
   foreign "SDL_GameControllerGetAttached" (game_controller @-> returning bool)
 
-let game_controller_get_axis = 
-  foreign "SDL_GameControllerGetAxis" 
+let game_controller_get_axis =
+  foreign "SDL_GameControllerGetAxis"
     (game_controller @-> int @-> returning int16_t)
 
-let game_controller_get_axis_from_string = 
-  foreign "SDL_GameControllerGetAxisFromString" 
+let game_controller_get_axis_from_string =
+  foreign "SDL_GameControllerGetAxisFromString"
     (string @-> returning int)
 
-let game_controller_get_bind_for_axis = 
+let game_controller_get_bind_for_axis =
   foreign "SDL_GameControllerGetBindForAxis"
     (game_controller @-> int @-> returning button_bind)
 
-let game_controller_get_bind_for_button = 
+let game_controller_get_bind_for_button =
   foreign "SDL_GameControllerGetBindForButton"
     (game_controller @-> int @-> returning button_bind)
 
-let game_controller_get_button = 
-  foreign "SDL_GameControllerGetButton" 
+let game_controller_get_button =
+  foreign "SDL_GameControllerGetButton"
     (game_controller @-> int @-> returning int_as_uint8_t)
 
-let game_controller_get_button_from_string = 
+let game_controller_get_button_from_string =
   foreign "SDL_GameControllerGetButtonFromString" (string @-> returning int)
 
-let game_controller_get_joystick = 
+let game_controller_get_joystick =
   foreign "SDL_GameControllerGetJoystick"
     (game_controller @-> returning (some_to_ok joystick_opt))
 
-let game_controller_get_string_for_axis = 
+let game_controller_get_string_for_axis =
   foreign "SDL_GameControllerGetStringForAxis" (int @-> returning string_opt)
 
-let game_controller_get_string_for_button = 
+let game_controller_get_string_for_button =
   foreign "SDL_GameControllerGetStringForButton" (int @-> returning string_opt)
 
-let game_controller_mapping = 
-  foreign "SDL_GameControllerMapping" 
+let game_controller_mapping =
+  foreign "SDL_GameControllerMapping"
     (game_controller @-> returning (some_to_ok string_opt))
 
-let game_controller_mapping_for_guid = 
+let game_controller_mapping_for_guid =
   foreign "SDL_GameControllerMappingForGUID"
     (joystick_guid @-> returning (some_to_ok string_opt))
 
-let game_controller_name = 
+let game_controller_name =
   foreign "SDL_GameControllerName"
     (game_controller @-> returning (some_to_ok string_opt))
 
-let game_controller_name_for_index = 
+let game_controller_name_for_index =
   foreign "SDL_GameControllerNameForIndex"
     (int @-> returning (some_to_ok string_opt))
-  
-let game_controller_open = 
-  foreign "SDL_GameControllerOpen" 
+
+let game_controller_open =
+  foreign "SDL_GameControllerOpen"
     (int @-> returning (some_to_ok game_controller_opt))
 
-let game_controller_update = 
+let game_controller_update =
   foreign "SDL_GameControllerUpdate" (void @-> returning void)
 
-let is_game_controller = 
+let is_game_controller =
   foreign "SDL_IsGameController" (int @-> returning bool)
 
 (* Events *)
@@ -3301,7 +3301,7 @@ module Event = struct
     let t : t structure typ = structure "SDL_ControllerAxisEvent"
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
-    let which = field t "which" joystick_id 
+    let which = field t "which" joystick_id
     let axis = field t "axis" int_as_uint8_t
     let _ = field t "padding1" uint8_t
     let _ = field t "padding2" uint8_t
@@ -3316,8 +3316,8 @@ module Event = struct
     let t : t structure typ = structure "SDL_ControllerButtonEvent"
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
-    let which = field t "which" joystick_id 
-    let button = field t "button" int_as_uint8_t     
+    let which = field t "which" joystick_id
+    let button = field t "button" int_as_uint8_t
     let state = field t "state" int_as_uint8_t
     let _ = field t "padding1" uint8_t
     let _ = field t "padding2" uint8_t
@@ -3329,7 +3329,7 @@ module Event = struct
     let t : t structure typ = structure "SDL_ControllerDeviceEvent"
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
-    let which = field t "which" joystick_id 
+    let which = field t "which" joystick_id
     let () = seal t
   end
 
@@ -3338,7 +3338,7 @@ module Event = struct
     let t : t structure typ = structure "SDL_DollarGestureEvent"
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
-    let touch_id = field t "touchId" touch_id     
+    let touch_id = field t "touchId" touch_id
     let gesture_id = field t "gestureId" gesture_id
     let num_fingers = field t "numFingers" int_as_uint32_t
     let error = field t "error" float
@@ -3351,12 +3351,12 @@ module Event = struct
     type t
     let t : t structure typ = structure "SDL_DropEvent"
     let _ = field t "type" int_as_uint32_t
-    let _ = field t "timestamp" int32_as_uint32_t    
+    let _ = field t "timestamp" int32_as_uint32_t
     let file = field t "file" (ptr char)
     let () = seal t
   end
 
-  module Keyboard_event = struct 
+  module Keyboard_event = struct
     type t
     let t : t structure typ = structure "SDL_KeyboardEvent"
     let _ = field t "type" int_as_uint32_t
@@ -3365,9 +3365,9 @@ module Event = struct
     let state = field t "state" int_as_uint8_t
     let repeat = field t "repeat" int_as_uint8_t
     let padding2 = field t "padding2" uint8_t
-    let padding3 = field t "padding3" uint8_t     
+    let padding3 = field t "padding3" uint8_t
     (* We inline the definition of SDL_Keysym *)
-    let scancode = field t "scancode" scancode    
+    let scancode = field t "scancode" scancode
     let keycode = field t "sym" keycode
     let keymod = field t "mod" keymod
     let unused = field t "unused" uint32_t
@@ -3410,7 +3410,7 @@ module Event = struct
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
     let which = field t "which" joystick_id
-    let button = field t "button" int_as_uint8_t   
+    let button = field t "button" int_as_uint8_t
     let state = field t "state" int_as_uint8_t
     let _ = field t "padding1" uint8_t
     let _ = field t "padding2" uint8_t
@@ -3432,7 +3432,7 @@ module Event = struct
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
     let which = field t "which" joystick_id
-    let hat = field t "hat" int_as_uint8_t    
+    let hat = field t "hat" int_as_uint8_t
     let value = field t "value" int_as_uint8_t
     let _ = field t "padding1" uint8_t
     let _ = field t "padding2" uint8_t
@@ -3487,11 +3487,11 @@ module Event = struct
     let t : t structure typ = structure "SDL_MultiGestureEvent"
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
-    let touch_id = field t "touchId" touch_id 
-    let dtheta = field t "dTheta" float 
-    let ddist = field t "ddist" float 
-    let x = field t "x" float 
-    let y = field t "y" float 
+    let touch_id = field t "touchId" touch_id
+    let dtheta = field t "dTheta" float
+    let ddist = field t "ddist" float
+    let x = field t "x" float
+    let y = field t "y" float
     let num_fingers = field t "numFingers" int_as_uint16_t
     let _ = field t "padding" uint16_t
     let () = seal t
@@ -3509,7 +3509,7 @@ module Event = struct
     type t
     let t : t structure typ = structure "SDL_SysWMEvent"
     let _ = field t "type" int_as_uint32_t
-    let _ = field t "timestamp" int32_as_uint32_t    
+    let _ = field t "timestamp" int32_as_uint32_t
     let _ = field t "msg" (ptr void)
     let () = seal t
   end
@@ -3520,7 +3520,7 @@ module Event = struct
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
     let window_id = field t "windowID" int_as_uint32_t
-    let text = field t "text" (string_as_char_array 
+    let text = field t "text" (string_as_char_array
                                  sdl_texteditingevent_text_size)
     let start = field t "start" int_as_int32_t
     let length = field t "end" int_as_int32_t
@@ -3533,7 +3533,7 @@ module Event = struct
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
     let window_id = field t "windowID" int_as_uint32_t
-    let text = field t "text" (string_as_char_array 
+    let text = field t "text" (string_as_char_array
                                  sdl_textinputevent_text_size)
     let () = seal t
   end
@@ -3543,11 +3543,11 @@ module Event = struct
     let t : t structure typ = structure "SDL_TouchFingerEvent"
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
-    let touch_id = field t "touchId" touch_id 
-    let finger_id = field t "fingerId" finger_id 
+    let touch_id = field t "touchId" touch_id
+    let finger_id = field t "fingerId" finger_id
     let x = field t "x" float
     let y = field t "y" float
-    let dx = field t "dx" float    
+    let dx = field t "dx" float
     let dy = field t "dy" float
     let pressure = field t "pressure" float
     let () = seal t
@@ -3565,7 +3565,7 @@ module Event = struct
     let () = seal t
   end
 
-  module Window_event = struct 
+  module Window_event = struct
     type t
     let t : t structure typ = structure "SDL_WindowEvent"
     let _ = field t "type" int_as_uint32_t
@@ -3581,7 +3581,7 @@ module Event = struct
   end
 
   type t
-  let t : t union typ = union "SDL_Event" 
+  let t : t union typ = union "SDL_Event"
   let typ = field t "type" int_as_uint32_t
   let common = field t "common" Common.t
   let controller_axis_event = field t "caxis" Controller_axis_event.t
@@ -3612,11 +3612,11 @@ module Event = struct
   let create () = make t
   let opt_addr = function
   | None -> coerce (ptr void) (ptr t) null
-  | Some v -> addr v  
+  | Some v -> addr v
 
-  type _ field = 
+  type _ field =
       F : (* existential to hide the 'a structure *)
-        (('a structure, t union) Ctypes.field * 
+        (('a structure, t union) Ctypes.field *
          ('b, 'a structure) Ctypes.field) -> 'b field
 
   let get e (F (s, f)) = getf (getf e s) f
@@ -3626,11 +3626,11 @@ module Event = struct
 
   let first_event = sdl_firstevent
   let last_event = sdl_lastevent
-      
+
   (* Common *)
-  
+
   let typ  = F (common, Common.typ)
-  let timestamp = F (common, Common.timestamp) 
+  let timestamp = F (common, Common.timestamp)
 
   (* Application events. *)
 
@@ -3640,7 +3640,7 @@ module Event = struct
   let app_did_enter_background = sdl_app_didenterbackground
   let app_will_enter_foreground = sdl_app_willenterforeground
   let app_did_enter_foreground = sdl_app_didenterforeground
-    
+
   (* Clipboard events *)
 
   let clipboard_update = sdl_clipboardupdate
@@ -3654,21 +3654,21 @@ module Event = struct
   let controller_device_remapped = sdl_controllerdeviceremapped
   let controller_device_removed = sdl_controllerdeviceremoved
 
-  let controller_axis_which = 
+  let controller_axis_which =
     F (controller_axis_event, Controller_axis_event.which)
-  let controller_axis_axis = 
+  let controller_axis_axis =
     F (controller_axis_event, Controller_axis_event.axis)
-  let controller_axis_value = 
+  let controller_axis_value =
     F (controller_axis_event, Controller_axis_event.value)
 
-  let controller_button_which = 
+  let controller_button_which =
     F (controller_button_event, Controller_button_event.which)
-  let controller_button_button = 
+  let controller_button_button =
     F (controller_button_event, Controller_button_event.button)
-  let controller_button_state = 
+  let controller_button_state =
     F (controller_button_event, Controller_button_event.state)
 
-  let controller_device_which = 
+  let controller_device_which =
     F (controller_device_event, Controller_device_event.which)
 
   (* Dollar gesture events *)
@@ -3676,13 +3676,13 @@ module Event = struct
   let dollar_gesture = sdl_dollargesture
   let dollar_record = sdl_dollarrecord
 
-  let dollar_gesture_touch_id = 
+  let dollar_gesture_touch_id =
     F (dollar_gesture_event, Dollar_gesture_event.touch_id)
-  let dollar_gesture_gesture_id = 
+  let dollar_gesture_gesture_id =
     F (dollar_gesture_event, Dollar_gesture_event.gesture_id)
-  let dollar_gesture_num_fingers = 
+  let dollar_gesture_num_fingers =
     F (dollar_gesture_event, Dollar_gesture_event.num_fingers)
-  let dollar_gesture_error = 
+  let dollar_gesture_error =
     F (dollar_gesture_event, Dollar_gesture_event.error)
   let dollar_gesture_x = F (dollar_gesture_event, Dollar_gesture_event.x)
   let dollar_gesture_y = F (dollar_gesture_event, Dollar_gesture_event.y)
@@ -3692,10 +3692,10 @@ module Event = struct
   let drop_file = sdl_dropfile
   let drop_file_file = F (drop_event, Drop_event.file)
 
-  let drop_file_free e = 
+  let drop_file_free e =
     sdl_free (to_voidp (get e drop_file_file))
 
-  let drop_file_file e = 
+  let drop_file_file e =
     let sp = get e drop_file_file in
     if ptr_compare (to_voidp sp) null = 0 then invalid_arg err_drop_file else
     coerce (ptr char) string (get e drop_file_file)
@@ -3707,13 +3707,13 @@ module Event = struct
   let finger_up = sdl_fingerup
 
   let touch_finger_touch_id = F (touch_finger_event,Touch_finger_event.touch_id)
-  let touch_finger_finger_id = 
+  let touch_finger_finger_id =
     F (touch_finger_event, Touch_finger_event.finger_id)
   let touch_finger_x = F (touch_finger_event, Touch_finger_event.x)
   let touch_finger_y = F (touch_finger_event, Touch_finger_event.y)
   let touch_finger_dx = F (touch_finger_event, Touch_finger_event.dx)
   let touch_finger_dy = F (touch_finger_event, Touch_finger_event.dy)
-  let touch_finger_pressure = 
+  let touch_finger_pressure =
     F (touch_finger_event, Touch_finger_event.pressure)
 
   (* Joystick events. *)
@@ -3749,12 +3749,12 @@ module Event = struct
 
   let key_down = sdl_keydown
   let key_up = sdl_keyup
-      
-  let keyboard_window_id = F (keyboard_event, Keyboard_event.window_id) 
-  let keyboard_repeat = F (keyboard_event, Keyboard_event.repeat) 
+
+  let keyboard_window_id = F (keyboard_event, Keyboard_event.window_id)
+  let keyboard_repeat = F (keyboard_event, Keyboard_event.repeat)
   let keyboard_state = F (keyboard_event, Keyboard_event.state)
-  let keyboard_scancode = F (keyboard_event, Keyboard_event.scancode) 
-  let keyboard_keycode = F (keyboard_event, Keyboard_event.keycode) 
+  let keyboard_scancode = F (keyboard_event, Keyboard_event.scancode)
+  let keyboard_keycode = F (keyboard_event, Keyboard_event.keycode)
   let keyboard_keymod = F (keyboard_event, Keyboard_event.keymod)
 
   (* Mouse events *)
@@ -3764,7 +3764,7 @@ module Event = struct
   let mouse_motion = sdl_mousemotion
   let mouse_wheel = sdl_mousewheel
 
-  let mouse_button_window_id = 
+  let mouse_button_window_id =
     F (mouse_button_event, Mouse_button_event.window_id)
   let mouse_button_which = F (mouse_button_event, Mouse_button_event.which)
   let mouse_button_state = F (mouse_button_event, Mouse_button_event.state)
@@ -3773,7 +3773,7 @@ module Event = struct
   let mouse_button_x = F (mouse_button_event, Mouse_button_event.x)
   let mouse_button_y = F (mouse_button_event, Mouse_button_event.y)
 
-  let mouse_motion_window_id = 
+  let mouse_motion_window_id =
     F (mouse_motion_event, Mouse_motion_event.window_id)
   let mouse_motion_which = F (mouse_motion_event, Mouse_motion_event.which)
   let mouse_motion_state = F (mouse_motion_event, Mouse_motion_event.state)
@@ -3791,13 +3791,13 @@ module Event = struct
 
   let multi_gesture = sdl_multigesture
 
-  let multi_gesture_touch_id = 
+  let multi_gesture_touch_id =
     F (multi_gesture_event, Multi_gesture_event.touch_id)
   let multi_gesture_dtheta = F (multi_gesture_event, Multi_gesture_event.dtheta)
   let multi_gesture_ddist = F (multi_gesture_event, Multi_gesture_event.ddist)
   let multi_gesture_x = F (multi_gesture_event, Multi_gesture_event.x)
-  let multi_gesture_y = F (multi_gesture_event, Multi_gesture_event.y)  
-  let multi_gesture_num_fingers = 
+  let multi_gesture_y = F (multi_gesture_event, Multi_gesture_event.y)
+  let multi_gesture_num_fingers =
     F (multi_gesture_event, Multi_gesture_event.num_fingers)
 
   (* Quit events *)
@@ -3813,7 +3813,7 @@ module Event = struct
   let text_editing = sdl_textediting
   let text_input = sdl_textinput
 
-  let text_editing_window_id = 
+  let text_editing_window_id =
     F (text_editing_event, Text_editing_event.window_id)
   let text_editing_text = F (text_editing_event, Text_editing_event.text)
   let text_editing_start = F (text_editing_event, Text_editing_event.start)
@@ -3848,16 +3848,16 @@ module Event = struct
 
   let window_window_id = F (window_event, Window_event.window_id)
   let window_event_id = F (window_event, Window_event.event)
-  let window_data1 = F (window_event, Window_event.data1) 
+  let window_data1 = F (window_event, Window_event.data1)
   let window_data2 = F (window_event, Window_event.data2)
-  
+
   let window_event = sdl_windowevent
 
-  (* Window event id enum *) 
+  (* Window event id enum *)
 
-  let enum_of_window_event_id = 
+  let enum_of_window_event_id =
     let add acc (k, v) = Imap.add k v acc in
-    let enums = [ 
+    let enums = [
       window_event_shown, `Shown;
       window_event_hidden, `Hidden;
       window_event_exposed, `Exposed;
@@ -3874,13 +3874,13 @@ module Event = struct
       window_event_close, `Close; ]
     in
     List.fold_left add Imap.empty enums
-    
-  let window_event_enum id = 
+
+  let window_event_enum id =
     try Imap.find id enum_of_window_event_id with Not_found -> assert false
 
-  (* Event type enum *) 
+  (* Event type enum *)
 
-  let enum_of_event_type = 
+  let enum_of_event_type =
     let add acc (k, v) = Imap.add k v acc in
     let enums = [ app_terminating, `App_terminating;
                   app_low_memory, `App_low_memory;
@@ -3923,66 +3923,66 @@ module Event = struct
                   window_event, `Window_event; ]
     in
     List.fold_left add Imap.empty enums
-    
+
   let enum t = try Imap.find t enum_of_event_type with Not_found -> `Unknown
 
 end
 
 type event = Event.t union
 
-let event_state = 
+let event_state =
   foreign "SDL_EventState" (event_type @-> int @-> returning int_as_uint8_t)
 
-let get_event_state e = 
-  event_state e sdl_query 
+let get_event_state e =
+  event_state e sdl_query
 
-let set_event_state e s = 
+let set_event_state e s =
   ignore (event_state e s)
 
-let flush_event = 
+let flush_event =
   foreign "SDL_FlushEvent" (event_type @-> returning void)
 
-let flush_events = 
+let flush_events =
   foreign "SDL_FlushEvents" (event_type @-> event_type @-> returning void)
 
-let has_event = 
+let has_event =
   foreign "SDL_HasEvent" (event_type @-> returning bool)
 
-let has_events = 
+let has_events =
   foreign "SDL_HasEvents" (event_type @-> event_type @-> returning bool)
 
-let poll_event = 
+let poll_event =
   foreign "SDL_PollEvent" (ptr Event.t @-> returning bool)
 
-let poll_event e = 
+let poll_event e =
   poll_event (Event.opt_addr e)
 
-let pump_events = 
+let pump_events =
   foreign "SDL_PumpEvents" (void @-> returning void)
 
-let push_event = 
+let push_event =
   foreign "SDL_PushEvent" (ptr Event.t @-> returning bool_to_ok)
 
-let push_event e = 
+let push_event e =
   push_event (addr e)
 
-let register_events = 
+let register_events =
   foreign "SDL_RegisterEvents" (int @-> returning uint32_t)
 
-let register_event () = match Unsigned.UInt32.to_int32 (register_events 1) with 
+let register_event () = match Unsigned.UInt32.to_int32 (register_events 1) with
 | -1l -> None | t -> Some (Int32.to_int t)
 
-let wait_event = 
+let wait_event =
   foreign "SDL_WaitEvent" (ptr Event.t @-> returning int)
 
-let wait_event e = match wait_event (Event.opt_addr e) with 
-| 1 -> `Ok () | _ -> error () 
-  
-let wait_event_timeout = 
-  foreign "SDL_WaitEventTimeout" 
+let wait_event e = match wait_event (Event.opt_addr e) with
+| 1 -> `Ok () | _ -> error ()
+
+let wait_event_timeout =
+  foreign "SDL_WaitEventTimeout"
     (ptr Event.t @-> int @-> returning bool)
- 
-let wait_event_timeout e t = 
+
+let wait_event_timeout e t =
   wait_event_timeout (Event.opt_addr e) t
 
 (* Force feedback *)
@@ -3993,13 +3993,13 @@ let haptic_opt : haptic option typ = ptr_opt void
 
 let unsafe_haptic_of_ptr addr : haptic =
   ptr_of_raw_address addr
-    
+
 module Haptic = struct
   let infinity = -1l
 
   (* Features *)
-  
-  type feature = int 
+
+  type feature = int
   let gain = sdl_haptic_gain
   let autocenter = sdl_haptic_autocenter
   let status = sdl_haptic_status
@@ -4010,10 +4010,10 @@ module Haptic = struct
   type direction_type = int
   let polar = sdl_haptic_polar
   let cartesian = sdl_haptic_cartesian
-  let spherical = sdl_haptic_spherical  
+  let spherical = sdl_haptic_spherical
 
   module Direction = struct
-    type _t 
+    type _t
     type t = _t structure
     let t : _t structure typ = structure "SDL_HapticDirection"
     let typ = field t "type" int_as_uint8_t
@@ -4022,14 +4022,14 @@ module Haptic = struct
     let dir_2 = field t "dir2" int32_t
     let () = seal t
 
-    let create typv d0 d1 d2 = 
-      let d = make t in 
+    let create typv d0 d1 d2 =
+      let d = make t in
       setf d typ typv;
       setf d dir_0 d0;
       setf d dir_1 d1;
       setf d dir_2 d2;
       d
-      
+
     let typ d = getf d typ
     let dir_0 d = getf d dir_0
     let dir_1 d = getf d dir_1
@@ -4077,7 +4077,7 @@ module Haptic = struct
     let () = seal t
   end
 
-  module Condition = struct 
+  module Condition = struct
     type t
     let t : t structure typ = structure "SDL_HapticCondition"
     let typ = field t "type" int_as_uint16_t
@@ -4088,7 +4088,7 @@ module Haptic = struct
     let interval = field t "interval" int_as_uint16_t
 
     let right_sat_0 = field t "right_sat[0]" int_as_uint16_t
-    let right_sat_1 = field t "right_sat[1]" int_as_uint16_t    
+    let right_sat_1 = field t "right_sat[1]" int_as_uint16_t
     let right_sat_2 = field t "right_sat[2]" int_as_uint16_t
     let left_sat_0 = field t "left_sat[0]" int_as_uint16_t
     let left_sat_1 = field t "left_sat[1]" int_as_uint16_t
@@ -4107,8 +4107,8 @@ module Haptic = struct
     let center_2 = field t "center[2]" int16_t
     let () = seal t
   end
-  
-  module Ramp = struct 
+
+  module Ramp = struct
     type t
     let t : t structure typ = structure "SDL_HapticRamp"
     let typ = field t "type" int_as_uint16_t
@@ -4117,7 +4117,7 @@ module Haptic = struct
     let delay = field t "delay" int_as_uint16_t
     let button = field t "button" int_as_uint16_t
     let interval = field t "interval" int_as_uint16_t
-    
+
     let start = field t "start" int16_t
     let end_ = field t "end" int16_t
     let attack_length = field t "attack_length" int_as_uint16_t
@@ -4127,28 +4127,28 @@ module Haptic = struct
     let () = seal t
   end
 
-  module Left_right = struct 
+  module Left_right = struct
     type t
     let t : t structure typ = structure "SDL_HapticLeftRight"
     let typ = field t "type" int_as_uint16_t
     let direction = field t "direction" Direction.t
     let length = field t "length" int32_as_uint32_t
-     
-    let large_magnitude = field t "large_magnitude" int_as_uint16_t 
-    let small_magnitude = field t "small_magnitude" int_as_uint16_t 
+
+    let large_magnitude = field t "large_magnitude" int_as_uint16_t
+    let small_magnitude = field t "small_magnitude" int_as_uint16_t
     let () = seal t
   end
 
-  module Custom = struct 
-    let int_list_as_uint16_t_ptr = 
+  module Custom = struct
+    let int_list_as_uint16_t_ptr =
       let read _ = invalid_arg err_read_field in
-      let write l = 
+      let write l =
         let l = List.map Unsigned.UInt16.of_int l in
-        let a = CArray.of_list uint16_t l in 
+        let a = CArray.of_list uint16_t l in
         CArray.start a
       in
       view ~read ~write (ptr uint16_t)
-      
+
     type t
     let t : t structure typ = structure "SDL_HapticCustom"
     let typ = field t "type" int_as_uint16_t
@@ -4158,7 +4158,7 @@ module Haptic = struct
     let button = field t "button" int_as_uint16_t
     let interval = field t "interval" int_as_uint16_t
 
-    let channels = field t "channels" int_as_uint8_t 
+    let channels = field t "channels" int_as_uint8_t
     let period = field t "period" int_as_uint16_t
     let samples = field t "samples" int_as_uint16_t
     let data = field t "data" int_list_as_uint16_t_ptr
@@ -4172,7 +4172,7 @@ module Haptic = struct
   module Effect = struct
     type t
     let t : t union typ = union "SDL_HapticEffect"
-    let typ = field t "type" int_as_uint16_t 
+    let typ = field t "type" int_as_uint16_t
     let constant = field t "constant" Constant.t
     let periodic = field t "periodic" Periodic.t
     let condition = field t "condition" Condition.t
@@ -4182,16 +4182,16 @@ module Haptic = struct
     let () = seal t
   end
 
-  type effect_type = int 
+  type effect_type = int
 
   let create_effect () = make Effect.t
   let opt_addr = function
   | None -> coerce (ptr void) (ptr Effect.t) null
-  | Some v -> addr v  
+  | Some v -> addr v
 
-  type _ field = 
+  type _ field =
       F : (* existential to hide the 'a structure *)
-        (('a structure, Effect.t union) Ctypes.field * 
+        (('a structure, Effect.t union) Ctypes.field *
          ('b, 'a structure) Ctypes.field) -> 'b field
 
   let get e (F (s, f)) = getf (getf e s) f
@@ -4289,12 +4289,12 @@ module Haptic = struct
 
   let left_right_type = F (Effect.left_right, Left_right.typ)
   let left_right_length = F (Effect.left_right, Left_right.length)
-  let left_right_large_magnitude = 
+  let left_right_large_magnitude =
     F (Effect.left_right, Left_right.large_magnitude)
-  let left_right_small_magnitude = 
+  let left_right_small_magnitude =
     F (Effect.left_right, Left_right.small_magnitude)
 
-  (* Custom *) 
+  (* Custom *)
 
   let custom = sdl_haptic_custom
 
@@ -4317,143 +4317,143 @@ end
 type haptic_effect = Haptic.Effect.t union
 
 type haptic_effect_id = int
-let haptic_effect_id : int typ = int 
+let haptic_effect_id : int typ = int
 
-let haptic_close = 
+let haptic_close =
   foreign "SDL_HapticClose" (haptic @-> returning void)
 
-let haptic_destroy_effect = 
-  foreign "SDL_HapticDestroyEffect" 
+let haptic_destroy_effect =
+  foreign "SDL_HapticDestroyEffect"
     (haptic @-> int @-> returning void)
 
-let haptic_effect_supported = 
-  foreign "SDL_HapticEffectSupported" 
+let haptic_effect_supported =
+  foreign "SDL_HapticEffectSupported"
     (haptic @-> ptr Haptic.Effect.t @-> returning bool_to_ok)
 
-let haptic_effect_supported h e = 
+let haptic_effect_supported h e =
   haptic_effect_supported h (addr e)
 
-let haptic_get_effect_status = 
-  foreign "SDL_HapticGetEffectStatus" 
+let haptic_get_effect_status =
+  foreign "SDL_HapticGetEffectStatus"
     (haptic @-> haptic_effect_id @-> returning bool_to_ok)
 
-let haptic_index = 
+let haptic_index =
   foreign "SDL_HapticIndex" (haptic @-> returning nat_to_ok)
 
 let haptic_name =
   foreign "SDL_HapticName" (int @-> returning (some_to_ok string_opt))
 
-let haptic_new_effect = 
-  foreign "SDL_HapticNewEffect" 
+let haptic_new_effect =
+  foreign "SDL_HapticNewEffect"
     (haptic @-> ptr Haptic.Effect.t @-> returning nat_to_ok)
 
-let haptic_new_effect h e = 
+let haptic_new_effect h e =
   haptic_new_effect h (addr e)
 
-let haptic_num_axes = 
+let haptic_num_axes =
   foreign "SDL_HapticNumAxes" (haptic @-> returning nat_to_ok)
 
-let haptic_num_effects = 
+let haptic_num_effects =
   foreign "SDL_HapticNumEffects" (haptic @-> returning nat_to_ok)
 
-let haptic_num_effects_playing = 
+let haptic_num_effects_playing =
   foreign "SDL_HapticNumEffectsPlaying" (haptic @-> returning nat_to_ok)
 
-let haptic_open = 
+let haptic_open =
   foreign "SDL_HapticOpen" (int @-> returning (some_to_ok haptic_opt))
 
-let haptic_open_from_joystick = 
-  foreign "SDL_HapticOpenFromJoystick" 
+let haptic_open_from_joystick =
+  foreign "SDL_HapticOpenFromJoystick"
   (joystick @-> returning (some_to_ok haptic_opt))
 
-let haptic_open_from_mouse = 
-  foreign "SDL_HapticOpenFromMouse" 
+let haptic_open_from_mouse =
+  foreign "SDL_HapticOpenFromMouse"
     (void @-> returning (some_to_ok haptic_opt))
 
-let haptic_opened = 
+let haptic_opened =
   foreign "SDL_HapticOpened" (int @-> returning int)
 
-let haptic_opened i = match haptic_opened i with 
+let haptic_opened i = match haptic_opened i with
 | 0 -> false | 1 -> true | _ -> assert false
 
-let haptic_pause = 
-  foreign "SDL_HapticPause" (haptic @-> returning zero_to_ok) 
+let haptic_pause =
+  foreign "SDL_HapticPause" (haptic @-> returning zero_to_ok)
 
-let haptic_query = 
+let haptic_query =
   foreign "SDL_HapticQuery" (haptic @-> returning int)
 
-let haptic_rumble_init = 
+let haptic_rumble_init =
   foreign "SDL_HapticRumbleInit" (haptic @-> returning zero_to_ok)
 
-let haptic_rumble_play = 
-  foreign "SDL_HapticRumblePlay" 
+let haptic_rumble_play =
+  foreign "SDL_HapticRumblePlay"
     (haptic @-> float @-> int32_t @-> returning zero_to_ok)
 
-let haptic_rumble_stop = 
+let haptic_rumble_stop =
   foreign "SDL_HapticRumbleStop" (haptic @-> returning zero_to_ok)
 
-let haptic_rumble_supported = 
+let haptic_rumble_supported =
   foreign "SDL_HapticRumbleSupported" (haptic @-> returning bool_to_ok)
 
-let haptic_run_effect = 
-  foreign "SDL_HapticRunEffect" 
+let haptic_run_effect =
+  foreign "SDL_HapticRunEffect"
     (haptic @-> haptic_effect_id  @-> int32_t @-> returning zero_to_ok)
-  
-let haptic_set_autocenter = 
+
+let haptic_set_autocenter =
   foreign "SDL_HapticSetAutocenter" (haptic @-> int @-> returning zero_to_ok)
 
-let haptic_set_gain = 
+let haptic_set_gain =
   foreign "SDL_HapticSetGain" (haptic @-> int @-> returning zero_to_ok)
-    
-let haptic_stop_all = 
+
+let haptic_stop_all =
   foreign "SDL_HapticStopAll" (haptic @-> returning zero_to_ok)
-    
+
 let haptic_stop_effect =
   foreign "SDL_HapticStopEffect"
     (haptic @-> haptic_effect_id @-> returning zero_to_ok)
-    
-let haptic_unpause = 
+
+let haptic_unpause =
   foreign "SDL_HapticUnpause" (haptic @-> returning zero_to_ok)
-    
+
 let haptic_update_effect =
   foreign "SDL_HapticUpdateEffect"
-    (haptic @-> haptic_effect_id @-> ptr Haptic.Effect.t @-> 
+    (haptic @-> haptic_effect_id @-> ptr Haptic.Effect.t @->
      returning zero_to_ok)
 
 let haptic_update_effect h id e =
   haptic_update_effect h id (addr e)
 
-let joystick_is_haptic = 
-  foreign "SDL_JoystickIsHaptic" 
+let joystick_is_haptic =
+  foreign "SDL_JoystickIsHaptic"
     (joystick @-> returning bool_to_ok)
 
-let mouse_is_haptic = 
+let mouse_is_haptic =
   foreign "SDL_MouseIsHaptic" (void @-> returning bool_to_ok)
-    
-let num_haptics = 
+
+let num_haptics =
   foreign "SDL_NumHaptics" (void @-> returning nat_to_ok)
 
 (* Audio *)
 
 (* Audio drivers *)
 
-let audio_init = 
+let audio_init =
   foreign "SDL_AudioInit" (string_opt @-> returning zero_to_ok)
 
-let audio_quit = 
+let audio_quit =
   foreign "SDL_AudioQuit" (void @-> returning void)
 
-let get_audio_driver = 
-  foreign "SDL_GetAudioDriver" 
+let get_audio_driver =
+  foreign "SDL_GetAudioDriver"
     (int @-> returning (some_to_ok string_opt))
 
-let get_current_audio_driver = 
+let get_current_audio_driver =
   foreign "SDL_GetCurrentAudioDriver" (void @-> returning string_opt)
-  
+
 let get_num_audio_drivers =
   foreign "SDL_GetNumAudioDrivers" (void @-> returning nat_to_ok)
 
-(* Audio devices *) 
+(* Audio devices *)
 
 module Audio = struct
   type status = int
@@ -4496,46 +4496,46 @@ end
 type audio_device_id = Unsigned.uint32
 let audio_device_id = uint32_t
 
-type ('a, 'b) audio_spec = 
-  { as_freq : int; 
+type ('a, 'b) audio_spec =
+  { as_freq : int;
     as_format : Audio.format;
-    as_channels : uint8; 
+    as_channels : uint8;
     as_silence : uint8;
     as_samples : uint8;
     as_size : uint32;
     as_ba_kind : ('a, 'b) Bigarray.kind;
     as_callback : (('a, 'b) bigarray -> unit) option; }
 
-let audio_callback = 
+let audio_callback =
   (ptr void @-> ptr uint8_t @-> int @-> returning void)
 
-type _audio_spec 
+type _audio_spec
 let audio_spec : _audio_spec structure typ = structure "SDL_AudioSpec"
-let as_freq = field audio_spec "freq" int 
+let as_freq = field audio_spec "freq" int
 let as_format = field audio_spec "format" Audio.format
 let as_channels = field audio_spec "channels" int_as_uint8_t
 let as_silence = field audio_spec "silence" int_as_uint8_t
 let as_samples = field audio_spec "samples" int_as_uint16_t
-let _ = field audio_spec "padding" uint16_t 
+let _ = field audio_spec "padding" uint16_t
 let as_size = field audio_spec "size" int32_as_uint32_t
 let as_callback = field audio_spec "callback" (funptr_opt audio_callback)
 (* let as_callback = field audio_spec "callback" (ptr void) *)
 let as_userdata = field audio_spec "userdata" (ptr void)
-let () = seal audio_spec 
+let () = seal audio_spec
 
-let audio_spec_of_c c as_ba_kind = 
-  let as_freq = getf c as_freq in 
-  let as_format = getf c as_format in 
-  let as_channels = getf c as_channels in 
+let audio_spec_of_c c as_ba_kind =
+  let as_freq = getf c as_freq in
+  let as_format = getf c as_format in
+  let as_channels = getf c as_channels in
   let as_silence = getf c as_silence in
   let as_samples = getf c as_samples in
   let as_size = getf c as_size in
   let as_callback = None in
-  { as_freq; as_format; as_channels; as_silence; as_samples; as_size; 
+  { as_freq; as_format; as_channels; as_silence; as_samples; as_size;
     as_ba_kind; as_callback; }
 
-let audio_spec_to_c a = 
-  let wrap_cb = match a.as_callback with 
+let audio_spec_to_c a =
+  let wrap_cb = match a.as_callback with
   | None -> None
   | Some cb ->
       let kind_bytes = ba_kind_byte_size a.as_ba_kind in
@@ -4547,170 +4547,170 @@ let audio_spec_to_c a =
       end
   in
   let c = make audio_spec in
-  setf c as_freq a.as_freq; 
+  setf c as_freq a.as_freq;
   setf c as_format a.as_format;
   setf c as_channels a.as_channels;
   setf c as_silence a.as_silence; (* irrelevant *)
   setf c as_samples a.as_samples;
-  setf c as_size a.as_size;       (* irrelevant *) 
-  setf c as_callback wrap_cb; (* FIXME: this will run on another thread 
+  setf c as_size a.as_size;       (* irrelevant *)
+  setf c as_callback wrap_cb; (* FIXME: this will run on another thread
                                  (=> acquire runtime lock) and may move
                                   does ctypes handle that ? *)
   setf c as_userdata null;
   c
 
-let close_audio_device = 
+let close_audio_device =
   foreign "SDL_CloseAudioDevice" (audio_device_id @-> returning void)
 
-let free_wav = 
+let free_wav =
   foreign "SDL_FreeWAV" (ptr void @-> returning void)
 
-let free_wav ba = 
+let free_wav ba =
   free_wav (to_voidp (bigarray_start array1 ba))
 
-let get_audio_device_name = 
-  foreign "SDL_GetAudioDeviceName" 
+let get_audio_device_name =
+  foreign "SDL_GetAudioDeviceName"
     (int @-> bool @-> returning (some_to_ok string_opt))
 
-let get_audio_device_status = 
+let get_audio_device_status =
   foreign "SDL_GetAudioDeviceStatus" (audio_device_id @-> returning int)
 
-let get_num_audio_devices = 
+let get_num_audio_devices =
   foreign "SDL_GetNumAudioDevices" (bool @-> returning nat_to_ok)
 
-let load_wav_rw = 
-  foreign "SDL_LoadWAV_RW" 
-    (rw_ops @-> ptr audio_spec @-> ptr (ptr void) @-> ptr uint32_t @-> 
+let load_wav_rw =
+  foreign "SDL_LoadWAV_RW"
+    (rw_ops @-> ptr audio_spec @-> ptr (ptr void) @-> ptr uint32_t @->
      returning (some_to_ok (ptr_opt audio_spec)))
-       
-let load_wav_rw ops spec = 
+
+let load_wav_rw ops spec =
   let d = allocate (ptr void) null in
-  let len = allocate uint32_t Unsigned.UInt32.zero in  
-  match load_wav_rw ops (addr (audio_spec_to_c spec)) d len with 
+  let len = allocate uint32_t Unsigned.UInt32.zero in
+  match load_wav_rw ops (addr (audio_spec_to_c spec)) d len with
   | `Error _ as e -> e
   | `Ok r ->
       let rspec = audio_spec_of_c (!@ r) spec.as_ba_kind in
       let kind_size = ba_kind_byte_size spec.as_ba_kind in
       let len = Unsigned.UInt32.to_int (!@ len) in
-      if len mod kind_size <> 0 
+      if len mod kind_size <> 0
       then invalid_arg (err_bigarray_data len kind_size)
       else
-      let ba_size = len / kind_size in 
+      let ba_size = len / kind_size in
       let ba_ptr = access_ptr_typ_of_ba_kind spec.as_ba_kind in
       let d = coerce (ptr void)  ba_ptr (!@ d) in
       `Ok (rspec, bigarray_of_ptr array1 ba_size spec.as_ba_kind d)
 
-let lock_audio_device = 
+let lock_audio_device =
   foreign "SDL_LockAudioDevice" (audio_device_id @-> returning void)
 
-let open_audio_device = 
-  foreign "SDL_OpenAudioDevice" 
-    (string_opt @-> bool @-> ptr audio_spec @-> ptr audio_spec @-> 
+let open_audio_device =
+  foreign "SDL_OpenAudioDevice"
+    (string_opt @-> bool @-> ptr audio_spec @-> ptr audio_spec @->
      Audio.allow @-> returning uint32_t)
 
-let open_audio_device dev capture desired allow = 
-  let desiredc = audio_spec_to_c desired in 
-  let obtained = make audio_spec in 
-  match open_audio_device dev capture (addr desiredc) (addr obtained) allow 
-  with 
-  | id when id = Unsigned.UInt32.zero -> error () 
+let open_audio_device dev capture desired allow =
+  let desiredc = audio_spec_to_c desired in
+  let obtained = make audio_spec in
+  match open_audio_device dev capture (addr desiredc) (addr obtained) allow
+  with
+  | id when id = Unsigned.UInt32.zero -> error ()
   | id -> `Ok (id,  audio_spec_of_c obtained desired.as_ba_kind)
 
-let pause_audio_device = 
+let pause_audio_device =
   foreign "SDL_PauseAudioDevice" (audio_device_id @-> bool @-> returning void)
 
-let unlock_audio_device = 
+let unlock_audio_device =
   foreign "SDL_UnlockAudioDevice" (audio_device_id @-> returning void)
 
 (* Timer *)
 
-let delay = 
+let delay =
   foreign "SDL_Delay" (int32_t @-> returning void)
 
-let get_ticks = 
+let get_ticks =
   foreign "SDL_GetTicks" (void @-> returning int32_t)
 
-let get_performance_counter = 
+let get_performance_counter =
   foreign "SDL_GetPerformanceCounter" (void @-> returning int64_t)
 
-let get_performance_frequency = 
+let get_performance_frequency =
   foreign "SDL_GetPerformanceFrequency" (void @-> returning int64_t)
-  
+
 (* Platform and CPU information *)
 
-let get_platform = 
+let get_platform =
   foreign "SDL_GetPlatform" (void @-> returning string)
 
-let get_cpu_cache_line_size = 
+let get_cpu_cache_line_size =
   foreign "SDL_GetCPUCacheLineSize" (void @-> returning nat_to_ok)
 
-let get_cpu_count = 
+let get_cpu_count =
   foreign "SDL_GetCPUCount" (void @-> returning int)
 
-let get_system_ram = 
+let get_system_ram =
   foreign "SDL_GetSystemRAM" (void @-> returning int)
 
-let has_3d_now = 
+let has_3d_now =
   foreign "SDL_Has3DNow" (void @-> returning bool)
 
-let has_altivec = 
+let has_altivec =
   foreign "SDL_HasAltiVec" (void @-> returning bool)
 
-let has_avx = 
+let has_avx =
   foreign ~stub "SDL_HasAVX" (void @-> returning bool)
 
-let has_mmx = 
+let has_mmx =
   foreign "SDL_HasMMX" (void @-> returning bool)
 
-let has_rdtsc = 
+let has_rdtsc =
   foreign "SDL_HasRDTSC" (void @-> returning bool)
 
-let has_sse = 
+let has_sse =
   foreign "SDL_HasSSE" (void @-> returning bool)
 
-let has_sse2 = 
+let has_sse2 =
   foreign "SDL_HasSSE2" (void @-> returning bool)
 
-let has_sse3 = 
+let has_sse3 =
   foreign "SDL_HasSSE3" (void @-> returning bool)
 
-let has_sse41 = 
+let has_sse41 =
   foreign "SDL_HasSSE41" (void @-> returning bool)
 
-let has_sse42 = 
+let has_sse42 =
   foreign "SDL_HasSSE42" (void @-> returning bool)
 
 (* Power management *)
-    
-type power_state = 
-  [ `Unknown | `On_battery | `No_battery | `Charging | `Charged ] 
-  
+
+type power_state =
+  [ `Unknown | `On_battery | `No_battery | `Charging | `Charged ]
+
 let power_state =
-  [ sdl_powerstate_unknown, `Unknown; 
+  [ sdl_powerstate_unknown, `Unknown;
     sdl_powerstate_on_battery, `On_battery;
     sdl_powerstate_no_battery, `No_battery;
     sdl_powerstate_charging, `Charging;
     sdl_powerstate_charged, `Charged; ]
-  
-type power_info = 
-  { pi_state : power_state; 
-    pi_secs : int option; 
-    pi_pct : int option; } 
-  
-let get_power_info = 
+
+type power_info =
+  { pi_state : power_state;
+    pi_secs : int option;
+    pi_pct : int option; }
+
+let get_power_info =
   foreign "SDL_GetPowerInfo" ((ptr int) @-> (ptr int) @-> returning int)
-    
+
 let get_power_info () =
-  let secs = allocate int 0 in 
+  let secs = allocate int 0 in
   let pct = allocate int 0 in
-  let s = get_power_info secs pct in 
+  let s = get_power_info secs pct in
   let pi_state = try List.assoc s power_state with Not_found -> assert false in
   let pi_secs = match !@ secs with -1 -> None | secs -> Some secs in
-  let pi_pct = match !@ pct with -1 -> None | pct -> Some pct in 
+  let pi_pct = match !@ pct with -1 -> None | pct -> Some pct in
   { pi_state; pi_secs; pi_pct }
 
 end
- 
+
 (*---------------------------------------------------------------------------
    Copyright (c) 2013 Daniel C. Bünzli.
    All rights reserved.
@@ -4718,7 +4718,7 @@ end
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-     
+
    1. Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
 
