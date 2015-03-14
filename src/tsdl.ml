@@ -448,6 +448,11 @@ module Color = struct
   let g c = Unsigned.UInt8.to_int (getf c color_g)
   let b c = Unsigned.UInt8.to_int (getf c color_b)
   let a c = Unsigned.UInt8.to_int (getf c color_a)
+
+  let set_r c r = setf c color_r (Unsigned.UInt8.of_int r)
+  let set_g c g = setf c color_g (Unsigned.UInt8.of_int g)
+  let set_b c b = setf c color_b (Unsigned.UInt8.of_int b)
+  let set_a c a = setf c color_a (Unsigned.UInt8.of_int a)
 end
 
 (* Points *)
@@ -468,6 +473,9 @@ module Point = struct
 
   let x p = getf p point_x
   let y p = getf p point_y
+
+  let set_x p x = setf p point_x x
+  let set_y p y = setf p point_y y
 
   let opt_addr = function
   | None -> coerce (ptr void) (ptr point) null
@@ -498,6 +506,11 @@ module Rect = struct
   let y r = getf r rect_y
   let w r = getf r rect_w
   let h r = getf r rect_h
+
+  let set_x r x = setf r rect_x x
+  let set_y r y = setf r rect_y y
+  let set_w r w = setf r rect_w w
+  let set_h r h = setf r rect_h h
 
   let opt_addr = function
   | None -> coerce (ptr void) (ptr rect) null

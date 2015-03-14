@@ -332,6 +332,10 @@ module Color : sig
   val g : color -> uint8
   val b : color -> uint8
   val a : color -> uint8
+  val set_r : color -> uint8 -> unit
+  val set_g : color -> uint8 -> unit
+  val set_b : color -> uint8 -> unit
+  val set_a : color -> uint8 -> unit
 end
 
 (** {2:points Points} *)
@@ -343,6 +347,8 @@ module Point : sig
   val create : x:int -> y:int -> point
   val x : point -> int
   val y : point -> int
+  val set_x : point -> int -> unit
+  val set_y : point -> int -> unit
 end
 
 (** {2:rectangles
@@ -357,6 +363,10 @@ module Rect : sig
   val y : rect -> int
   val w : rect -> int
   val h : rect -> int
+  val set_x : rect -> int -> unit
+  val set_y : rect -> int -> unit
+  val set_w : rect -> int -> unit
+  val set_h : rect -> int -> unit
 end
 
 val enclose_points : ?clip:rect -> point list -> rect option
