@@ -301,6 +301,7 @@ val rw_close : rw_ops -> unit result
 
 (**/**)
 val unsafe_rw_ops_of_ptr : nativeint -> rw_ops
+val unsafe_ptr_of_rw_ops : rw_ops -> nativeint
 (**/**)
 
 (** {1:fspaths {{:https://wiki.libsdl.org/CategoryFilesystem}Filesystem
@@ -319,6 +320,7 @@ type window
 
 (**/**)
 val unsafe_window_of_ptr : nativeint -> window
+val unsafe_ptr_of_window : window -> nativeint
 (**/**)
 
 (** {2:colors Colors} *)
@@ -428,6 +430,7 @@ val set_palette_colors_ba : palette ->
 
 (**/**)
 val unsafe_palette_of_ptr : nativeint -> palette
+val unsafe_ptr_of_palette : palette -> nativeint
 (**/**)
 
 (** {2:pixel_formats {{:http://wiki.libsdl.org/CategoryPixels}Pixels
@@ -545,6 +548,7 @@ val set_pixel_format_palette : pixel_format -> palette -> unit result
 
 (**/**)
 val unsafe_pixel_format_of_ptr : nativeint -> pixel_format
+val unsafe_ptr_of_pixel_format : pixel_format -> nativeint
 (**/**)
 
 (** {2:surfaces
@@ -701,6 +705,7 @@ val unlock_surface : surface -> unit
 
 (**/**)
 val unsafe_surface_of_ptr : nativeint -> surface
+val unsafe_ptr_of_surface : surface -> nativeint
 (**/**)
 
 (** {2:renderers {{:http://wiki.libsdl.org/CategoryRender}Renderers}} *)
@@ -722,12 +727,14 @@ type texture
 
 (**/**)
 val unsafe_texture_of_ptr : nativeint -> texture
+val unsafe_ptr_of_texture : texture -> nativeint
 (**/**)
 
 type renderer
 
 (**/**)
 val unsafe_renderer_of_ptr : nativeint -> renderer
+val unsafe_ptr_of_renderer : renderer -> nativeint
 (**/**)
 
 (** SDL_Renderer *)
@@ -1247,6 +1254,7 @@ type gl_context
 
 (**/**)
 val unsafe_gl_context_of_ptr : nativeint -> gl_context
+val unsafe_ptr_of_gl_context : gl_context -> nativeint
 (**/**)
 
 (** SDL_GLContext *)
@@ -2053,6 +2061,7 @@ type cursor
 
 (**/**)
 val unsafe_cursor_of_ptr : nativeint -> cursor
+val unsafe_ptr_of_cursor : cursor -> nativeint
 (**/**)
 
 (** SDL_Cursor *)
@@ -2201,6 +2210,7 @@ type joystick
 
 (**/**)
 val unsafe_joystick_of_ptr : nativeint -> joystick
+val unsafe_ptr_of_joystick : joystick -> nativeint
 (**/**)
 
 (** SDL_Joystick *)
@@ -2298,6 +2308,7 @@ type game_controller
 
 (**/**)
 val unsafe_game_controller_of_ptr : nativeint -> game_controller
+val unsafe_ptr_of_game_controller : game_controller -> nativeint
 (**/**)
 
 (** SDL_GameController *)
