@@ -571,7 +571,8 @@ val blit_scaled : src:surface -> rect -> dst:surface -> rect option ->
   unit result
 (** {{:http://wiki.libsdl.org/SDL_BlitScaled}SDL_BlitScaled} *)
 
-val blit_surface : src:surface -> rect -> dst:surface -> rect -> unit result
+val blit_surface : src:surface -> rect option -> dst:surface -> rect ->
+  unit result
 (** {{:http://wiki.libsdl.org/SDL_BlitSurface}SDL_BlitSurface} *)
 
 val convert_pixels : w:int -> h:int -> src:Pixel.format_enum ->
