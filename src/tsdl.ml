@@ -29,12 +29,12 @@ let err_length_mul l mul = str "invalid length: %d not a multiple of %d" l mul
 let err_drop_file = "null file name (drop_file_free already called ?)"
 let err_read_field = "cannot read field"
 let err_bigarray_pitch pitch ba_el_size =
-  "invalid bigarray kind: pitch (%d bytes) not a multiple of bigarray element \
-   byte size (%d)"
+  str "invalid bigarray kind: pitch (%d bytes) not a multiple of bigarray \
+       element byte size (%d)" pitch ba_el_size
 
 let err_bigarray_data len ba_el_size =
-  "invalid bigarray kind: data (%d bytes) not a multiple of bigarray element \
-   byte size (%d)"
+  str "invalid bigarray kind: data (%d bytes) not a multiple of bigarray \
+       element byte size (%d)" len ba_el_size
 
 (* ctypes views *)
 
