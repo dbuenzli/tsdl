@@ -3486,7 +3486,7 @@ match Sdl.init Sdl.Init.(video + timer + audio) with
 To use [Tsdl] in the toplevel with [findlib] just issue:
 {[
 > #use "topfind";;
-> #require "tsdl";;
+> #require "tsdl.top";;
 ]}
 
 This automatically loads the library and opens the [Tsdl] module.
