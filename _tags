@@ -16,6 +16,6 @@ true: thread
 <src/tsdl_top.*> : package(compiler-libs.toplevel)
 
 <test> : include
-<test/{sdlevents,test,min}.{native,byte}> : package(ctypes), \
+<test/{sdlevents,test,min,test_audio}.{native,byte}> : package(ctypes), \
   package(ctypes.foreign), use_sdl2
 <test/test.byte> : custom

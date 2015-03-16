@@ -4546,6 +4546,14 @@ type ('a, 'b) audio_spec =
 let audio_callback =
   (ptr void @-> ptr uint8_t @-> int @-> returning void)
 
+let funptr_opt ?abi ?name ?check_errno ?runtime_lock fn =
+  (* opt args missing in ctypes <= 0.4.0 see ctypes' issue #285 *)
+  let typ = (Foreign.funptr ?abi ?name ?check_errno ?runtime_lock fn) in
+  let from_ptr = coerce (ptr void) typ and to_ptr = coerce typ (ptr void) in
+  let read p = if to_voidp p = null then None else Some (from_ptr p)
+  and write = function None -> null | Some f -> to_ptr f in
+  view ~read ~write (ptr void)
+
 type _audio_spec
 let audio_spec : _audio_spec structure typ = structure "SDL_AudioSpec"
 let as_freq = field audio_spec "freq" int
@@ -4555,8 +4563,9 @@ let as_silence = field audio_spec "silence" int_as_uint8_t
 let as_samples = field audio_spec "samples" int_as_uint16_t
 let _ = field audio_spec "padding" uint16_t
 let as_size = field audio_spec "size" int32_as_uint32_t
-let as_callback = field audio_spec "callback" (funptr_opt audio_callback)
-(* let as_callback = field audio_spec "callback" (ptr void) *)
+let as_callback =
+  field audio_spec "callback" (funptr_opt ~runtime_lock:true audio_callback )
+
 let as_userdata = field audio_spec "userdata" (ptr void)
 let () = seal audio_spec
 
@@ -4590,9 +4599,7 @@ let audio_spec_to_c a =
   setf c as_silence a.as_silence; (* irrelevant *)
   setf c as_samples a.as_samples;
   setf c as_size a.as_size;       (* irrelevant *)
-  setf c as_callback wrap_cb; (* FIXME: this will run on another thread
-                                 (=> acquire runtime lock) and may move
-                                  does ctypes handle that ? *)
+  setf c as_callback wrap_cb;
   setf c as_userdata null;
   c
 
