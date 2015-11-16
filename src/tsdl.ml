@@ -4008,13 +4008,14 @@ let register_event () = match Unsigned.UInt32.to_int32 (register_events 1) with
 | -1l -> None | t -> Some (Int32.to_int t)
 
 let wait_event =
-  foreign "SDL_WaitEvent" (ptr Event.t @-> returning int)
+  foreign ~release_runtime_lock:true
+    "SDL_WaitEvent" (ptr Event.t @-> returning int)
 
 let wait_event e = match wait_event (Event.opt_addr e) with
 | 1 -> `Ok () | _ -> error ()
 
 let wait_event_timeout =
-  foreign "SDL_WaitEventTimeout"
+  foreign "SDL_WaitEventTimeout" ~release_runtime_lock:true
     (ptr Event.t @-> int @-> returning bool)
 
 let wait_event_timeout e t =
