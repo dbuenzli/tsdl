@@ -4546,14 +4546,6 @@ type ('a, 'b) audio_spec =
 let audio_callback =
   (ptr void @-> ptr uint8_t @-> int @-> returning void)
 
-let funptr_opt ?abi ?name ?check_errno ?runtime_lock fn =
-  (* opt args missing in ctypes <= 0.4.0 see ctypes' issue #285 *)
-  let typ = (Foreign.funptr ?abi ?name ?check_errno ?runtime_lock fn) in
-  let from_ptr = coerce (ptr void) typ and to_ptr = coerce typ (ptr void) in
-  let read p = if to_voidp p = null then None else Some (from_ptr p)
-  and write = function None -> null | Some f -> to_ptr f in
-  view ~read ~write (ptr void)
-
 type _audio_spec
 let audio_spec : _audio_spec structure typ = structure "SDL_AudioSpec"
 let as_freq = field audio_spec "freq" int

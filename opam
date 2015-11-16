@@ -6,17 +6,16 @@ doc: "http://erratique.ch/software/tsdl/doc/Tsdl"
 tags: [ "audio" "bindings" "graphics" "media" "opengl" "input" "hci" ]
 license: "BSD3"
 ocaml-version: [>= "4.00.1"]
-depends: [ "ocamlfind" "ctypes" {>= "0.4.0"} "ctypes-foreign" ]
+depends: [ "ocamlfind" "ctypes" {>= "0.4.1"} "ctypes-foreign" ]
 depexts: [
  [["debian"] ["libsdl2-dev"]]
  [["ubuntu"] ["libsdl2-dev"]]
  [["mageia"] ["libsdl2.0-devel"]]
  [["osx" "homebrew"] ["sdl2"]]
 ]
-build: 
+build:
 [
   [ "ocaml" "pkg/git.ml" ]
   [ "ocaml" "pkg/build.ml" "native=%{ocaml-native}%"
                            "native-dynlink=%{ocaml-native}%" ] # TODO fixme
 ]
-
