@@ -1258,7 +1258,7 @@ let test_audio_devices () =
           | `Ok name -> name
           end;
       done;
-      let a440 =
+(*      let a440 =
         let t = ref 0. in
         fun a ->
           let c = (6.2831853 *. 440.) /. 44100. in
@@ -1267,12 +1267,13 @@ let test_audio_devices () =
             t := !t +. 1.0;
           done
       in
+*)
       let spec = { Sdl.as_freq = 44100;
                    as_format = Sdl.Audio.s16_sys;
                    as_channels = 1;
                    as_samples = 4096;
                    as_ba_kind = Bigarray.int16_unsigned;
-                   as_callback = Some a440;
+(*                   as_callback = Some a440; *)
                    as_size = 0l;
                    as_silence = 0; }
       in
