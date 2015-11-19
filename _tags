@@ -8,7 +8,7 @@ true: thread
 
 <src> : include
 <src/tsdl.{ml,mli}> : package(ctypes), thread
-<src/tsdl.ml> : sdl_consts_dep
+<src/tsdl.ml> : sdl_consts
 <src/tsdl.{cma,cmxa,cmxs}> : custom, thread, \
  package(ctypes), package(ctypes.foreign), use_sdl2
 
