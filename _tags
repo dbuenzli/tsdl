@@ -7,7 +7,7 @@ true: thread
 
 
 <src> : include
-<src/tsdl.{ml,mli}> : package(ctypes), thread
+<src/tsdl.{ml,mli}> : package(ctypes), package(result), thread
 <src/tsdl.ml> : sdl_consts
 <src/tsdl.{cma,cmxa,cmxs}> : custom, thread, \
  package(ctypes), package(ctypes.foreign), use_sdl2
@@ -16,6 +16,7 @@ true: thread
 <src/tsdl_top.*> : package(compiler-libs.toplevel)
 
 <test> : include
+<test/*.ml>: package(result)
 <test/{sdlevents,test,min,test_audio}.{native,byte}> : package(ctypes), \
-  package(ctypes.foreign), use_sdl2
+ package(ctypes.foreign), package(result), use_sdl2
 <test/test.byte> : custom
