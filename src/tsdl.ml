@@ -82,26 +82,30 @@ let string_as_char_array n = (* FIXME: drop this if ctypes proposes better *)
 let get_error =
   foreign "SDL_GetError" (void @-> returning string)
 
-let error () = `Error (get_error ())
+(* SDL results *)
+open Result
+type 'a result = ( 'a, [ `Msg of string ] ) Result.result
+
+let error () = Error ( `Msg ( get_error () ) )
 
 let zero_to_ok =
-  let read = function 0 -> `Ok () | err -> error () in
+  let read = function 0 -> Ok () | err -> error () in
   view ~read ~write:write_never int
 
 let one_to_ok =
-  let read = function 1 -> `Ok () | err -> error () in
+  let read = function 1 -> Ok () | err -> error () in
   view ~read ~write:write_never int
 
 let bool_to_ok =
-  let read = function 0 -> `Ok false | 1 -> `Ok true | _ -> error () in
+  let read = function 0 -> Ok false | 1 -> Ok true | _ -> error () in
   view ~read ~write:write_never int
 
 let nat_to_ok =
-  let read = function n when n < 0 -> error () | n -> `Ok n in
+  let read = function n when n < 0 -> error () | n -> Ok n in
   view ~read ~write:write_never int
 
 let some_to_ok t =
-  let read = function Some v -> `Ok v | None -> error () in
+  let read = function Some v -> Ok v | None -> error () in
   view ~read ~write:write_never t
 
 let sdl_free = foreign "SDL_free" (ptr void @-> returning void)
@@ -115,9 +119,6 @@ let () =
 
 let stub = true
 
-(* SDL results *)
-
-type 'a result = [ `Ok of 'a | `Error of string ]
 
 (* Integer types and maps *)
 
@@ -390,7 +391,7 @@ let rw_from_file =
 
 let rw_close ops =
   let close = getf (!@ ops) rw_ops_close in
-  if close ops = 0 then `Ok () else (error ())
+  if close ops = 0 then Ok () else (error ())
 
 let unsafe_rw_ops_of_ptr addr : rw_ops =
   from_voidp rw_ops_struct (ptr_of_raw_address addr)
@@ -825,7 +826,7 @@ let pixel_format_enum_to_masks pf =
   let bpp = allocate int 0 in
   let rm, gm, bm, am = ui (), ui (), ui (), ui () in
   if not (pixel_format_enum_to_masks pf bpp rm gm bm am) then error () else
-  `Ok (!@ bpp, get rm, get gm, get bm, get am)
+  Ok (!@ bpp, get rm, get gm, get bm, get am)
 
 let set_pixel_format_palette =
   foreign "SDL_SetPixelFormatPalette"
@@ -965,7 +966,7 @@ let get_color_key =
 let get_color_key s =
   let key = allocate uint32_t Unsigned.UInt32.zero in
   match get_color_key s key with
-  | `Ok () -> `Ok (Unsigned.UInt32.to_int32 (!@ key)) | `Error _ as e -> e
+  | Ok () -> Ok (Unsigned.UInt32.to_int32 (!@ key)) | Error _ as e -> e
 
 let get_surface_alpha_mod =
   foreign "SDL_GetSurfaceAlphaMod"
@@ -974,7 +975,7 @@ let get_surface_alpha_mod =
 let get_surface_alpha_mod s =
   let alpha = allocate uint8_t Unsigned.UInt8.zero in
   match get_surface_alpha_mod s alpha with
-  | `Ok () -> `Ok (Unsigned.UInt8.to_int (!@ alpha)) | `Error _ as e -> e
+  | Ok () -> Ok (Unsigned.UInt8.to_int (!@ alpha)) | Error _ as e -> e
 
 let get_surface_blend_mode =
   foreign "SDL_GetSurfaceBlendMode"
@@ -983,7 +984,7 @@ let get_surface_blend_mode =
 let get_surface_blend_mode s =
   let mode = allocate int 0 in
   match get_surface_blend_mode s mode with
-  `Ok () -> `Ok (!@ mode) | `Error _ as e -> e
+  Ok () -> Ok (!@ mode) | Error _ as e -> e
 
 let get_surface_color_mod =
   foreign "SDL_GetSurfaceColorMod"
@@ -995,7 +996,7 @@ let get_surface_color_mod s =
   let get v = Unsigned.UInt8.to_int (!@ v) in
   let r, g, b = alloc (), alloc (), alloc () in
   match get_surface_color_mod s r g b with
-  | `Ok () -> `Ok (get r, get g, get b) | `Error _ as e -> e
+  | Ok () -> Ok (get r, get g, get b) | Error _ as e -> e
 
 let get_surface_format_enum s =
   (* We don't give direct access to the format field. This prevents
@@ -1030,8 +1031,8 @@ let load_bmp_rw rw ~close =
 let load_bmp file =
   (* SDL_LoadBMP is cpp based *)
   match rw_from_file file "rb" with
-  | `Error _ as e -> e
-  | `Ok rw -> load_bmp_rw rw ~close:true
+  | Error _ as e -> e
+  | Ok rw -> load_bmp_rw rw ~close:true
 
 let lock_surface =
   foreign "SDL_LockSurface" (surface @-> returning zero_to_ok)
@@ -1060,8 +1061,8 @@ let save_bmp_rw s rw ~close =
 let save_bmp s file =
   (* SDL_SaveBMP is cpp based *)
   match rw_from_file file "wb" with
-  | `Error _ as e -> e
-  | `Ok rw -> save_bmp_rw s rw ~close:true
+  | Error _ as e -> e
+  | Ok rw -> save_bmp_rw s rw ~close:true
 
 let set_clip_rect =
   foreign "SDL_SetClipRect" (surface @-> ptr rect @-> returning bool)
@@ -1192,7 +1193,7 @@ let get_render_draw_blend_mode =
 let get_render_draw_blend_mode r =
   let m = allocate int 0 in
   match get_render_draw_blend_mode r m with
-  | `Ok () -> `Ok !@m | `Error _ as e -> e
+  | Ok () -> Ok !@m | Error _ as e -> e
 
 let get_render_draw_color =
   foreign "SDL_GetRenderDrawColor"
@@ -1204,7 +1205,7 @@ let get_render_draw_color rend =
   let get v = Unsigned.UInt8.to_int (!@ v) in
   let r, g, b, a = alloc (), alloc (), alloc (), alloc () in
   match get_render_draw_color rend r g b a with
-  | `Ok () -> `Ok (get r, get g, get b, get a) | `Error _ as e -> e
+  | Ok () -> Ok (get r, get g, get b, get a) | Error _ as e -> e
 
 let get_render_driver_info =
   foreign "SDL_GetRenderDriverInfo"
@@ -1213,7 +1214,7 @@ let get_render_driver_info =
 let get_render_driver_info i =
   let info = make renderer_info in
   match get_render_driver_info i (addr info) with
-  | `Ok () -> `Ok (renderer_info_of_c info) | `Error _ as e -> e
+  | Ok () -> Ok (renderer_info_of_c info) | Error _ as e -> e
 
 let get_render_target =
   foreign "SDL_GetRenderTarget" (renderer @-> returning texture_opt)
@@ -1229,7 +1230,7 @@ let get_renderer_info =
 let get_renderer_info r =
   let info = make renderer_info in
   match get_renderer_info r (addr info) with
-  | `Ok () -> `Ok (renderer_info_of_c info) | `Error _ as e -> e
+  | Ok () -> Ok (renderer_info_of_c info) | Error _ as e -> e
 
 let get_renderer_output_size =
   foreign "SDL_GetRendererOutputSize"
@@ -1239,7 +1240,7 @@ let get_renderer_output_size r =
   let w = allocate int 0 in
   let h = allocate int 0 in
   match get_renderer_output_size r w h with
-  | `Ok () -> `Ok (!@ w, !@ h) | `Error _ as e -> e
+  | Ok () -> Ok (!@ w, !@ h) | Error _ as e -> e
 
 let render_clear =
   foreign "SDL_RenderClear" (renderer @-> returning zero_to_ok)
@@ -1477,7 +1478,7 @@ let get_texture_alpha_mod =
 let get_texture_alpha_mod t =
   let alpha = allocate uint8_t Unsigned.UInt8.zero in
   match get_texture_alpha_mod t alpha with
-  | `Ok () -> `Ok (Unsigned.UInt8.to_int (!@ alpha)) | `Error _ as e -> e
+  | Ok () -> Ok (Unsigned.UInt8.to_int (!@ alpha)) | Error _ as e -> e
 
 let get_texture_blend_mode =
   foreign "SDL_GetTextureBlendMode"
@@ -1486,7 +1487,7 @@ let get_texture_blend_mode =
 let get_texture_blend_mode t =
   let m = allocate int 0 in
   match get_texture_blend_mode t m with
-  | `Ok () -> `Ok (!@ m) | `Error _ as e -> e
+  | Ok () -> Ok (!@ m) | Error _ as e -> e
 
 let get_texture_color_mod =
   foreign "SDL_GetTextureColorMod"
@@ -1498,7 +1499,7 @@ let get_texture_color_mod t =
   let get v = Unsigned.UInt8.to_int (!@ v) in
   let r, g, b = alloc (), alloc (), alloc () in
   match get_texture_color_mod t r g b with
-  | `Ok () -> `Ok (get r, get g, get b) | `Error _ as e -> e
+  | Ok () -> Ok (get r, get g, get b) | Error _ as e -> e
 
 let query_texture =
   foreign "SDL_QueryTexture"
@@ -1510,7 +1511,7 @@ let _texture_height t =
   let unull = coerce (ptr void) (ptr uint32_t) null in
   let inull = coerce (ptr void) (ptr int) null in
   match query_texture t unull inull inull h with
-  | `Ok () -> `Ok (!@ h) | `Error _ as e -> e
+  | Ok () -> Ok (!@ h) | Error _ as e -> e
 
 let lock_texture =
   foreign "SDL_LockTexture"
@@ -1518,14 +1519,14 @@ let lock_texture =
      returning zero_to_ok)
 
 let lock_texture t r kind =
-  match (match r with None -> _texture_height t | Some r -> `Ok (Rect.h r)) with
-  | `Error _ as e -> e
-  | `Ok h ->
+  match (match r with None -> _texture_height t | Some r -> Ok (Rect.h r)) with
+  | Error _ as e -> e
+  | Ok h ->
       let pitch = allocate int 0 in
       let p = allocate (ptr void) null in
       match lock_texture t (Rect.opt_addr r) p pitch with
-      | `Error _ as e -> e
-      | `Ok () ->
+      | Error _ as e -> e
+      | Ok () ->
           let p = !@ p in
           let pitch = !@ pitch in
           let kind_size = ba_kind_byte_size kind in
@@ -1534,7 +1535,7 @@ let lock_texture t r kind =
           else
           let ba_size = (pitch * h) / kind_size in
           let pixels = coerce (ptr void) (access_ptr_typ_of_ba_kind kind) p in
-          `Ok (bigarray_of_ptr array1 ba_size kind pixels, pitch / kind_size)
+          Ok (bigarray_of_ptr array1 ba_size kind pixels, pitch / kind_size)
 
 let query_texture t =
   let pf = allocate uint32_t Unsigned.UInt32.zero in
@@ -1542,7 +1543,7 @@ let query_texture t =
   let w = allocate int 0 in
   let h = allocate int 0 in
   match query_texture t pf access w h with
-  | `Ok () -> `Ok (!@ pf, !@ access, (!@ w, !@ h)) | `Error _ as e -> e
+  | Ok () -> Ok (!@ pf, !@ access, (!@ w, !@ h)) | Error _ as e -> e
 
 let set_texture_alpha_mod =
   foreign "SDL_SetTextureAlphaMod"
@@ -1658,7 +1659,7 @@ let get_current_display_mode =
 let get_current_display_mode i =
   let mode = make display_mode in
   match get_current_display_mode i (addr mode) with
-  | `Ok () -> `Ok (display_mode_of_c mode) | `Error _ as e -> e
+  | Ok () -> Ok (display_mode_of_c mode) | Error _ as e -> e
 
 let get_desktop_display_mode =
   foreign "SDL_GetDesktopDisplayMode"
@@ -1667,7 +1668,7 @@ let get_desktop_display_mode =
 let get_desktop_display_mode i =
   let mode = make display_mode in
   match get_desktop_display_mode i (addr mode) with
-  | `Ok () -> `Ok (display_mode_of_c mode) | `Error _ as e -> e
+  | Ok () -> Ok (display_mode_of_c mode) | Error _ as e -> e
 
 let get_display_bounds =
   foreign "SDL_GetDisplayBounds"
@@ -1676,7 +1677,7 @@ let get_display_bounds =
 let get_display_bounds i =
   let r = make rect in
   match get_display_bounds i (addr r) with
-  | `Ok () -> `Ok r | `Error _ as e -> e
+  | Ok () -> Ok r | Error _ as e -> e
 
 let get_display_mode =
   foreign "SDL_GetDisplayMode"
@@ -1685,7 +1686,7 @@ let get_display_mode =
 let get_display_mode d i =
   let mode = make display_mode in
   match get_display_mode d i (addr mode) with
-  | `Ok () -> `Ok (display_mode_of_c mode) | `Error _ as e -> e
+  | Ok () -> Ok (display_mode_of_c mode) | Error _ as e -> e
 
 let get_num_display_modes =
   foreign "SDL_GetNumDisplayModes" (int @-> returning nat_to_ok)
@@ -1742,7 +1743,7 @@ let create_window_and_renderer ~w ~h flags =
   let win = allocate window null in
   let r = allocate renderer null in
   match create_window_and_renderer w h flags win r with
-  | `Ok () -> `Ok (!@ win, !@ r) | `Error _ as e -> e
+  | Ok () -> Ok (!@ win, !@ r) | Error _ as e -> e
 
 let destroy_window =
   foreign "SDL_DestroyWindow" (window @-> returning void)
@@ -1760,7 +1761,7 @@ let get_window_display_mode =
 let get_window_display_mode w =
   let mode = make display_mode in
   match get_window_display_mode w (addr mode) with
-  | 0 -> `Ok (display_mode_of_c mode) | err -> error ()
+  | 0 -> Ok (display_mode_of_c mode) | err -> error ()
 
 let get_window_flags =
   foreign "SDL_GetWindowFlags" (window @-> returning uint32_t)
@@ -1778,7 +1779,7 @@ let get_window_gamma_ramp w =
   let r, g, b = create_ramp (), create_ramp (), create_ramp () in
   let ramp_ptr r = to_voidp (bigarray_start array1 r) in
   match get_window_gamma_ramp w (ramp_ptr r) (ramp_ptr g) (ramp_ptr b) with
-  | `Ok () -> `Ok (r, g, b) | `Error _ as e -> e
+  | Ok () -> Ok (r, g, b) | Error _ as e -> e
 
 let get_window_grab =
   foreign "SDL_GetWindowGrab" (window @-> returning bool)
@@ -1994,7 +1995,7 @@ let gl_bind_texture t =
   let w = allocate float 0. in
   let h = allocate float 0. in
   match gl_bind_texture t w h with
-  | `Ok () -> `Ok (!@ w, !@ h) | `Error _ as e -> e
+  | Ok () -> Ok (!@ w, !@ h) | Error _ as e -> e
 
 let gl_create_context =
   foreign "SDL_GL_CreateContext"
@@ -2012,7 +2013,7 @@ let gl_get_attribute =
 let gl_get_attribute att =
   let value = allocate int 0 in
   match gl_get_attribute att value with
-  | 0 -> `Ok (!@ value) | err -> error ()
+  | 0 -> Ok (!@ value) | err -> error ()
 
 let gl_get_current_context =
   foreign "SDL_GL_GetCurrentContext"
@@ -2180,7 +2181,7 @@ let show_message_box d =
   let d = addr (Message_box.data_to_c d) in
   let ret = allocate int 0 in
   match show_message_box d ret with
-  | `Ok () -> `Ok (!@ ret) | `Error _ as e -> e
+  | Ok () -> Ok (!@ ret) | Error _ as e -> e
 
 let show_simple_message_box =
   foreign "SDL_ShowSimpleMessageBox"
@@ -2204,7 +2205,7 @@ let get_clipboard_text () =
     ptr := !ptr +@ 1;
   done;
   sdl_free (to_voidp p);
-  `Ok (Buffer.contents b)
+  Ok (Buffer.contents b)
 
 let has_clipboard_text =
   foreign "SDL_HasClipboardText" (void @-> returning bool)
@@ -3004,7 +3005,7 @@ let get_touch_device =
 
 let get_touch_device i =
   match get_touch_device i with
-  | 0L -> error () | id -> `Ok id
+  | 0L -> error () | id -> Ok id
 
 let get_touch_finger =
   foreign "SDL_GetTouchFinger"
@@ -3105,7 +3106,7 @@ let joystick_get_ball j i =
   let x = allocate int 0 in
   let y = allocate int 0 in
   match joystick_get_ball j i x y with
-  | 0 -> `Ok (!@ x, !@ y) | _ -> error ()
+  | 0 -> Ok (!@ x, !@ y) | _ -> error ()
 
 let joystick_get_button =
   foreign "SDL_JoystickGetButton"
@@ -3138,7 +3139,7 @@ let joystick_instance_id =
 
 let joystick_instance_id j =
   match joystick_instance_id j with
-  | n when n < 0l -> error () | n -> `Ok n
+  | n when n < 0l -> error () | n -> Ok n
 
 let joystick_name =
   foreign "SDL_JoystickName" (joystick @-> returning (some_to_ok string_opt))
@@ -4012,7 +4013,7 @@ let wait_event =
     "SDL_WaitEvent" (ptr Event.t @-> returning int)
 
 let wait_event e = match wait_event (Event.opt_addr e) with
-| 1 -> `Ok () | _ -> error ()
+| 1 -> Ok () | _ -> error ()
 
 let wait_event_timeout =
   foreign "SDL_WaitEventTimeout" ~release_runtime_lock:true
@@ -4632,8 +4633,8 @@ let load_wav_rw ops spec =
   let d = allocate (ptr void) null in
   let len = allocate uint32_t Unsigned.UInt32.zero in
   match load_wav_rw ops (addr (audio_spec_to_c spec)) d len with
-  | `Error _ as e -> e
-  | `Ok r ->
+  | Error _ as e -> e
+  | Ok r ->
       let rspec = audio_spec_of_c (!@ r) spec.as_ba_kind in
       let kind_size = ba_kind_byte_size spec.as_ba_kind in
       let len = Unsigned.UInt32.to_int (!@ len) in
@@ -4643,7 +4644,7 @@ let load_wav_rw ops spec =
       let ba_size = len / kind_size in
       let ba_ptr = access_ptr_typ_of_ba_kind spec.as_ba_kind in
       let d = coerce (ptr void)  ba_ptr (!@ d) in
-      `Ok (rspec, bigarray_of_ptr array1 ba_size spec.as_ba_kind d)
+      Ok (rspec, bigarray_of_ptr array1 ba_size spec.as_ba_kind d)
 
 let lock_audio_device =
   foreign "SDL_LockAudioDevice" (audio_device_id @-> returning void)
@@ -4659,7 +4660,7 @@ let open_audio_device dev capture desired allow =
   match open_audio_device dev capture (addr desiredc) (addr obtained) allow
   with
   | id when id = Unsigned.UInt32.zero -> error ()
-  | id -> `Ok (id,  audio_spec_of_c obtained desired.as_ba_kind)
+  | id -> Ok (id,  audio_spec_of_c obtained desired.as_ba_kind)
 
 let pause_audio_device =
   foreign "SDL_PauseAudioDevice" (audio_device_id @-> bool @-> returning void)
