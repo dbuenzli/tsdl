@@ -3374,7 +3374,7 @@ val get_power_info : unit -> power_info
     {- {{:http://wiki.libsdl.org/CategoryAtomic}Atomic Operations}
         (mostly cpp based)}
     {- {{:http://wiki.libsdl.org/CategoryIO}File I/O Abstraction}
-        (only the minimal was covered for other parts of the API that needs
+        (only the minimum was covered for other parts of the API that needs
         it, better use another OCaml API)}
     {- {{:http://wiki.libsdl.org/CategorySharedObject}
        Shared Object Loading and Function Lookup} (use ocaml-ctypes)}
@@ -3496,7 +3496,7 @@ This automatically loads the library and opens the [Tsdl] module.
 
     {2:opengl OpenGL window}
 
-    The following is the minimal you need to get a working OpenGL window
+    The following is the minimum you need to get a working OpenGL window
     with SDL.
 {[
 open Tsdl
