@@ -3463,7 +3463,7 @@ end
     {2:errors Errors}
 
     All functions that return an {!Sdl.result} have the string
-    returned by [Sdl.get_error ()] in the [Error ( `Msg _ )] case.
+    returned by [Sdl.get_error ()] in the [Error (`Msg _)] case.
 
     {2:enums Bit fields and enumerants}
 
@@ -3502,10 +3502,10 @@ This automatically loads the library and opens the [Tsdl] module.
 open Tsdl
 
 let main () = match Sdl.init Sdl.Init.video with
-| Error ( `Msg e ) -> Sdl.log "Init error: %s" e; exit 1
+| Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1
 | Ok () ->
     match Sdl.create_window ~w:640 ~h:480 "SDL OpenGL" Sdl.Window.opengl with
-    | Error (`Msg e ) -> Sdl.log "Create window error: %s" e; exit 1
+    | Error (`Msg e) -> Sdl.log "Create window error: %s" e; exit 1
     | Ok w ->
         Sdl.delay 3000l;
         Sdl.destroy_window w;

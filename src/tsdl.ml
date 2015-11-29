@@ -86,7 +86,7 @@ let get_error =
 open Result
 type 'a result = ( 'a, [ `Msg of string ] ) Result.result
 
-let error () = Error ( `Msg ( get_error () ) )
+let error () = Error (`Msg (get_error ()))
 
 let zero_to_ok =
   let read = function 0 -> Ok () | err -> error () in
