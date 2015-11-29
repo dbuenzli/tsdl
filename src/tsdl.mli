@@ -90,8 +90,8 @@ type uint64 = int64
 type ('a, 'b) bigarray = ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
 (** The type for bigarrays.*)
 
-type 'a result = [ `Ok of 'a | `Error of string ]
-(** The type for function results. In the [`Error] case,
+type 'a result = ('a, [ `Msg of string ]) Result.result
+(** The type for function results. In the error case,
     the string is what {!Sdl.get_error} returned. *)
 
 (** {1:basics Basics} *)
@@ -3463,7 +3463,7 @@ end
     {2:errors Errors}
 
     All functions that return an {!Sdl.result} have the string
-    returned by [Sdl.get_error ()] in the [`Error _] case.
+    returned by [Sdl.get_error ()] in the [Error ( `Msg _ )] case.
 
     {2:enums Bit fields and enumerants}
 
@@ -3474,8 +3474,8 @@ end
     module {!Sdl.Init} is an example of that:
 {[
 match Sdl.init Sdl.Init.(video + timer + audio) with
-| `Error -> ...
-| `Ok () -> ...
+| Error _ -> ...
+| Ok () -> ...
 ]}
     Using variants in that case is inconvenient for the binding
     function and of limited use since most of the time bit fields are
@@ -3502,11 +3502,11 @@ This automatically loads the library and opens the [Tsdl] module.
 open Tsdl
 
 let main () = match Sdl.init Sdl.Init.video with
-| `Error e -> Sdl.log "Init error: %s" e; exit 1
-| `Ok () ->
+| Error ( `Msg e ) -> Sdl.log "Init error: %s" e; exit 1
+| Ok () ->
     match Sdl.create_window ~w:640 ~h:480 "SDL OpenGL" Sdl.Window.opengl with
-    | `Error e -> Sdl.log "Create window error: %s" e; exit 1
-    | `Ok w ->
+    | Error (`Msg e ) -> Sdl.log "Create window error: %s" e; exit 1
+    | Ok w ->
         Sdl.delay 3000l;
         Sdl.destroy_window w;
         Sdl.quit ();

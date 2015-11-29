@@ -3,6 +3,7 @@
 
 open Tsdl
 open Bigarray
+open Result
 
 let audio_freq    = 44100
 let audio_samples = 4096
@@ -34,24 +35,24 @@ let audio_setup () =
     Sdl.as_ba_kind = int32; }
   in
   match Sdl.open_audio_device None false desired_audiospec 0 with
-  | `Error _ -> Sdl.log "Can't open audio device"; exit 1
-  | `Ok (device_id, _) -> device_id
+  | Error _ -> Sdl.log "Can't open audio device"; exit 1
+  | Ok (device_id, _) -> device_id
 
 let video_setup () =
   match Sdl.create_window ~w:640 ~h:480 "SDL Audio Test" Sdl.Window.opengl with
-  | `Error e -> Sdl.log "Create window error: %s" e; exit 1
-  | `Ok w -> w
+  | Error ( `Msg e ) -> Sdl.log "Create window error: %s" e; exit 1
+  | Ok w -> w
 
 let main () = match Sdl.init Sdl.Init.(audio + video) with
-| `Error e -> Sdl.log "Init error: %s" e; exit 1
-| `Ok () ->
+| Error ( `Msg e ) -> Sdl.log "Init error: %s" e; exit 1
+| Ok () ->
     let window = video_setup () in
     let device_id = audio_setup () in
     let () = Sdl.pause_audio_device device_id false in
     let e = Sdl.Event.create () in
     let rec loop () = match Sdl.wait_event (Some e) with
-    | `Error err -> Sdl.log "Could not wait event: %s" err; ()
-    | `Ok () ->
+    | Error ( `Msg err ) -> Sdl.log "Could not wait event: %s" err; ()
+    | Ok () ->
         match Sdl.Event.(enum (get e typ)) with
         | `Quit ->
             Sdl.pause_audio_device device_id true;
