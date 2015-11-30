@@ -5,8 +5,9 @@ Release %%VERSION%%
 Tsdl is an OCaml library providing thin bindings to the cross-platform
 SDL C library.
 
-Tsdl depends on the [SDL 2.0.1][1] C library (or later) and
-[ocaml-ctypes][2]. Tsdl is distributed under the BSD3 license.
+Tsdl depends on the [SDL 2.0.1][1] C library (or later),
+[ocaml-ctypes][2] and the `result` compatibility package.
+Tsdl is distributed under the BSD3 license.
 
 [1]: http://www.libsdl.org/
 [2]: https://github.com/ocamllabs/ocaml-ctypes

@@ -1,3 +1,11 @@
+v0.9.0 2015-11-30 Cambridge (UK)
+--------------------------------
+
+* Switch from a polymorphic variant result type to the one exposed by
+  the `result` compatibility package. This is an incompatible
+  change. Thanks to Florian Angeletti for the patch.
+
+
 v0.8.2 2015-11-20 Cambridge (UK)
 --------------------------------
 
