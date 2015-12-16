@@ -18,9 +18,5 @@ true: thread
 <test> : include
 <test/*.ml>: package(result)
 <test/{sdlevents,test,min,test_audio}.{native,byte}> : package(ctypes), \
-<<<<<<< HEAD
  package(ctypes.foreign), package(result), use_sdl2, use_sdl2, use_SDL2_image, use_SDL2_ttf
-=======
- package(ctypes.foreign), package(result), use_sdl2
->>>>>>> upstream/master
 <test/test.byte> : custom

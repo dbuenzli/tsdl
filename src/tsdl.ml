@@ -625,21 +625,12 @@ let get_palette_ncolors p =
   getf (!@ p) palette_ncolors
 
 let get_palette_colors p =
-<<<<<<< HEAD
   let ps = !@ p in
   CArray.to_list
     (CArray.from_ptr (getf ps palette_colors) (getf ps palette_ncolors))
 
 let get_palette_colors_ba p =
   let ps = !@ p in
-=======
-  let ps = !@ p in
-  CArray.to_list
-    (CArray.from_ptr (getf ps palette_colors) (getf ps palette_ncolors))
-
-let get_palette_colors_ba p =
-  let ps = !@ p in
->>>>>>> upstream/master
   (* FIXME: ctypes should have a CArray.copy function *)
   let n = getf ps palette_ncolors in
   let ba = Bigarray.(Array1.create int8_unsigned c_layout (n * 4)) in
@@ -848,11 +839,7 @@ let set_pixel_format_palette =
 type _surface
 type surface_struct = _surface structure
 let surface_struct : surface_struct typ = structure "SDL_Surface"
-<<<<<<< HEAD
 let surface_flags = field surface_struct "flags" uint32_t
-=======
-let _ = field surface_struct "flags" uint32_t
->>>>>>> upstream/master
 let surface_format = field surface_struct "format" pixel_format
 let surface_w = field surface_struct "w" int
 let surface_h = field surface_struct "h" int
@@ -1018,13 +1005,10 @@ let get_surface_format_enum s =
      memory ownership problems. *)
   get_pixel_format_format (getf (!@ s) surface_format)
 
-<<<<<<< HEAD
 (* SAN: I do it anyway *)
 let get_surface_format s =
   getf (!@ s) surface_format
 
-=======
->>>>>>> upstream/master
 let get_surface_pitch s =
   getf (!@ s) surface_pitch
 
@@ -1470,7 +1454,6 @@ let set_render_target r t =
   let t = match t with None -> null | Some t -> t in
   set_render_target r t
 
-<<<<<<< HEAD
 (* SAN *)
 (* Font *)
 module TTF = struct
@@ -1564,8 +1547,6 @@ module Img = struct
       (string @-> returning (some_to_ok surface_opt))
 end
 
-=======
->>>>>>> upstream/master
 (* Textures *)
 
 module Texture = struct
@@ -3361,19 +3342,11 @@ let game_controller_add_mapping =
 let game_controller_add_mapping_from_file =
   foreign "SDL_GameControllerAddMappingsFromFile"
     ~stub (string @-> returning nat_to_ok)
-<<<<<<< HEAD
 
 let game_controller_add_mapping_from_rw =
   foreign "SDL_GameControllerAddMappingsFromRW"
     ~stub (rw_ops @-> bool @-> returning nat_to_ok)
 
-=======
-
-let game_controller_add_mapping_from_rw =
-  foreign "SDL_GameControllerAddMappingsFromRW"
-    ~stub (rw_ops @-> bool @-> returning nat_to_ok)
-
->>>>>>> upstream/master
 let game_controller_close =
   foreign "SDL_GameControllerClose" (game_controller @-> returning void)
 
@@ -4144,17 +4117,10 @@ let register_event () = match Unsigned.UInt32.to_int32 (register_events 1) with
 let wait_event =
   foreign ~release_runtime_lock:true
     "SDL_WaitEvent" (ptr Event.t @-> returning int)
-<<<<<<< HEAD
 
 let wait_event e = match wait_event (Event.opt_addr e) with
 | 1 -> Ok () | _ -> error ()
 
-=======
-
-let wait_event e = match wait_event (Event.opt_addr e) with
-| 1 -> Ok () | _ -> error ()
-
->>>>>>> upstream/master
 let wait_event_timeout =
   foreign "SDL_WaitEventTimeout" ~release_runtime_lock:true
     (ptr Event.t @-> int @-> returning bool)
