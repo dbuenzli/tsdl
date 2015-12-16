@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------
    Copyright (c) 2013 Daniel C. Bünzli. All rights reserved.
    Distributed under the BSD3 license, see license at the end of the file.
-   %%NAME%% release %%VERSION%%
+   tsdl release 0.9.0
   ---------------------------------------------------------------------------*/
 
 #include <errno.h>
@@ -11,10 +11,14 @@
 #include <caml/mlvalues.h>
 #include "SDL.h"
 
+/* SAN */
+#include "SDL_image.h"
+#include "SDL_ttf.h"
+
 void let (FILE *fd, const char *symb)
 {
   int i;
-  fprintf (fd, "let "); 
+  fprintf (fd, "let ");
   for (i = 0; i < strlen(symb); i++) { fprintf (fd, "%c", tolower (symb[i])); }
 }
 
@@ -24,6 +28,9 @@ void str_v (FILE *fd, char *symb, const char *value)
 void int_v (FILE *fd, char *symb, int value)
 { let (fd, symb); fprintf (fd, " = %d\n", value); }
 
+void int_vx (FILE *fd, char *symb, int value)
+{ let (fd, symb); fprintf (fd, " = 0x%X\n", value); }
+
 void int32_v (FILE *fd, char *symb, int32_t value)
 { let (fd, symb); fprintf (fd, " = 0x%Xl\n", value); }
 
@@ -31,26 +38,27 @@ void consts (FILE *fd)
 {
 
 #define int_v(e) int_v(fd, "" # e, (int)e)
+#define int_vx(e) int_vx(fd, "" # e, (int)e)
 #define int32_v(e) int32_v(fd, "" # e, (int32_t)e)
 #define str_v(e) str_v(fd, "" # e, (const char *)e)
 
   /* Check that a C int is 32 bits. We rely on that when we pass
      arrays of Point or Rect structs as bigarrays (e.g. see
      Sdl.enclose_points_ba */
-     
+
   assert(sizeof(int) == 4);
 
   /* Init */
-  
+
   int_v (SDL_INIT_TIMER);
-  int_v (SDL_INIT_AUDIO); 
-  int_v (SDL_INIT_VIDEO); 
-  int_v (SDL_INIT_JOYSTICK); 
-  int_v (SDL_INIT_HAPTIC); 
-  int_v (SDL_INIT_GAMECONTROLLER); 
-  int_v (SDL_INIT_EVENTS); 
-  int_v (SDL_INIT_EVERYTHING); 
-  int_v (SDL_INIT_NOPARACHUTE); 
+  int_v (SDL_INIT_AUDIO);
+  int_v (SDL_INIT_VIDEO);
+  int_v (SDL_INIT_JOYSTICK);
+  int_v (SDL_INIT_HAPTIC);
+  int_v (SDL_INIT_GAMECONTROLLER);
+  int_v (SDL_INIT_EVENTS);
+  int_v (SDL_INIT_EVERYTHING);
+  int_v (SDL_INIT_NOPARACHUTE);
 
   /* Hint */
 
@@ -61,7 +69,7 @@ void consts (FILE *fd)
   str_v (SDL_HINT_RENDER_OPENGL_SHADERS);
   str_v (SDL_HINT_RENDER_SCALE_QUALITY);
   str_v (SDL_HINT_RENDER_VSYNC);
-  
+
   int_v (SDL_HINT_DEFAULT);
   int_v (SDL_HINT_NORMAL);
   int_v (SDL_HINT_OVERRIDE);
@@ -133,13 +141,29 @@ void consts (FILE *fd)
 
   int_v (SDL_RLEACCEL);
 
+  /* SAN */
+  /* Images */
+
+  int_v (IMG_INIT_JPG);
+  int_v (IMG_INIT_PNG);
+  int_v (IMG_INIT_TIF);
+  int_v (IMG_INIT_WEBP);
+
+  /* SAN */
+  /* TTF */
+
+  int_v (TTF_STYLE_NORMAL);
+  int_v (TTF_STYLE_BOLD);
+  int_v (TTF_STYLE_ITALIC);
+  int_v (TTF_STYLE_UNDERLINE);
+  int_v (TTF_STYLE_STRIKETHROUGH);
 
   /* Renderer */ 
 
   int_v (SDL_FLIP_NONE);
   int_v (SDL_FLIP_HORIZONTAL);
   int_v (SDL_FLIP_VERTICAL);
-   
+
   int_v (SDL_RENDERER_SOFTWARE);
   int_v (SDL_RENDERER_ACCELERATED);
   int_v (SDL_RENDERER_PRESENTVSYNC);
@@ -220,7 +244,7 @@ void consts (FILE *fd)
 
   int_v (SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT);
   int_v (SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT);
-  
+
   int_v (SDL_MESSAGEBOX_COLOR_BACKGROUND);
   int_v (SDL_MESSAGEBOX_COLOR_TEXT);
   int_v (SDL_MESSAGEBOX_COLOR_BUTTON_BORDER);
@@ -475,261 +499,261 @@ void consts (FILE *fd)
   int_v (SDL_SCANCODE_APP2);
   int_v (SDL_NUM_SCANCODES);
 
-  int_v (SDLK_SCANCODE_MASK);
-  int_v (SDLK_UNKNOWN);
-  int_v (SDLK_RETURN);
-  int_v (SDLK_ESCAPE);
-  int_v (SDLK_BACKSPACE);
-  int_v (SDLK_TAB);
-  int_v (SDLK_SPACE);
-  int_v (SDLK_EXCLAIM);
-  int_v (SDLK_QUOTEDBL);
-  int_v (SDLK_HASH);
-  int_v (SDLK_PERCENT);
-  int_v (SDLK_DOLLAR);
-  int_v (SDLK_AMPERSAND);
-  int_v (SDLK_QUOTE);
-  int_v (SDLK_LEFTPAREN);
-  int_v (SDLK_RIGHTPAREN);
-  int_v (SDLK_ASTERISK);
-  int_v (SDLK_PLUS);
-  int_v (SDLK_COMMA);
-  int_v (SDLK_MINUS);
-  int_v (SDLK_PERIOD);
-  int_v (SDLK_SLASH);
-  int_v (SDLK_0);
-  int_v (SDLK_1);
-  int_v (SDLK_2);
-  int_v (SDLK_3);
-  int_v (SDLK_4);
-  int_v (SDLK_5);
-  int_v (SDLK_6);
-  int_v (SDLK_7);
-  int_v (SDLK_8);
-  int_v (SDLK_9);
-  int_v (SDLK_COLON);
-  int_v (SDLK_SEMICOLON);
-  int_v (SDLK_LESS);
-  int_v (SDLK_EQUALS);
-  int_v (SDLK_GREATER);
-  int_v (SDLK_QUESTION);
-  int_v (SDLK_AT);
-  int_v (SDLK_LEFTBRACKET);
-  int_v (SDLK_BACKSLASH);
-  int_v (SDLK_RIGHTBRACKET);
-  int_v (SDLK_CARET);
-  int_v (SDLK_UNDERSCORE);
-  int_v (SDLK_BACKQUOTE);
-  int_v (SDLK_a);
-  int_v (SDLK_b);
-  int_v (SDLK_c);
-  int_v (SDLK_d);
-  int_v (SDLK_e);
-  int_v (SDLK_f);
-  int_v (SDLK_g);
-  int_v (SDLK_h);
-  int_v (SDLK_i);
-  int_v (SDLK_j);
-  int_v (SDLK_k);
-  int_v (SDLK_l);
-  int_v (SDLK_m);
-  int_v (SDLK_n);
-  int_v (SDLK_o);
-  int_v (SDLK_p);
-  int_v (SDLK_q);
-  int_v (SDLK_r);
-  int_v (SDLK_s);
-  int_v (SDLK_t);
-  int_v (SDLK_u);
-  int_v (SDLK_v);
-  int_v (SDLK_w);
-  int_v (SDLK_x);
-  int_v (SDLK_y);
-  int_v (SDLK_z);
-  int_v (SDLK_CAPSLOCK);
-  int_v (SDLK_F1);
-  int_v (SDLK_F2);
-  int_v (SDLK_F3);
-  int_v (SDLK_F4);
-  int_v (SDLK_F5);
-  int_v (SDLK_F6);
-  int_v (SDLK_F7);
-  int_v (SDLK_F8);
-  int_v (SDLK_F9);
-  int_v (SDLK_F10);
-  int_v (SDLK_F11);
-  int_v (SDLK_F12);
-  int_v (SDLK_PRINTSCREEN);
-  int_v (SDLK_SCROLLLOCK);
-  int_v (SDLK_PAUSE);
-  int_v (SDLK_INSERT);
-  int_v (SDLK_HOME);
-  int_v (SDLK_PAGEUP);
-  int_v (SDLK_DELETE);
-  int_v (SDLK_END);
-  int_v (SDLK_PAGEDOWN);
-  int_v (SDLK_RIGHT);
-  int_v (SDLK_LEFT);
-  int_v (SDLK_DOWN);
-  int_v (SDLK_UP);
-  int_v (SDLK_NUMLOCKCLEAR);
-  int_v (SDLK_KP_DIVIDE);
-  int_v (SDLK_KP_MULTIPLY);
-  int_v (SDLK_KP_MINUS);
-  int_v (SDLK_KP_PLUS);
-  int_v (SDLK_KP_ENTER);
-  int_v (SDLK_KP_1);
-  int_v (SDLK_KP_2);
-  int_v (SDLK_KP_3);
-  int_v (SDLK_KP_4);
-  int_v (SDLK_KP_5);
-  int_v (SDLK_KP_6);
-  int_v (SDLK_KP_7);
-  int_v (SDLK_KP_8);
-  int_v (SDLK_KP_9);
-  int_v (SDLK_KP_0);
-  int_v (SDLK_KP_PERIOD);
-  int_v (SDLK_APPLICATION);
-  int_v (SDLK_POWER);
-  int_v (SDLK_KP_EQUALS);
-  int_v (SDLK_F13);
-  int_v (SDLK_F14);
-  int_v (SDLK_F15);
-  int_v (SDLK_F16);
-  int_v (SDLK_F17);
-  int_v (SDLK_F18);
-  int_v (SDLK_F19);
-  int_v (SDLK_F20);
-  int_v (SDLK_F21);
-  int_v (SDLK_F22);
-  int_v (SDLK_F23);
-  int_v (SDLK_F24);
-  int_v (SDLK_EXECUTE);
-  int_v (SDLK_HELP);
-  int_v (SDLK_MENU);
-  int_v (SDLK_SELECT);
-  int_v (SDLK_STOP);
-  int_v (SDLK_AGAIN);
-  int_v (SDLK_UNDO);
-  int_v (SDLK_CUT);
-  int_v (SDLK_COPY);
-  int_v (SDLK_PASTE);
-  int_v (SDLK_FIND);
-  int_v (SDLK_MUTE);
-  int_v (SDLK_VOLUMEUP);
-  int_v (SDLK_VOLUMEDOWN);
-  int_v (SDLK_KP_COMMA);
-  int_v (SDLK_KP_EQUALSAS400);
-  int_v (SDLK_ALTERASE);
-  int_v (SDLK_SYSREQ);
-  int_v (SDLK_CANCEL);
-  int_v (SDLK_CLEAR);
-  int_v (SDLK_PRIOR);
-  int_v (SDLK_RETURN2);
-  int_v (SDLK_SEPARATOR);
-  int_v (SDLK_OUT);
-  int_v (SDLK_OPER);
-  int_v (SDLK_CLEARAGAIN);
-  int_v (SDLK_CRSEL);
-  int_v (SDLK_EXSEL);
-  int_v (SDLK_KP_00);
-  int_v (SDLK_KP_000);
-  int_v (SDLK_THOUSANDSSEPARATOR);
-  int_v (SDLK_DECIMALSEPARATOR);
-  int_v (SDLK_CURRENCYUNIT);
-  int_v (SDLK_CURRENCYSUBUNIT);
-  int_v (SDLK_KP_LEFTPAREN);
-  int_v (SDLK_KP_RIGHTPAREN);
-  int_v (SDLK_KP_LEFTBRACE);
-  int_v (SDLK_KP_RIGHTBRACE);
-  int_v (SDLK_KP_TAB);
-  int_v (SDLK_KP_BACKSPACE);
-  int_v (SDLK_KP_A);
-  int_v (SDLK_KP_B);
-  int_v (SDLK_KP_C);
-  int_v (SDLK_KP_D);
-  int_v (SDLK_KP_E);
-  int_v (SDLK_KP_F);
-  int_v (SDLK_KP_XOR);
-  int_v (SDLK_KP_POWER);
-  int_v (SDLK_KP_PERCENT);
-  int_v (SDLK_KP_LESS);
-  int_v (SDLK_KP_GREATER);
-  int_v (SDLK_KP_AMPERSAND);
-  int_v (SDLK_KP_DBLAMPERSAND);
-  int_v (SDLK_KP_VERTICALBAR);
-  int_v (SDLK_KP_DBLVERTICALBAR);
-  int_v (SDLK_KP_COLON);
-  int_v (SDLK_KP_HASH);
-  int_v (SDLK_KP_SPACE);
-  int_v (SDLK_KP_AT);
-  int_v (SDLK_KP_EXCLAM);
-  int_v (SDLK_KP_MEMSTORE);
-  int_v (SDLK_KP_MEMRECALL);
-  int_v (SDLK_KP_MEMCLEAR);
-  int_v (SDLK_KP_MEMADD);
-  int_v (SDLK_KP_MEMSUBTRACT);
-  int_v (SDLK_KP_MEMMULTIPLY);
-  int_v (SDLK_KP_MEMDIVIDE);
-  int_v (SDLK_KP_PLUSMINUS);
-  int_v (SDLK_KP_CLEAR);
-  int_v (SDLK_KP_CLEARENTRY);
-  int_v (SDLK_KP_BINARY);
-  int_v (SDLK_KP_OCTAL);
-  int_v (SDLK_KP_DECIMAL);
-  int_v (SDLK_KP_HEXADECIMAL);
-  int_v (SDLK_LCTRL);
-  int_v (SDLK_LSHIFT);
-  int_v (SDLK_LALT);
-  int_v (SDLK_LGUI);
-  int_v (SDLK_RCTRL);
-  int_v (SDLK_RSHIFT);
-  int_v (SDLK_RALT);
-  int_v (SDLK_RGUI);
-  int_v (SDLK_MODE);
-  int_v (SDLK_AUDIONEXT);
-  int_v (SDLK_AUDIOPREV);
-  int_v (SDLK_AUDIOSTOP);
-  int_v (SDLK_AUDIOPLAY);
-  int_v (SDLK_AUDIOMUTE);
-  int_v (SDLK_MEDIASELECT);
-  int_v (SDLK_WWW);
-  int_v (SDLK_MAIL);
-  int_v (SDLK_CALCULATOR);
-  int_v (SDLK_COMPUTER);
-  int_v (SDLK_AC_SEARCH);
-  int_v (SDLK_AC_HOME);
-  int_v (SDLK_AC_BACK);
-  int_v (SDLK_AC_FORWARD);
-  int_v (SDLK_AC_STOP);
-  int_v (SDLK_AC_REFRESH);
-  int_v (SDLK_AC_BOOKMARKS);
-  int_v (SDLK_BRIGHTNESSDOWN);
-  int_v (SDLK_BRIGHTNESSUP);
-  int_v (SDLK_DISPLAYSWITCH);
-  int_v (SDLK_KBDILLUMTOGGLE);
-  int_v (SDLK_KBDILLUMDOWN);
-  int_v (SDLK_KBDILLUMUP);
-  int_v (SDLK_EJECT);
-  int_v (SDLK_SLEEP);
+  int_vx (SDLK_SCANCODE_MASK);
+  int_vx (SDLK_UNKNOWN);
+  int_vx (SDLK_RETURN);
+  int_vx (SDLK_ESCAPE);
+  int_vx (SDLK_BACKSPACE);
+  int_vx (SDLK_TAB);
+  int_vx (SDLK_SPACE);
+  int_vx (SDLK_EXCLAIM);
+  int_vx (SDLK_QUOTEDBL);
+  int_vx (SDLK_HASH);
+  int_vx (SDLK_PERCENT);
+  int_vx (SDLK_DOLLAR);
+  int_vx (SDLK_AMPERSAND);
+  int_vx (SDLK_QUOTE);
+  int_vx (SDLK_LEFTPAREN);
+  int_vx (SDLK_RIGHTPAREN);
+  int_vx (SDLK_ASTERISK);
+  int_vx (SDLK_PLUS);
+  int_vx (SDLK_COMMA);
+  int_vx (SDLK_MINUS);
+  int_vx (SDLK_PERIOD);
+  int_vx (SDLK_SLASH);
+  int_vx (SDLK_0);
+  int_vx (SDLK_1);
+  int_vx (SDLK_2);
+  int_vx (SDLK_3);
+  int_vx (SDLK_4);
+  int_vx (SDLK_5);
+  int_vx (SDLK_6);
+  int_vx (SDLK_7);
+  int_vx (SDLK_8);
+  int_vx (SDLK_9);
+  int_vx (SDLK_COLON);
+  int_vx (SDLK_SEMICOLON);
+  int_vx (SDLK_LESS);
+  int_vx (SDLK_EQUALS);
+  int_vx (SDLK_GREATER);
+  int_vx (SDLK_QUESTION);
+  int_vx (SDLK_AT);
+  int_vx (SDLK_LEFTBRACKET);
+  int_vx (SDLK_BACKSLASH);
+  int_vx (SDLK_RIGHTBRACKET);
+  int_vx (SDLK_CARET);
+  int_vx (SDLK_UNDERSCORE);
+  int_vx (SDLK_BACKQUOTE);
+  int_vx (SDLK_a);
+  int_vx (SDLK_b);
+  int_vx (SDLK_c);
+  int_vx (SDLK_d);
+  int_vx (SDLK_e);
+  int_vx (SDLK_f);
+  int_vx (SDLK_g);
+  int_vx (SDLK_h);
+  int_vx (SDLK_i);
+  int_vx (SDLK_j);
+  int_vx (SDLK_k);
+  int_vx (SDLK_l);
+  int_vx (SDLK_m);
+  int_vx (SDLK_n);
+  int_vx (SDLK_o);
+  int_vx (SDLK_p);
+  int_vx (SDLK_q);
+  int_vx (SDLK_r);
+  int_vx (SDLK_s);
+  int_vx (SDLK_t);
+  int_vx (SDLK_u);
+  int_vx (SDLK_v);
+  int_vx (SDLK_w);
+  int_vx (SDLK_x);
+  int_vx (SDLK_y);
+  int_vx (SDLK_z);
+  int_vx (SDLK_CAPSLOCK);
+  int_vx (SDLK_F1);
+  int_vx (SDLK_F2);
+  int_vx (SDLK_F3);
+  int_vx (SDLK_F4);
+  int_vx (SDLK_F5);
+  int_vx (SDLK_F6);
+  int_vx (SDLK_F7);
+  int_vx (SDLK_F8);
+  int_vx (SDLK_F9);
+  int_vx (SDLK_F10);
+  int_vx (SDLK_F11);
+  int_vx (SDLK_F12);
+  int_vx (SDLK_PRINTSCREEN);
+  int_vx (SDLK_SCROLLLOCK);
+  int_vx (SDLK_PAUSE);
+  int_vx (SDLK_INSERT);
+  int_vx (SDLK_HOME);
+  int_vx (SDLK_PAGEUP);
+  int_vx (SDLK_DELETE);
+  int_vx (SDLK_END);
+  int_vx (SDLK_PAGEDOWN);
+  int_vx (SDLK_RIGHT);
+  int_vx (SDLK_LEFT);
+  int_vx (SDLK_DOWN);
+  int_vx (SDLK_UP);
+  int_vx (SDLK_NUMLOCKCLEAR);
+  int_vx (SDLK_KP_DIVIDE);
+  int_vx (SDLK_KP_MULTIPLY);
+  int_vx (SDLK_KP_MINUS);
+  int_vx (SDLK_KP_PLUS);
+  int_vx (SDLK_KP_ENTER);
+  int_vx (SDLK_KP_1);
+  int_vx (SDLK_KP_2);
+  int_vx (SDLK_KP_3);
+  int_vx (SDLK_KP_4);
+  int_vx (SDLK_KP_5);
+  int_vx (SDLK_KP_6);
+  int_vx (SDLK_KP_7);
+  int_vx (SDLK_KP_8);
+  int_vx (SDLK_KP_9);
+  int_vx (SDLK_KP_0);
+  int_vx (SDLK_KP_PERIOD);
+  int_vx (SDLK_APPLICATION);
+  int_vx (SDLK_POWER);
+  int_vx (SDLK_KP_EQUALS);
+  int_vx (SDLK_F13);
+  int_vx (SDLK_F14);
+  int_vx (SDLK_F15);
+  int_vx (SDLK_F16);
+  int_vx (SDLK_F17);
+  int_vx (SDLK_F18);
+  int_vx (SDLK_F19);
+  int_vx (SDLK_F20);
+  int_vx (SDLK_F21);
+  int_vx (SDLK_F22);
+  int_vx (SDLK_F23);
+  int_vx (SDLK_F24);
+  int_vx (SDLK_EXECUTE);
+  int_vx (SDLK_HELP);
+  int_vx (SDLK_MENU);
+  int_vx (SDLK_SELECT);
+  int_vx (SDLK_STOP);
+  int_vx (SDLK_AGAIN);
+  int_vx (SDLK_UNDO);
+  int_vx (SDLK_CUT);
+  int_vx (SDLK_COPY);
+  int_vx (SDLK_PASTE);
+  int_vx (SDLK_FIND);
+  int_vx (SDLK_MUTE);
+  int_vx (SDLK_VOLUMEUP);
+  int_vx (SDLK_VOLUMEDOWN);
+  int_vx (SDLK_KP_COMMA);
+  int_vx (SDLK_KP_EQUALSAS400);
+  int_vx (SDLK_ALTERASE);
+  int_vx (SDLK_SYSREQ);
+  int_vx (SDLK_CANCEL);
+  int_vx (SDLK_CLEAR);
+  int_vx (SDLK_PRIOR);
+  int_vx (SDLK_RETURN2);
+  int_vx (SDLK_SEPARATOR);
+  int_vx (SDLK_OUT);
+  int_vx (SDLK_OPER);
+  int_vx (SDLK_CLEARAGAIN);
+  int_vx (SDLK_CRSEL);
+  int_vx (SDLK_EXSEL);
+  int_vx (SDLK_KP_00);
+  int_vx (SDLK_KP_000);
+  int_vx (SDLK_THOUSANDSSEPARATOR);
+  int_vx (SDLK_DECIMALSEPARATOR);
+  int_vx (SDLK_CURRENCYUNIT);
+  int_vx (SDLK_CURRENCYSUBUNIT);
+  int_vx (SDLK_KP_LEFTPAREN);
+  int_vx (SDLK_KP_RIGHTPAREN);
+  int_vx (SDLK_KP_LEFTBRACE);
+  int_vx (SDLK_KP_RIGHTBRACE);
+  int_vx (SDLK_KP_TAB);
+  int_vx (SDLK_KP_BACKSPACE);
+  int_vx (SDLK_KP_A);
+  int_vx (SDLK_KP_B);
+  int_vx (SDLK_KP_C);
+  int_vx (SDLK_KP_D);
+  int_vx (SDLK_KP_E);
+  int_vx (SDLK_KP_F);
+  int_vx (SDLK_KP_XOR);
+  int_vx (SDLK_KP_POWER);
+  int_vx (SDLK_KP_PERCENT);
+  int_vx (SDLK_KP_LESS);
+  int_vx (SDLK_KP_GREATER);
+  int_vx (SDLK_KP_AMPERSAND);
+  int_vx (SDLK_KP_DBLAMPERSAND);
+  int_vx (SDLK_KP_VERTICALBAR);
+  int_vx (SDLK_KP_DBLVERTICALBAR);
+  int_vx (SDLK_KP_COLON);
+  int_vx (SDLK_KP_HASH);
+  int_vx (SDLK_KP_SPACE);
+  int_vx (SDLK_KP_AT);
+  int_vx (SDLK_KP_EXCLAM);
+  int_vx (SDLK_KP_MEMSTORE);
+  int_vx (SDLK_KP_MEMRECALL);
+  int_vx (SDLK_KP_MEMCLEAR);
+  int_vx (SDLK_KP_MEMADD);
+  int_vx (SDLK_KP_MEMSUBTRACT);
+  int_vx (SDLK_KP_MEMMULTIPLY);
+  int_vx (SDLK_KP_MEMDIVIDE);
+  int_vx (SDLK_KP_PLUSMINUS);
+  int_vx (SDLK_KP_CLEAR);
+  int_vx (SDLK_KP_CLEARENTRY);
+  int_vx (SDLK_KP_BINARY);
+  int_vx (SDLK_KP_OCTAL);
+  int_vx (SDLK_KP_DECIMAL);
+  int_vx (SDLK_KP_HEXADECIMAL);
+  int_vx (SDLK_LCTRL);
+  int_vx (SDLK_LSHIFT);
+  int_vx (SDLK_LALT);
+  int_vx (SDLK_LGUI);
+  int_vx (SDLK_RCTRL);
+  int_vx (SDLK_RSHIFT);
+  int_vx (SDLK_RALT);
+  int_vx (SDLK_RGUI);
+  int_vx (SDLK_MODE);
+  int_vx (SDLK_AUDIONEXT);
+  int_vx (SDLK_AUDIOPREV);
+  int_vx (SDLK_AUDIOSTOP);
+  int_vx (SDLK_AUDIOPLAY);
+  int_vx (SDLK_AUDIOMUTE);
+  int_vx (SDLK_MEDIASELECT);
+  int_vx (SDLK_WWW);
+  int_vx (SDLK_MAIL);
+  int_vx (SDLK_CALCULATOR);
+  int_vx (SDLK_COMPUTER);
+  int_vx (SDLK_AC_SEARCH);
+  int_vx (SDLK_AC_HOME);
+  int_vx (SDLK_AC_BACK);
+  int_vx (SDLK_AC_FORWARD);
+  int_vx (SDLK_AC_STOP);
+  int_vx (SDLK_AC_REFRESH);
+  int_vx (SDLK_AC_BOOKMARKS);
+  int_vx (SDLK_BRIGHTNESSDOWN);
+  int_vx (SDLK_BRIGHTNESSUP);
+  int_vx (SDLK_DISPLAYSWITCH);
+  int_vx (SDLK_KBDILLUMTOGGLE);
+  int_vx (SDLK_KBDILLUMDOWN);
+  int_vx (SDLK_KBDILLUMUP);
+  int_vx (SDLK_EJECT);
+  int_vx (SDLK_SLEEP);
 
-  int_v (KMOD_NONE);
-  int_v (KMOD_LSHIFT);
-  int_v (KMOD_RSHIFT);
-  int_v (KMOD_LCTRL);
-  int_v (KMOD_RCTRL);
-  int_v (KMOD_LALT);
-  int_v (KMOD_RALT);
-  int_v (KMOD_LGUI);
-  int_v (KMOD_RGUI);
-  int_v (KMOD_NUM);
-  int_v (KMOD_CAPS);
-  int_v (KMOD_MODE);
-  int_v (KMOD_RESERVED);
-  int_v (KMOD_CTRL);
-  int_v (KMOD_SHIFT);
-  int_v (KMOD_ALT);
-  int_v (KMOD_GUI);
+  int_vx (KMOD_NONE);
+  int_vx (KMOD_LSHIFT);
+  int_vx (KMOD_RSHIFT);
+  int_vx (KMOD_LCTRL);
+  int_vx (KMOD_RCTRL);
+  int_vx (KMOD_LALT);
+  int_vx (KMOD_RALT);
+  int_vx (KMOD_LGUI);
+  int_vx (KMOD_RGUI);
+  int_vx (KMOD_NUM);
+  int_vx (KMOD_CAPS);
+  int_vx (KMOD_MODE);
+  int_vx (KMOD_RESERVED);
+  int_vx (KMOD_CTRL);
+  int_vx (KMOD_SHIFT);
+  int_vx (KMOD_ALT);
+  int_vx (KMOD_GUI);
 
   /* Mouse */
 
@@ -758,12 +782,12 @@ void consts (FILE *fd)
   int_v (SDL_BUTTON_X1MASK);
   int_v (SDL_BUTTON_X2MASK);
 
-  /* Touch */ 
+  /* Touch */
 
-  int_v (SDL_TOUCH_MOUSEID);
+  int32_v (SDL_TOUCH_MOUSEID);
 
-  /* Joystick */ 
-  
+  /* Joystick */
+
   int_v (SDL_HAT_CENTERED);
   int_v (SDL_HAT_UP);
   int_v (SDL_HAT_RIGHT);
@@ -780,7 +804,7 @@ void consts (FILE *fd)
   int_v (SDL_CONTROLLER_BINDTYPE_BUTTON);
   int_v (SDL_CONTROLLER_BINDTYPE_AXIS);
   int_v (SDL_CONTROLLER_BINDTYPE_HAT);
-  
+
   int_v (SDL_CONTROLLER_AXIS_INVALID);
   int_v (SDL_CONTROLLER_AXIS_LEFTX);
   int_v (SDL_CONTROLLER_AXIS_LEFTY);
@@ -789,7 +813,7 @@ void consts (FILE *fd)
   int_v (SDL_CONTROLLER_AXIS_TRIGGERLEFT);
   int_v (SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
   int_v (SDL_CONTROLLER_AXIS_MAX);
-  
+
   int_v (SDL_CONTROLLER_BUTTON_INVALID);
   int_v (SDL_CONTROLLER_BUTTON_A);
   int_v (SDL_CONTROLLER_BUTTON_B);
@@ -807,14 +831,14 @@ void consts (FILE *fd)
   int_v (SDL_CONTROLLER_BUTTON_DPAD_LEFT);
   int_v (SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
   int_v (SDL_CONTROLLER_BUTTON_MAX);
-    
+
   assert (sizeof(SDL_GameControllerButtonBind) == 12);
 
-  /* Event */ 
+  /* Event */
 
   int_v (SDL_QUERY);
-  int_v (SDL_DISABLE); 
-  int_v (SDL_ENABLE); 
+  int_v (SDL_DISABLE);
+  int_v (SDL_ENABLE);
   int_v (SDL_PRESSED);
   int_v (SDL_RELEASED);
 
@@ -860,14 +884,14 @@ void consts (FILE *fd)
   int_v (SDL_USEREVENT);
   int_v (SDL_LASTEVENT);
 
-  int tsdl_sdl_event_size = sizeof (SDL_Event); 
+  int tsdl_sdl_event_size = sizeof (SDL_Event);
   int_v (tsdl_sdl_event_size);
 
   int_v (SDL_TEXTEDITINGEVENT_TEXT_SIZE);
   int_v (SDL_TEXTINPUTEVENT_TEXT_SIZE);
 
   /* SDL_WindowEventID */
-  
+
   int_v (SDL_WINDOWEVENT_SHOWN);
   int_v (SDL_WINDOWEVENT_HIDDEN);
   int_v (SDL_WINDOWEVENT_EXPOSED);
@@ -958,11 +982,11 @@ CAMLprim value output_consts (value fname)
   FILE *fd;
   if (strlen(outf) == 0) { fd = stdout; }
   else
-    { 
+    {
       fd = fopen (outf, "w");
       if (!fd) { perror(outf); exit (1); }
     }
-  
+
   consts(fd);
   fflush(fd);
   if (fd != stdout) { fclose (fd); }
@@ -976,7 +1000,7 @@ CAMLprim value output_consts (value fname)
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-     
+
    1. Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
 

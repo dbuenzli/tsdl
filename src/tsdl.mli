@@ -1,7 +1,7 @@
 (*---------------------------------------------------------------------------
    Copyright 2013 Daniel C. Bünzli. All rights reserved.
    Distributed under the BSD3 license, see license at the end of the file.
-   %%NAME%% release %%VERSION%%
+   tsdl release 0.9.0
   ---------------------------------------------------------------------------*)
 
 (** SDL thin bindings.
@@ -21,7 +21,7 @@
     {ul
     {- {{:http://wiki.libsdl.org/APIByCategory}SDL API}}}
 
-    {e Release %%VERSION%% — SDL version %%SDLVERSION%% — %%MAINTAINER%% } *)
+    {e Release 0.9.0 — SDL version 2.0.3 — Daniel Bünzli <daniel.buenzl i\@erratique.ch> } *)
 
 (** {1:sdl SDL} *)
 
@@ -90,8 +90,8 @@ type uint64 = int64
 type ('a, 'b) bigarray = ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
 (** The type for bigarrays.*)
 
-type 'a result = [ `Ok of 'a | `Error of string ]
-(** The type for function results. In the [`Error] case,
+type 'a result = ('a, [ `Msg of string ]) Result.result
+(** The type for function results. In the error case,
     the string is what {!Sdl.get_error} returned. *)
 
 (** {1:basics Basics} *)
@@ -121,6 +121,8 @@ module Init : sig
   val events : t
   val everything : t
   val noparachute : t
+  (* SAN: *)
+  val zero : t
 end
 (** Subsystem flags. *)
 
@@ -299,6 +301,11 @@ val rw_from_file : string -> string -> rw_ops result
 val rw_close : rw_ops -> unit result
 (** {{:https://wiki.libsdl.org/SDL_RWclose}SDL_RWclose} *)
 
+(**/**)
+val unsafe_rw_ops_of_ptr : nativeint -> rw_ops
+val unsafe_ptr_of_rw_ops : rw_ops -> nativeint
+(**/**)
+
 (** {1:fspaths {{:https://wiki.libsdl.org/CategoryFilesystem}Filesystem
     Paths}} *)
 
@@ -313,6 +320,11 @@ val get_pref_path : org:string -> app:string -> string result
 type window
 (** SDL_Window *)
 
+(**/**)
+val unsafe_window_of_ptr : nativeint -> window
+val unsafe_ptr_of_window : window -> nativeint
+(**/**)
+
 (** {2:colors Colors} *)
 
 type color
@@ -324,6 +336,10 @@ module Color : sig
   val g : color -> uint8
   val b : color -> uint8
   val a : color -> uint8
+  val set_r : color -> uint8 -> unit
+  val set_g : color -> uint8 -> unit
+  val set_b : color -> uint8 -> unit
+  val set_a : color -> uint8 -> unit
 end
 
 (** {2:points Points} *)
@@ -335,6 +351,8 @@ module Point : sig
   val create : x:int -> y:int -> point
   val x : point -> int
   val y : point -> int
+  val set_x : point -> int -> unit
+  val set_y : point -> int -> unit
 end
 
 (** {2:rectangles
@@ -349,6 +367,10 @@ module Rect : sig
   val y : rect -> int
   val w : rect -> int
   val h : rect -> int
+  val set_x : rect -> int -> unit
+  val set_y : rect -> int -> unit
+  val set_w : rect -> int -> unit
+  val set_h : rect -> int -> unit
 end
 
 val enclose_points : ?clip:rect -> point list -> rect option
@@ -417,6 +439,11 @@ val set_palette_colors_ba : palette ->
     color. The data is copied.
     @raise Invalid_argument if the length of the array is not
     a multiple of 4. *)
+
+(**/**)
+val unsafe_palette_of_ptr : nativeint -> palette
+val unsafe_ptr_of_palette : palette -> nativeint
+(**/**)
 
 (** {2:pixel_formats {{:http://wiki.libsdl.org/CategoryPixels}Pixels
     formats}} *)
@@ -531,6 +558,11 @@ val set_pixel_format_palette : pixel_format -> palette -> unit result
     {b Note} If you allocated the palette with {!alloc_palette} you
     can {!free_palette} after. *)
 
+(**/**)
+val unsafe_pixel_format_of_ptr : nativeint -> pixel_format
+val unsafe_ptr_of_pixel_format : pixel_format -> nativeint
+(**/**)
+
 (** {2:surfaces
     {{:http://wiki.libsdl.org/CategorySurface}Surface}} *)
 
@@ -541,7 +573,8 @@ val blit_scaled : src:surface -> rect -> dst:surface -> rect option ->
   unit result
 (** {{:http://wiki.libsdl.org/SDL_BlitScaled}SDL_BlitScaled} *)
 
-val blit_surface : src:surface -> rect -> dst:surface -> rect -> unit result
+val blit_surface : src:surface -> rect option -> dst:surface -> rect ->
+  unit result
 (** {{:http://wiki.libsdl.org/SDL_BlitSurface}SDL_BlitSurface} *)
 
 val convert_pixels : w:int -> h:int -> src:Pixel.format_enum ->
@@ -688,6 +721,11 @@ val unlock_surface : surface -> unit
 
 val must_lock : surface -> bool
 
+(**/**)
+val unsafe_surface_of_ptr : nativeint -> surface
+val unsafe_ptr_of_surface : surface -> nativeint
+(**/**)
+
 (** {2:renderers {{:http://wiki.libsdl.org/CategoryRender}Renderers}} *)
 
 type flip
@@ -705,7 +743,18 @@ end
 type texture
 (** SDL_Texture *)
 
+(**/**)
+val unsafe_texture_of_ptr : nativeint -> texture
+val unsafe_ptr_of_texture : texture -> nativeint
+(**/**)
+
 type renderer
+
+(**/**)
+val unsafe_renderer_of_ptr : nativeint -> renderer
+val unsafe_ptr_of_renderer : renderer -> nativeint
+(**/**)
+
 (** SDL_Renderer *)
 
 module Renderer : sig
@@ -911,13 +960,33 @@ module TTF : sig
     font -> string -> color -> surface result
   val size_utf8 :
     font -> string -> (int * int) result
+  val font_line_skip :
+    font -> int
   val glyph_metrics :
     font -> int -> (int * int * int * int * int) result
+  type style
+  module Style : sig
+    val ( + ) : style -> style -> style
+    val normal : style
+    val bold : style
+    val italic : style
+    val underline : style
+    val strikethrough : style
+    val has : style -> style -> bool
+  end
+   val set_font_style : font -> style -> unit
+   val get_font_style : font -> style
 end
 
 (** {2:images --  {{:http://jcatki.no-ip.org:8080/SDL_image/SDL_image.html}sdl-image}} *)
 
 module Img : sig
+  val init_jpg : int
+  val init_png : int
+  val init_tif : int
+  val ( + ) : int -> int -> int
+  val init : int -> int
+  val quit : unit -> unit
   val load : string -> surface result
   (** {{:http://jcatki.no-ip.org:8080/SDL_image/SDL_image_11.html#SEC11}IMG_Load} *)
 end
@@ -1250,6 +1319,12 @@ val update_window_surface_rects_ba : window ->
 (** {2:opengl {{:http://wiki.libsdl.org/CategoryVideo}OpenGL contexts}} *)
 
 type gl_context
+
+(**/**)
+val unsafe_gl_context_of_ptr : nativeint -> gl_context
+val unsafe_ptr_of_gl_context : gl_context -> nativeint
+(**/**)
+
 (** SDL_GLContext *)
 
 module Gl : sig
@@ -1339,6 +1414,10 @@ val gl_set_swap_interval : int -> unit result
 
 val gl_swap_window : window -> unit
 (** {{:http://wiki.libsdl.org/SDL_GL_SwapWindow}SDL_GL_SwapWindow} *)
+
+val gl_reset_attributes : unit -> unit
+(** {{:http://wiki.libsdl.org/SDL_GL_ResetAttributes}SDL_GL_ResetAttributes}
+    (SDL 2.0.2). *)
 
 val gl_unbind_texture : texture -> unit result
 (** {{:http://wiki.libsdl.org/SDL_GL_UnbindTexture}SDL_GL_UnbindTexture}
@@ -2047,6 +2126,12 @@ val stop_text_input : unit -> unit
 (** {2:mouse {{:http://wiki.libsdl.org/CategoryMouse}Mouse}} *)
 
 type cursor
+
+(**/**)
+val unsafe_cursor_of_ptr : nativeint -> cursor
+val unsafe_ptr_of_cursor : cursor -> nativeint
+(**/**)
+
 (** SDL_Cursor *)
 
 module System_cursor : sig
@@ -2190,6 +2275,12 @@ type joystick_id = int32
 (** SDL_JoystickID *)
 
 type joystick
+
+(**/**)
+val unsafe_joystick_of_ptr : nativeint -> joystick
+val unsafe_ptr_of_joystick : joystick -> nativeint
+(**/**)
+
 (** SDL_Joystick *)
 
 module Hat : sig
@@ -2282,6 +2373,12 @@ val num_joysticks : unit -> int result
   {{:http://wiki.libsdl.org/CategoryGameController}Game controller}} *)
 
 type game_controller
+
+(**/**)
+val unsafe_game_controller_of_ptr : nativeint -> game_controller
+val unsafe_ptr_of_game_controller : game_controller -> nativeint
+(**/**)
+
 (** SDL_GameController *)
 
 module Controller : sig
@@ -2332,10 +2429,13 @@ val game_controller_add_mapping : string -> bool result
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerAddMapping}
      SDL_GameControllerAddMapping} *)
 
-(* SDL 2.0.2
 val game_controller_add_mapping_from_file : string -> int result
 (** {{:https://wiki.libsdl.org/SDL_GameControllerAddMappingsFromFile}
-    SDL_GameControllerAddMappingsFromFile} *) *)
+    SDL_GameControllerAddMappingsFromFile} (SDL 2.0.2). *)
+
+val game_controller_add_mapping_from_rw : rw_ops -> bool -> int result
+(** {{:https://wiki.libsdl.org/SDL_GameControllerAddMappingsFromRW}
+    SDL_GameControllerAddMappingsFromFile} (SDL 2.0.2). *)
 
 val game_controller_close : game_controller -> unit
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerClose}
@@ -2639,6 +2739,7 @@ module Event : sig
   val mouse_button_which : uint32 field
   val mouse_button_button : uint8 field
   val mouse_button_state : button_state field
+  val mouse_button_clicks : uint8 field (** SDL 2.0.2 *)
   val mouse_button_x : int field
   val mouse_button_y : int field
 
@@ -3170,8 +3271,11 @@ type ('a, 'b) audio_spec =
     as_samples : uint8;
     as_size : uint32;
     as_ba_kind : ('a, 'b) Bigarray.kind;
-    as_callback : (('a, 'b) bigarray -> unit) option; }
-(** {{:http://wiki.libsdl.org/SDL_AudioSpec}SDL_AudioSpec} *)
+(*    as_callback : (('a, 'b) bigarray -> unit) option; *) }
+(** {{:http://wiki.libsdl.org/SDL_AudioSpec}SDL_AudioSpec}.
+
+    {b Note.} The callback is currently not exposed because
+    of {{:https://github.com/dbuenzli/tsdl/issues/13}this problem}. *)
 
 val close_audio_device : audio_device_id -> unit
 (** {{:http://wiki.libsdl.org/SDL_CloseAudioDevice}
@@ -3271,6 +3375,9 @@ val has_3d_now : unit -> bool
 val has_altivec : unit -> bool
 (** {{:http://wiki.libsdl.org/SDL_HasAltiVec}SDL_HasAltiVec} *)
 
+val has_avx : unit -> bool
+(** {{:https://wiki.libsdl.org/SDL_HasAVX}SDL_HasAVX} (SDL 2.0.2) *)
+
 val has_mmx : unit -> bool
 (** {{:http://wiki.libsdl.org/SDL_HasMMX}SDL_HasMMX} *)
 
@@ -3324,7 +3431,7 @@ val get_power_info : unit -> power_info
     {- {{:http://wiki.libsdl.org/CategoryAtomic}Atomic Operations}
         (mostly cpp based)}
     {- {{:http://wiki.libsdl.org/CategoryIO}File I/O Abstraction}
-        (only the minimal was covered for other parts of the API that needs
+        (only the minimum was covered for other parts of the API that needs
         it, better use another OCaml API)}
     {- {{:http://wiki.libsdl.org/CategorySharedObject}
        Shared Object Loading and Function Lookup} (use ocaml-ctypes)}
@@ -3413,7 +3520,7 @@ end
     {2:errors Errors}
 
     All functions that return an {!Sdl.result} have the string
-    returned by [Sdl.get_error ()] in the [`Error _] case.
+    returned by [Sdl.get_error ()] in the [Error (`Msg _)] case.
 
     {2:enums Bit fields and enumerants}
 
@@ -3424,8 +3531,8 @@ end
     module {!Sdl.Init} is an example of that:
 {[
 match Sdl.init Sdl.Init.(video + timer + audio) with
-| `Error -> ...
-| `Ok () -> ...
+| Error _ -> ...
+| Ok () -> ...
 ]}
     Using variants in that case is inconvenient for the binding
     function and of limited use since most of the time bit fields are
@@ -3439,28 +3546,24 @@ match Sdl.init Sdl.Init.(video + timer + audio) with
 To use [Tsdl] in the toplevel with [findlib] just issue:
 {[
 > #use "topfind";;
-> #require "tsdl";;
+> #require "tsdl.top";;
 ]}
 
 This automatically loads the library and opens the [Tsdl] module.
 
     {2:opengl OpenGL window}
 
-    The following is the minimal you need to get a working OpenGL window
+    The following is the minimum you need to get a working OpenGL window
     with SDL.
 {[
 open Tsdl
 
-let log_err fmt =
-  let k msg = Sdl.log "%s: %s@." msg (Sdl.get_error ()) in
-  Format.ksprintf k fmt
-
 let main () = match Sdl.init Sdl.Init.video with
-| `Error -> log_err "Init error"; exit 1
-| `Ok () ->
+| Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1
+| Ok () ->
     match Sdl.create_window ~w:640 ~h:480 "SDL OpenGL" Sdl.Window.opengl with
-    | `Error -> log_err "Create window error"; exit 1
-    | `Ok w ->
+    | Error (`Msg e) -> Sdl.log "Create window error: %s" e; exit 1
+    | Ok w ->
         Sdl.delay 3000l;
         Sdl.destroy_window w;
         Sdl.quit ();

@@ -1,18 +1,18 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2013 Daniel C. Bünzli. All rights reserved.
    Distributed under the BSD3 license, see license at the end of the file.
-   %%NAME%% release %%VERSION%%
+   tsdl release 0.9.0
   ---------------------------------------------------------------------------*)
 
 (* Outputs SDL's #defines and enum values as OCaml let bindings. *)
 
 external output_consts : string -> unit = "output_consts"
 
-let main () = 
-  let outf = 
-    if Array.length Sys.argv < 2 then "" else 
-    if Sys.argv.(1) = "" then "" else 
-    if Sys.argv.(1) = "-" then "" else 
+let main () =
+  let outf =
+    if Array.length Sys.argv < 2 then "" else
+    if Sys.argv.(1) = "" then "" else
+    if Sys.argv.(1) = "-" then "" else
     Sys.argv.(1)
   in
   output_consts outf
@@ -26,7 +26,7 @@ let () = main ()
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-     
+
    1. Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
 
