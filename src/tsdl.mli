@@ -3500,6 +3500,7 @@ This automatically loads the library and opens the [Tsdl] module.
     with SDL.
 {[
 open Tsdl
+open Result
 
 let main () = match Sdl.init Sdl.Init.video with
 | Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1
@@ -3517,8 +3518,8 @@ let () = main ()
 
 This can be compiled to byte and native code with:
 {v
-> ocamlfind ocamlc -package tsdl -linkpkg -o min.byte min.ml
-> ocamlfind ocamlopt -package tsdl -linkpkg -o min.native min.ml
+> ocamlfind ocamlc -package result,tsdl -linkpkg -o min.byte min.ml
+> ocamlfind ocamlopt -package result,tsdl -linkpkg -o min.native min.ml
 v}
 
 *)
