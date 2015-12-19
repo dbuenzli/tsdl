@@ -8,11 +8,7 @@ archive(native, plugin) = "tsdl.cmxs"
 exists_if = "tsdl.cma"
 
 package "top" (
-<<<<<<< HEAD
  version = "0.9.0"
-=======
- version = "%%VERSION%%"
->>>>>>> upstream/master
  description = "Tsdl toplevel support"
  requires = "tsdl"
  archive(byte) = "tsdl_top.cma"
