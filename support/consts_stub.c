@@ -136,6 +136,7 @@ void consts (FILE *fd)
   int32_v (SDL_PIXELFORMAT_UYVY);
   int32_v (SDL_PIXELFORMAT_YVYU);
 
+<<<<<<< HEAD
   /* SAN */
   /* Surfaces */
 
@@ -159,6 +160,9 @@ void consts (FILE *fd)
   int_v (TTF_STYLE_STRIKETHROUGH);
 
   /* Renderer */ 
+=======
+  /* Renderer */
+>>>>>>> upstream/master
 
   int_v (SDL_FLIP_NONE);
   int_v (SDL_FLIP_HORIZONTAL);
@@ -783,9 +787,15 @@ void consts (FILE *fd)
   int_v (SDL_BUTTON_X2MASK);
 
   /* Touch */
+<<<<<<< HEAD
 
   int32_v (SDL_TOUCH_MOUSEID);
 
+=======
+
+  int32_v (SDL_TOUCH_MOUSEID);
+
+>>>>>>> upstream/master
   /* Joystick */
 
   int_v (SDL_HAT_CENTERED);

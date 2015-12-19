@@ -1,6 +1,0 @@
-NAME=tsdl
-VERSION=`git describe master | sed "s/^.//"`
-SDLVERSION="2.0.1"
-MAINTAINER="Daniel Bünzli <daniel.buenzl i\\\@erratique.ch>"
-
-VARSUBST="s|%%SDLVERSION%%|$SDLVERSION|g;"

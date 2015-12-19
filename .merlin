@@ -1,0 +1,4 @@
+PKG ctypes ctypes.foreign result
+S src
+S test
+B _build/**

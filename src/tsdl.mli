@@ -719,8 +719,11 @@ val set_surface_rle : surface -> bool -> unit result
 val unlock_surface : surface -> unit
 (** {{:http://wiki.libsdl.org/SDL_UnlockSurface}SDL_UnlockSurface} *)
 
+<<<<<<< HEAD
 val must_lock : surface -> bool
 
+=======
+>>>>>>> upstream/master
 (**/**)
 val unsafe_surface_of_ptr : nativeint -> surface
 val unsafe_ptr_of_surface : surface -> nativeint
@@ -1459,10 +1462,17 @@ module Message_box : sig
   val information : flags
 
   (** {1 Message box color scheme} *)
+<<<<<<< HEAD
 
   type color = int * int * int
   (** r, g, b from 0 to 255 *)
 
+=======
+
+  type color = int * int * int
+  (** r, g, b from 0 to 255 *)
+
+>>>>>>> upstream/master
   type color_scheme =
     { color_background : color;
       color_text : color;
