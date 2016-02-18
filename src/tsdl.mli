@@ -30,7 +30,7 @@
     {ul
     {- {!Sdl.basics}
     {ul
-    {- {{!Sdl.init}Initialization and shutdown}}
+    {- {{!section:Sdl.init}Initialization and shutdown}}
     {- {{!Sdl.hints}Hints}}
     {- {{!Sdl.errors}Errors}}
     {- {{!Sdl.log}Log}}
