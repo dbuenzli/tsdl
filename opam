@@ -5,7 +5,8 @@ homepage: "http://erratique.ch/software/tsdl"
 doc: "http://erratique.ch/software/tsdl/doc/Tsdl"
 dev-repo: "http://erratique.ch/repos/tsdl.git"
 bug-reports: "https://github.com/dbuenzli/tsdl/issues"
-tags: [ "audio" "bindings" "graphics" "media" "opengl" "input" "hci" ]
+tags: [ "audio" "bindings" "graphics" "media" "opengl" "input" "hci"
+        "org:erratique" ]
 license: "BSD-3-Clause"
 available: [ ocaml-version >= "4.00.1" ]
 depends: [ "ocamlfind" {build} "ctypes" {>= "0.4.1"} "ctypes-foreign" "result" ]
