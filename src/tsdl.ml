@@ -4664,7 +4664,7 @@ let unlock_audio_device =
 (* Timer *)
 
 let delay =
-  foreign "SDL_Delay" (int32_t @-> returning void)
+  foreign ~release_runtime_lock:true "SDL_Delay" (int32_t @-> returning void)
 
 let get_ticks =
   foreign "SDL_GetTicks" (void @-> returning int32_t)

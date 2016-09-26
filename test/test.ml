@@ -1248,13 +1248,13 @@ let test_audio_drivers () =
         end;
       done
   end;
-  log " Quit audio";
+(*  log " Quit audio";
   Sdl.audio_quit ();
   log " Init audio with: %a" (Fmts.pp_opt Fmts.pp_str) driver;
   begin match Sdl.audio_init driver with
   | Error (`Msg e) -> log_err " Could not init audio: %s" e
   | Ok () -> ()
-  end;
+  end; *)
   ()
 
 let test_audio_devices () =
