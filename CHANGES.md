@@ -1,4 +1,6 @@
 
+- Really fix signature of `Sdl.blit_surface`, thanks to
+  Richard Davison for the report.
 - Build depend on topkg.
 - Relicense from BSD3 to ISC.
 

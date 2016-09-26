@@ -311,7 +311,7 @@ let test_surfaces () =
           assert (Sdl.fill_rects_ba s0 ba 0xFF000000l = Ok ());
           assert (Sdl.blit_scaled ~src:s0 r0 ~dst:s1 (Some r1) = Ok ());
           assert (Sdl.blit_scaled ~src:s0 r0 ~dst:s1 None = Ok ());
-          assert (Sdl.blit_surface ~src:s0 (Some r0) ~dst:s1 r1 = Ok ());
+          assert (Sdl.blit_surface ~src:s0 (Some r0) ~dst:s1 (Some r1) = Ok ());
           assert (Sdl.lower_blit ~src:s0 r0 ~dst:s1 r1 = Ok ());
           assert (Sdl.lower_blit_scaled ~src:s0 r0 ~dst:s1 r1 = Ok ());
           Sdl.free_surface s1

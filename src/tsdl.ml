@@ -874,7 +874,7 @@ let blit_surface =
     (surface @-> ptr rect @-> surface @-> ptr rect @-> returning zero_to_ok)
 
 let blit_surface ~src sr ~dst dr =
-  blit_surface src (Rect.opt_addr sr) dst (addr dr)
+  blit_surface src (Rect.opt_addr sr) dst (Rect.opt_addr dr)
 
 let convert_pixels =
   foreign "SDL_ConvertPixels"
