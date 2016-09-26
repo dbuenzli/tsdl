@@ -4543,14 +4543,7 @@ type ('a, 'b) audio_spec =
     as_samples : uint8;
     as_size : uint32;
     as_ba_kind : ('a, 'b) Bigarray.kind;
-(*
-    Support for this was removed because the audio thread
-    can't be made aware of the OCaml runtime system
-    which leads to crashes. See discussion in
-    https://github.com/dbuenzli/tsdl/issues/13
-    as_callback : (('a, 'b) bigarray -> unit) option;
- *)
- }
+    as_callback : (('a, 'b) bigarray -> unit) option; }
 
 let audio_callback =
   (ptr void @-> ptr uint8_t @-> int @-> returning void)
@@ -4566,8 +4559,8 @@ let _ = field audio_spec "padding" uint16_t
 let as_size = field audio_spec "size" int32_as_uint32_t
 let as_callback =
   field audio_spec "callback"
-    (* (funptr_opt ~runtime_lock:true audio_callback ) *)
-    (ptr void)
+    (funptr_opt ~thread_registration:true ~runtime_lock:true audio_callback)
+
 let as_userdata = field audio_spec "userdata" (ptr void)
 let () = seal audio_spec
 
@@ -4578,12 +4571,12 @@ let audio_spec_of_c c as_ba_kind =
   let as_silence = getf c as_silence in
   let as_samples = getf c as_samples in
   let as_size = getf c as_size in
-(*  let as_callback = None in *)
+  let as_callback = None in
   { as_freq; as_format; as_channels; as_silence; as_samples; as_size;
-    as_ba_kind; (* as_callback; *) }
+    as_ba_kind; as_callback; }
 
 let audio_spec_to_c a =
-(*  let wrap_cb = match a.as_callback with
+  let wrap_cb = match a.as_callback with
   | None -> None
   | Some cb ->
       let kind_bytes = ba_kind_byte_size a.as_ba_kind in
@@ -4593,7 +4586,7 @@ let audio_spec_to_c a =
         let len = len / kind_bytes in
         cb (bigarray_of_ptr array1 len a.as_ba_kind p)
       end
-  in *)
+  in
   let c = make audio_spec in
   setf c as_freq a.as_freq;
   setf c as_format a.as_format;
@@ -4601,7 +4594,7 @@ let audio_spec_to_c a =
   setf c as_silence a.as_silence; (* irrelevant *)
   setf c as_samples a.as_samples;
   setf c as_size a.as_size;       (* irrelevant *)
-  setf c as_callback null;
+  setf c as_callback wrap_cb;
   setf c as_userdata null;
   c
 

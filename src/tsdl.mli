@@ -3215,11 +3215,8 @@ type ('a, 'b) audio_spec =
     as_samples : uint8;
     as_size : uint32;
     as_ba_kind : ('a, 'b) Bigarray.kind;
-(*    as_callback : (('a, 'b) bigarray -> unit) option; *) }
-(** {{:http://wiki.libsdl.org/SDL_AudioSpec}SDL_AudioSpec}.
-
-    {b Note.} The callback is currently not exposed because
-    of {{:https://github.com/dbuenzli/tsdl/issues/13}this problem}. *)
+    as_callback : (('a, 'b) bigarray -> unit) option; }
+(** {{:http://wiki.libsdl.org/SDL_AudioSpec}SDL_AudioSpec} *)
 
 val close_audio_device : audio_device_id -> unit
 (** {{:http://wiki.libsdl.org/SDL_CloseAudioDevice}

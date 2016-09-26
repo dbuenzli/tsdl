@@ -1,6 +1,9 @@
 
+
+- Reinstate support for audio callback support, `ocaml-ctypes`
+  is getting smarter (#13).
 - Really fix signature of `Sdl.blit_surface`, thanks to
-  Richard Davison for the report.
+  Richard Davison for the report (#25).
 - Build depend on topkg.
 - Relicense from BSD3 to ISC.
 
