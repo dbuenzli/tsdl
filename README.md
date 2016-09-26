@@ -7,7 +7,7 @@ SDL C library.
 
 Tsdl depends on the [SDL 2.0.1][sdl] C library (or later),
 [ocaml-ctypes][ctypes] and the `result` compatibility package.
-Tsdl is distributed under the BSD3 license.
+Tsdl is distributed under the ISC license.
 
 [sdl]: http://www.libsdl.org/
 [ctypes]: https://github.com/ocamllabs/ocaml-ctypes
