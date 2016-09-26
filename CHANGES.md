@@ -1,6 +1,8 @@
+v0.9.1 2016-09-27 Zagreb
+------------------------
 
 - Release runtime lock on `Sdl.delay`.
-- Reinstate support for audio callback support, `ocaml-ctypes`
+- Reinstate support for audio callbacks, `ocaml-ctypes`
   is getting smarter (#13).
 - Really fix signature of `Sdl.blit_surface`, thanks to
   Richard Davison for the report (#25).
