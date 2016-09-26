@@ -9,16 +9,19 @@ tags: [ "audio" "bindings" "graphics" "media" "opengl" "input" "hci"
         "org:erratique" ]
 license: "BSD-3-Clause"
 available: [ ocaml-version >= "4.00.1" ]
-depends: [ "ocamlfind" {build} "ctypes" {>= "0.4.1"} "ctypes-foreign" "result" ]
+depends: [
+  "ocamlfind" {build}
+  "ocamlbuild" {build}
+  "topkg" {build}
+  "result"
+  "ctypes" {>= "0.9.0"}
+  "ctypes-foreign" ]
 depexts: [
  [["debian"] ["libsdl2-dev"]]
  [["ubuntu"] ["libsdl2-dev"]]
  [["mageia"] ["libsdl2.0-devel"]]
  [["osx" "homebrew"] ["sdl2"]]
 ]
-build:
-[
-  [ "ocaml" "pkg/git.ml" ]
-  [ "ocaml" "pkg/build.ml" "native=%{ocaml-native}%"
-                           "native-dynlink=%{ocaml-native-dynlink}%" ]
-]
+build: [[
+  "ocaml" "pkg/pkg.ml" "build"
+           "--pinned" "%{pinned}%" ]]

@@ -21,7 +21,8 @@
     {ul
     {- {{:http://wiki.libsdl.org/APIByCategory}SDL API}}}
 
-    {e Release %%VERSION%% — SDL version %%SDLVERSION%% — %%MAINTAINER%% } *)
+    {e Release %%VERSION%% — SDL %%SDLVERSION%% —
+    {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** {1:sdl SDL} *)
 
@@ -3518,8 +3519,8 @@ let () = main ()
 
 This can be compiled to byte and native code with:
 {v
-> ocamlfind ocamlc -package result,tsdl -linkpkg -o min.byte min.ml
-> ocamlfind ocamlopt -package result,tsdl -linkpkg -o min.native min.ml
+> ocamlfind ocamlc -package tsdl -linkpkg -o min.byte min.ml
+> ocamlfind ocamlopt -package tsdl -linkpkg -o min.native min.ml
 v}
 
 *)

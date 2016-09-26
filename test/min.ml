@@ -1,8 +1,8 @@
 (*
    Minimal OCaml SDL example. This code is in the public domain.
    Compile with:
-   ocamlfind ocamlc -package result,tsdl -linkpkg -o min.byte min.ml
-   ocamlfind ocamlopt -package result,tsdl -linkpkg -o min.native min.ml
+   ocamlfind ocamlc -package tsdl -linkpkg -o min.byte min.ml
+   ocamlfind ocamlopt -package tsdl -linkpkg -o min.native min.ml
 *)
 
 open Tsdl
