@@ -9,10 +9,7 @@ true: thread
 <src> : include
 <src/tsdl.{ml,mli}> : package(ctypes), package(result), thread
 <src/tsdl.ml> : sdl_consts
-<src/tsdl.cm{,x}a>: custom, thread, package(ctypes), package(ctypes.foreign), \
-  link_stubs(src/libtsdl)
-<src/tsdl.cm{,x}a> or <src/libtsdl.a>: pkg-config(sdl2)
-<src/libtsdl.a>: link_no_as_needed
+<src/tsdl.cm{,x}a>: custom, thread, package(ctypes), package(ctypes.foreign)
 
 <src/tsdl_top.*> : package(compiler-libs.toplevel)
 

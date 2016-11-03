@@ -17,7 +17,6 @@ let () =
     Pkg.mllib ~api:["Tsdl"] "src/tsdl.mllib";
     Pkg.mllib ~api:[] "src/tsdl_top.mllib";
     Pkg.lib "src/tsdl_top_init.ml";
-    Pkg.clib "src/libtsdl.clib";
     Pkg.doc "README.md";
     Pkg.doc "CHANGES.md";
     Pkg.doc "test/min.ml";
