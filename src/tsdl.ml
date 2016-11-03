@@ -9,6 +9,11 @@ let unsafe_get = Array.unsafe_get
 open Ctypes
 open Foreign
 
+let libsdl = Dl.(dlopen ~filename:"libSDL2.so" ~flags:[RTLD_LAZY])
+
+let foreign ?release_runtime_lock ?stub name t =
+  Foreign.foreign ~from:libsdl ?release_runtime_lock ?stub name t
+
 module Sdl = struct
 
 (* Enum cases and #ifdef'd constants, see support/ in the distribution *)

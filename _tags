@@ -2,21 +2,19 @@ true: thread
 <**/*.{ml,mli}> : bin_annot
 
 <support> : include
-<support/consts_stub.c> : use_sdl2
+<support/consts_stub.c> : pkg-config(sdl2)
 <support/consts.{ml,native,byte}> : custom, link_consts_stub
 
 
 <src> : include
 <src/tsdl.{ml,mli}> : package(ctypes), package(result), thread
 <src/tsdl.ml> : sdl_consts
-<src/tsdl.{cma,cmxa,cmxs}> : custom, thread, \
- package(ctypes), package(ctypes.foreign), use_sdl2
+<src/tsdl.cm{,x}a>: custom, thread, package(ctypes), package(ctypes.foreign)
 
-<src/libtsdl.*> : use_sdl2
 <src/tsdl_top.*> : package(compiler-libs.toplevel)
 
 <test> : include
 <test/*.ml>: package(result)
 <test/{sdlevents,test,min,test_audio}.{native,byte}> : package(ctypes), \
- package(ctypes.foreign), package(result), use_sdl2
+ package(ctypes.foreign), package(result), use_tsdl
 <test/test.byte> : custom
