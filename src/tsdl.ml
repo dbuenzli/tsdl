@@ -3616,9 +3616,20 @@ module Event = struct
     let () = seal t
   end
 
+  module Audio_device_event = struct
+    type t
+    let t : t structure typ = structure "SDL_AudioDevice"
+    let _ = field t "type" int_as_uint32_t
+    let timestamp = field t "timestamp" int32_as_uint32_t
+    let which = field t "which" int32_as_uint32_t
+    let iscapture = field t "iscapture" int_as_uint8_t
+    let () = seal t
+  end
+
   type t
   let t : t union typ = union "SDL_Event"
   let typ = field t "type" int_as_uint32_t
+  let audio_device_event = field t "adevice" Audio_device_event.t
   let common = field t "common" Common.t
   let controller_axis_event = field t "caxis" Controller_axis_event.t
   let controller_button_event = field t "cbutton" Controller_button_event.t
@@ -3726,6 +3737,10 @@ module Event = struct
   (* Drop file event *)
 
   let drop_file = sdl_dropfile
+  let drop_text = sdl_droptext
+  let drop_begin = sdl_dropbegin
+  let drop_complete = sdl_dropcomplete
+
   let drop_file_file = F (drop_event, Drop_event.file)
 
   let drop_file_free e =
@@ -3785,6 +3800,7 @@ module Event = struct
 
   let key_down = sdl_keydown
   let key_up = sdl_keyup
+  let keymap_changed = sdl_keymapchanged
 
   let keyboard_window_id = F (keyboard_event, Keyboard_event.window_id)
   let keyboard_repeat = F (keyboard_event, Keyboard_event.repeat)
@@ -3881,6 +3897,8 @@ module Event = struct
   let window_event_focus_gained = sdl_windowevent_focus_gained
   let window_event_focus_lost = sdl_windowevent_focus_lost
   let window_event_close = sdl_windowevent_close
+  let window_event_take_focus = sdl_windowevent_take_focus
+  let window_event_hit_test = sdl_windowevent_hit_test
 
   let window_window_id = F (window_event, Window_event.window_id)
   let window_event_id = F (window_event, Window_event.event)
@@ -3907,12 +3925,33 @@ module Event = struct
       window_event_leave, `Leave;
       window_event_focus_gained, `Focus_gained;
       window_event_focus_lost, `Focus_lost;
-      window_event_close, `Close; ]
+      window_event_close, `Close;
+      window_event_take_focus, `Take_focus;
+      window_event_hit_test, `Hit_test; ]
     in
     List.fold_left add Imap.empty enums
 
   let window_event_enum id =
-    try Imap.find id enum_of_window_event_id with Not_found -> assert false
+    try Imap.find id enum_of_window_event_id with Not_found -> `Unknown id
+
+  (* Redner events *)
+
+  let render_targets_reset = sdl_render_targets_reset
+  let render_device_reset = sdl_render_device_reset
+
+  (* Audio device event *)
+
+  let audio_device_added = sdl_audiodeviceadded
+  let audio_device_removed = sdl_audiodeviceremoved
+
+  let audio_device_timestamp =
+    F (audio_device_event, Audio_device_event.timestamp)
+
+  let audio_device_which =
+    F (audio_device_event, Audio_device_event.which)
+
+  let audio_device_is_capture =
+    F (audio_device_event, Audio_device_event.iscapture)
 
   (* Event type enum *)
 
@@ -3960,7 +3999,7 @@ module Event = struct
     in
     List.fold_left add Imap.empty enums
 
-  let enum t = try Imap.find t enum_of_event_type with Not_found -> `Unknown
+  let enum t = try Imap.find t enum_of_event_type with Not_found -> `Unknown t
 
 end
 
@@ -4532,8 +4571,8 @@ module Audio = struct
   let allow_any_change = sdl_audio_allow_any_change
 end
 
-type audio_device_id = Unsigned.uint32
-let audio_device_id = uint32_t
+type audio_device_id = int32
+let audio_device_id = int32_as_uint32_t
 
 type ('a, 'b) audio_spec =
   { as_freq : int;
@@ -4645,14 +4684,14 @@ let lock_audio_device =
 let open_audio_device =
   foreign "SDL_OpenAudioDevice"
     (string_opt @-> bool @-> ptr audio_spec @-> ptr audio_spec @->
-     Audio.allow @-> returning uint32_t)
+     Audio.allow @-> returning int32_as_uint32_t)
 
 let open_audio_device dev capture desired allow =
   let desiredc = audio_spec_to_c desired in
   let obtained = make audio_spec in
   match open_audio_device dev capture (addr desiredc) (addr obtained) allow
   with
-  | id when id = Unsigned.UInt32.zero -> error ()
+  | id when id = Int32.zero -> error ()
   | id -> Ok (id,  audio_spec_of_c obtained desired.as_ba_kind)
 
 let pause_audio_device =

@@ -335,6 +335,7 @@ let test_surfaces () =
       let ba = Sdl.get_surface_pixels s0 Bigarray.int32 in
       assert (Bigarray.Array1.dim ba = 256 * 256);
       ba.{0} <- 0xFF0000FFl;
+      assert (ba.{0} = 0xFF0000FFl);
       Sdl.unlock_surface s0;
       begin match Sdl.save_bmp s0 "/tmp/bla.bmp" with
       | Error (`Msg e) -> log_err " Could not save bmp: %s" e
@@ -346,10 +347,15 @@ let test_surfaces () =
               assert (Sdl.get_surface_format_enum s =
                       Sdl.Pixel.format_argb8888);
               let hi, lo = if Sys.big_endian then 0xFF, 0x00 else 0x00, 0xFF in
+              (* The result here is odd it seems the alpha channel is not
+                 preserved whereas the 2.0.5 release notes seem to indicate
+                 that this is now the case *)
               assert (ba.{0} = hi);
               assert (ba.{1} = hi);
               assert (ba.{2} = lo);
-              assert (ba.{3} = lo);
+              assert (ba.{3} = hi);
+              let ba = Sdl.get_surface_pixels s Bigarray.int32 in
+              assert (ba.{0} = 0x00FF0000l)
           end;
       end;
       Sdl.free_surface s0;
@@ -1128,7 +1134,7 @@ let test_events () =
   match Sdl.create_window "Events" ~w:640 ~h:480 Sdl.Window.resizable with
   | Error (`Msg e) -> log_err " Could not create window: %s" e
   | Ok w ->
-      assert (Sdl.Event.(enum first_event) = `Unknown);
+      assert (Sdl.Event.(enum first_event) = (`Unknown Sdl.Event.first_event));
       assert (Sdl.Event.(enum quit) = `Quit);
       assert (Sdl.Event.(enum window_event) = `Window_event);
       let e = Sdl.Event.create () in

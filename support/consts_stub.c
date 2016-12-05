@@ -830,6 +830,7 @@ void consts (FILE *fd)
   int_v (SDL_KEYUP);
   int_v (SDL_TEXTEDITING);
   int_v (SDL_TEXTINPUT);
+  int_v (SDL_KEYMAPCHANGED);
   int_v (SDL_MOUSEMOTION);
   int_v (SDL_MOUSEBUTTONDOWN);
   int_v (SDL_MOUSEBUTTONUP);
@@ -855,6 +856,13 @@ void consts (FILE *fd)
   int_v (SDL_MULTIGESTURE);
   int_v (SDL_CLIPBOARDUPDATE);
   int_v (SDL_DROPFILE);
+  int_v (SDL_DROPTEXT);
+  int_v (SDL_DROPBEGIN);
+  int_v (SDL_DROPCOMPLETE);
+  int_v (SDL_AUDIODEVICEADDED);
+  int_v (SDL_AUDIODEVICEREMOVED);
+  int_v (SDL_RENDER_TARGETS_RESET);
+  int_v (SDL_RENDER_DEVICE_RESET);
   int_v (SDL_USEREVENT);
   int_v (SDL_LASTEVENT);
 
@@ -880,6 +888,8 @@ void consts (FILE *fd)
   int_v (SDL_WINDOWEVENT_FOCUS_GAINED);
   int_v (SDL_WINDOWEVENT_FOCUS_LOST);
   int_v (SDL_WINDOWEVENT_CLOSE);
+  int_v (SDL_WINDOWEVENT_TAKE_FOCUS);
+  int_v (SDL_WINDOWEVENT_HIT_TEST);
 
   /* Haptic */
 

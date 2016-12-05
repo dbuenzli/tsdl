@@ -2509,7 +2509,9 @@ module Event : sig
       {- {!quitev}}
       {- {!syswm}}
       {- {!text}}
-      {- {!window}}} *)
+      {- {!window}}
+      {- {!render_target}}
+      {- {!audio}}} *)
 
   (** {2 Event type aliases and misc} *)
 
@@ -2585,8 +2587,11 @@ module Event : sig
       called on the event after you have finished processing it. *)
 
   val drop_file : event_type
-  val drop_file_free : event -> unit
+  val drop_text : event_type
+  val drop_begin : event_type
+  val drop_complete : event_type
 
+  val drop_file_free : event -> unit
 
   (** {3 {{:http://wiki.libsdl.org/SDL_DropEvent}SDL_DropEvent}
       fields} *)
@@ -2658,6 +2663,7 @@ module Event : sig
 
   val key_down : event_type
   val key_up : event_type
+  val keymap_changed : event_type
 
   (** {3 {{:http://wiki.libsdl.org/SDL_KeyboardEvent}SDL_KeyboardEvent}
       fields} *)
@@ -2765,8 +2771,9 @@ module Event : sig
 
   val window_event_enum : window_event_id ->
     [ `Close | `Enter | `Exposed | `Focus_gained | `Focus_lost | `Hidden
-    | `Leave | `Maximized | `Minimized | `Moved | `Resized | `Restored
-    | `Shown | `Size_changed ]
+    | `Hit_test | `Leave | `Maximized | `Minimized | `Moved | `Resized
+    | `Restored | `Shown | `Size_changed | `Take_focus
+    | `Unknown of window_event_id ]
 
   val window_event_shown : window_event_id
   val window_event_hidden : window_event_id
@@ -2782,6 +2789,8 @@ module Event : sig
   val window_event_focus_gained : window_event_id
   val window_event_focus_lost : window_event_id
   val window_event_close : window_event_id
+  val window_event_take_focus : window_event_id
+  val window_event_hit_test : window_event_id
 
   (** {3 {{:http://wiki.libsdl.org/SDL_WindowEvent}SDL_WindowEvent} fields} *)
 
@@ -2789,6 +2798,23 @@ module Event : sig
   val window_event_id : window_event_id field
   val window_data1 : int32 field
   val window_data2 : int32 field
+
+  (** {2:render Render target} *)
+
+  val render_targets_reset : event_type
+  val render_device_reset : event_type
+
+  (** {2:audio Audio hotplug events} *)
+
+  val audio_device_added : event_type
+  val audio_device_removed : event_type
+
+  (** {3 {{:https://wiki.libsdl.org/SDL_AudioDeviceEvent}SDL_AudioDeviceEvent}
+      fields} *)
+
+  val audio_device_timestamp : uint32 field
+  val audio_device_which : uint32 field
+  val audio_device_is_capture : int field
 
   (** {1:enum Event type enum} *)
 
@@ -2805,7 +2831,8 @@ module Event : sig
     | `Joy_device_removed | `Joy_hat_motion | `Key_down | `Key_up
     | `Mouse_button_down | `Mouse_button_up | `Mouse_motion
     | `Mouse_wheel | `Multi_gesture | `Quit | `Sys_wm_event
-    | `Text_editing | `Text_input | `Unknown | `User_event | `Window_event ]
+    | `Text_editing | `Text_input | `Unknown of int | `User_event
+    | `Window_event ]
 end
 
 val get_event_state : event_type -> toggle_state
@@ -3205,7 +3232,7 @@ val get_num_audio_drivers : unit -> int result
 
 (** {2:audiodevices Audio devices} *)
 
-type audio_device_id
+type audio_device_id = uint32
 
 type ('a, 'b) audio_spec =
   { as_freq : int;

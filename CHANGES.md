@@ -1,3 +1,9 @@
+
+
+- Build depend on `ocb-stubblr`.
+- Add support for 2.0.{4,5} events and the stubs more robust
+  to additions of events.
+
 v0.9.1 2016-09-27 Zagreb
 ------------------------
 
