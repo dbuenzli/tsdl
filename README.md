@@ -18,7 +18,7 @@ Contact: Daniel Bünzli `<daniel.buenzl i@erratique.ch>`
 
 ## Installation
 
-Tsdl needs the C library SDL 2.0.1 or later installed on your
+Tsdl needs the C library SDL 2.0.5 or later installed on your
 system. Tsdl can be installed with `opam`:
 
     opam install tsdl

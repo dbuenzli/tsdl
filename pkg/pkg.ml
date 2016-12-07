@@ -6,7 +6,7 @@ open Topkg
 
 let distrib =
   (* FIXME OPAMv2, move this to an x-sdl-version field in the opam file. *)
-  let watermarks = ("SDLVERSION", `String "2.0.3") :: Pkg.watermarks in
+  let watermarks = ("SDLVERSION", `String "2.0.5") :: Pkg.watermarks in
   Pkg.distrib ~watermarks ()
 
 let build = Pkg.build ~cmd:Ocb_stubblr_topkg.cmd ()
