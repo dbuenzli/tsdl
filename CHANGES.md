@@ -1,5 +1,7 @@
+v0.9.2 2016-12-07 Cambridge (UK)
+--------------------------------
 
-
+- Safe-string support.
 - Build depend on `ocb-stubblr`.
 - Add support for 2.0.{4,5} events and the stubs more robust
   to additions of events.
