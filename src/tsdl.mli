@@ -568,7 +568,7 @@ val unsafe_ptr_of_pixel_format : pixel_format -> nativeint
 type surface
 (** {{:https://wiki.libsdl.org/SDL_Surface}SDL_Surface} *)
 
-val blit_scaled : src:surface -> rect -> dst:surface -> rect option ->
+val blit_scaled : src:surface -> rect option -> dst:surface -> rect option ->
   unit result
 (** {{:http://wiki.libsdl.org/SDL_BlitScaled}SDL_BlitScaled} *)
 

@@ -309,11 +309,11 @@ let test_surfaces () =
           ba.{0} <- 5l; ba.{1} <- 6l; ba.{2} <- 3l; ba.{3} <- 4l;
           ba.{4} <- 10l; ba.{5} <- 10l; ba.{6} <- 6l; ba.{7} <- 7l;
           assert (Sdl.fill_rects_ba s0 ba 0xFF000000l = Ok ());
-          assert (Sdl.blit_scaled ~src:s0 r0 ~dst:s1 (Some r1) = Ok ());
-          assert (Sdl.blit_scaled ~src:s0 r0 ~dst:s1 None = Ok ());
+          assert (Sdl.blit_scaled ~src:s0 (Some r0) ~dst:s1 (Some r1) = Ok ());
+          assert (Sdl.blit_scaled ~src:s0 (Some r0) ~dst:s1 None = Ok ());
           assert (Sdl.blit_surface ~src:s0 (Some r0) ~dst:s1 (Some r1) = Ok ());
           assert (Sdl.lower_blit ~src:s0 r0 ~dst:s1 r1 = Ok ());
-          assert (Sdl.lower_blit_scaled ~src:s0 r0 ~dst:s1 r1 = Ok ());
+          assert (Sdl.lower_blit_scaled ~src:s0 (Some r0) ~dst:s1 r1 = Ok ());
           Sdl.free_surface s1
       end;
       begin match Sdl.alloc_format Sdl.Pixel.format_index8 with

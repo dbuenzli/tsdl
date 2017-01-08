@@ -866,7 +866,7 @@ let blit_scaled =
     (surface @-> ptr rect @-> surface @-> ptr rect @-> returning zero_to_ok)
 
 let blit_scaled ~src sr ~dst dr =
-  blit_scaled src (addr sr) dst (Rect.opt_addr dr)
+  blit_scaled src (Rect.opt_addr sr) dst (Rect.opt_addr dr)
 
 let blit_surface =
   (* SDL_BlitSurface is #ifdef'd to SDL_UpperBlit *)
