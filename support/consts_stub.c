@@ -11,6 +11,22 @@
 #include <caml/mlvalues.h>
 #include "SDL.h"
 
+#ifndef SDL_DROPTEXT
+  #define SDL_DROPTEXT 0
+#endif
+#ifndef SDL_DROPBEGIN
+  #define SDL_DROPBEGIN 0
+#endif
+#ifndef SDL_DROPCOMPLETE
+  #define SDL_DROPCOMPLETE 0
+#endif
+#ifndef SDL_WINDOWEVENT_TAKE_FOCUS
+  #define SDL_WINDOWEVENT_TAKE_FOCUS 0
+#endif
+#ifndef SDL_WINDOWEVENT_HIT_TEST
+  #define SDL_WINDOWEVENT_HIT_TEST 0
+#endif
+
 void let (FILE *fd, const char *symb)
 {
   int i;
