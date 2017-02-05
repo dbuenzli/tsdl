@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------
    Copyright (c) 2013 Daniel C. Bünzli. All rights reserved.
-   Distributed under the BSD3 license, see license at the end of the file.
-   tsdl release 0.9.0
+   Distributed under the ISC license, see terms at the end of the file.
+   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*/
 
 #include <errno.h>
@@ -10,10 +10,6 @@
 #include <assert.h>
 #include <caml/mlvalues.h>
 #include "SDL.h"
-
-/* SAN */
-#include "SDL_image.h"
-#include "SDL_ttf.h"
 
 void let (FILE *fd, const char *symb)
 {
@@ -136,29 +132,7 @@ void consts (FILE *fd)
   int32_v (SDL_PIXELFORMAT_UYVY);
   int32_v (SDL_PIXELFORMAT_YVYU);
 
-  /* SAN */
-  /* Surfaces */
-
-  int_v (SDL_RLEACCEL);
-
-  /* SAN */
-  /* Images */
-
-  int_v (IMG_INIT_JPG);
-  int_v (IMG_INIT_PNG);
-  int_v (IMG_INIT_TIF);
-  int_v (IMG_INIT_WEBP);
-
-  /* SAN */
-  /* TTF */
-
-  int_v (TTF_STYLE_NORMAL);
-  int_v (TTF_STYLE_BOLD);
-  int_v (TTF_STYLE_ITALIC);
-  int_v (TTF_STYLE_UNDERLINE);
-  int_v (TTF_STYLE_STRIKETHROUGH);
-
-  /* Renderer */ 
+  /* Renderer */
 
   int_v (SDL_FLIP_NONE);
   int_v (SDL_FLIP_HORIZONTAL);
@@ -856,6 +830,7 @@ void consts (FILE *fd)
   int_v (SDL_KEYUP);
   int_v (SDL_TEXTEDITING);
   int_v (SDL_TEXTINPUT);
+  int_v (SDL_KEYMAPCHANGED);
   int_v (SDL_MOUSEMOTION);
   int_v (SDL_MOUSEBUTTONDOWN);
   int_v (SDL_MOUSEBUTTONUP);
@@ -881,6 +856,13 @@ void consts (FILE *fd)
   int_v (SDL_MULTIGESTURE);
   int_v (SDL_CLIPBOARDUPDATE);
   int_v (SDL_DROPFILE);
+  int_v (SDL_DROPTEXT);
+  int_v (SDL_DROPBEGIN);
+  int_v (SDL_DROPCOMPLETE);
+  int_v (SDL_AUDIODEVICEADDED);
+  int_v (SDL_AUDIODEVICEREMOVED);
+  int_v (SDL_RENDER_TARGETS_RESET);
+  int_v (SDL_RENDER_DEVICE_RESET);
   int_v (SDL_USEREVENT);
   int_v (SDL_LASTEVENT);
 
@@ -906,6 +888,8 @@ void consts (FILE *fd)
   int_v (SDL_WINDOWEVENT_FOCUS_GAINED);
   int_v (SDL_WINDOWEVENT_FOCUS_LOST);
   int_v (SDL_WINDOWEVENT_CLOSE);
+  int_v (SDL_WINDOWEVENT_TAKE_FOCUS);
+  int_v (SDL_WINDOWEVENT_HIT_TEST);
 
   /* Haptic */
 
@@ -994,34 +978,17 @@ CAMLprim value output_consts (value fname)
 }
 
 /*---------------------------------------------------------------------------
-   Copyright (c) 2013 Daniel C. Bünzli.
-   All rights reserved.
+   Copyright (c) 2013 Daniel C. Bünzli
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   1. Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-   2. Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-
-   3. Neither the name of Daniel C. Bünzli nor the names of
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
   ---------------------------------------------------------------------------*/

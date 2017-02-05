@@ -1,9 +1,8 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2013 Daniel C. Bünzli. All rights reserved.
-   Distributed under the BSD3 license, see license at the end of the file.
-   tsdl release 0.9.0
+   Distributed under the ISC license, see terms at the end of the file.
+   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
-(*ESSAI*)
 
 let unsafe_get = Array.unsafe_get
 
@@ -191,8 +190,6 @@ module Init = struct
   let events = i sdl_init_events
   let everything = i sdl_init_everything
   let noparachute = i sdl_init_noparachute
-      (* SAN *)
-  let zero = i 0
 end
 
 let init =
@@ -840,7 +837,7 @@ let set_pixel_format_palette =
 type _surface
 type surface_struct = _surface structure
 let surface_struct : surface_struct typ = structure "SDL_Surface"
-let surface_flags = field surface_struct "flags" uint32_t
+let _ = field surface_struct "flags" uint32_t
 let surface_format = field surface_struct "format" pixel_format
 let surface_w = field surface_struct "w" int
 let surface_h = field surface_struct "h" int
@@ -869,7 +866,7 @@ let blit_scaled =
     (surface @-> ptr rect @-> surface @-> ptr rect @-> returning zero_to_ok)
 
 let blit_scaled ~src sr ~dst dr =
-  blit_scaled src (addr sr) dst (Rect.opt_addr dr)
+  blit_scaled src (Rect.opt_addr sr) dst (Rect.opt_addr dr)
 
 let blit_surface =
   (* SDL_BlitSurface is #ifdef'd to SDL_UpperBlit *)
@@ -877,7 +874,7 @@ let blit_surface =
     (surface @-> ptr rect @-> surface @-> ptr rect @-> returning zero_to_ok)
 
 let blit_surface ~src sr ~dst dr =
-  blit_surface src (Rect.opt_addr sr) dst (addr dr)
+  blit_surface src (Rect.opt_addr sr) dst (Rect.opt_addr dr)
 
 let convert_pixels =
   foreign "SDL_ConvertPixels"
@@ -1006,10 +1003,6 @@ let get_surface_format_enum s =
      memory ownership problems. *)
   get_pixel_format_format (getf (!@ s) surface_format)
 
-(* SAN: I do it anyway *)
-let get_surface_format s =
-  getf (!@ s) surface_format
-
 let get_surface_pitch s =
   getf (!@ s) surface_pitch
 
@@ -1103,13 +1096,6 @@ let set_surface_rle =
 
 let unlock_surface =
   foreign "SDL_UnlockSurface" (surface @-> returning void)
-
-(* SAN *)
-let must_lock s =
-  Unsigned.UInt32.to_int (getf (!@ s) surface_flags) land sdl_rleaccel <> 0;;
-(* SDL_RLEACCEL *)
-(* if there is not length encoding, no need to lock *)
-
 
 (* Renderers *)
 
@@ -1454,99 +1440,6 @@ let set_render_target =
 let set_render_target r t =
   let t = match t with None -> null | Some t -> t in
   set_render_target r t
-
-(* SAN *)
-(* Font *)
-module TTF = struct
-  type _font
-  type font_struct = _font structure
-  let font_struct : font_struct typ = structure "TTF_Font"
-  type font = font_struct ptr
-  let font_opt : font option typ = ptr_opt font_struct
-  let font : font typ = ptr font_struct
-  let init =
-    foreign "TTF_Init"
-      (void @-> returning zero_to_ok)
-  let quit =
-    foreign "TTF_Quit"
-      (void @-> returning void)
-  let was_init =
-    foreign "TTF_WasInit"
-      (void @-> returning bool)
-  let open_font =
-    foreign "TTF_OpenFont"
-      (string @-> int @-> returning (some_to_ok font_opt) )
-  let close_font =
-    foreign "TTF_CloseFont"
-      (font @-> returning void)
-  let render_text_blended =
-    foreign "TTF_RenderText_Blended"
-      (font @-> string @-> color @-> returning (some_to_ok surface_opt))
-  let render_utf8_blended =
-    foreign "TTF_RenderUTF8_Blended"
-      (font @-> string @-> color @-> returning (some_to_ok surface_opt))
-  let render_unicode_blended =
-    foreign "TTF_RenderUNICODE_Blended"
-      (font @-> string @-> color @-> returning (some_to_ok surface_opt))
-  let size_utf8 =
-    foreign "TTF_SizeUTF8"
-      (font @-> string @-> ptr int @-> ptr int @-> returning zero_to_ok)
-  let size_utf8 f s =
-    let w = allocate int 0 in
-    let h = allocate int 0 in
-    match size_utf8 f s w h with
-    | Ok () -> Ok (!@ w, !@ h) | Error _ as e -> e
-  let font_line_skip =
-    foreign "TTF_FontLineSkip" (font @-> returning int)
-  let glyph_metrics =
-    foreign "TTF_GlyphMetrics"
-      (font @-> int_as_uint16_t @-> ptr int @-> ptr int @-> ptr int @-> ptr int @-> ptr int @-> returning zero_to_ok)
-  let glyph_metrics f c =
-    let minx = allocate int 0 in
-    let maxx = allocate int 0 in
-    let miny = allocate int 0 in
-    let maxy = allocate int 0 in
-    let advance = allocate int 0 in
-    match glyph_metrics f c minx maxx miny maxy advance with
-    | Ok () -> Ok (!@ minx, !@ maxx, !@ miny, !@ maxy, !@ advance)
-    | Error _ as e -> e
-
-  type style = int
-  module Style = struct
-    let ( + ) = ( lor )
-    let normal = ttf_style_normal
-    let bold = ttf_style_bold
-    let italic = ttf_style_italic
-    let underline = ttf_style_underline
-    let strikethrough = ttf_style_strikethrough
-    let has style substyle = style land substyle = substyle
-  end
-
-  let set_font_style =
-    foreign "TTF_SetFontStyle"
-      (font @-> int @-> returning void)
-  let get_font_style =
-    foreign "TTF_GetFontStyle"
-      (font @-> returning int)
-end
-
-(* SAN *)
-(* Images *)
-module Img = struct
-  let init_jpg = img_init_jpg
-  let init_png = img_init_png
-  let init_tif = img_init_tif
-  let ( + ) a b = a lor b
-  let init =
-    foreign "IMG_Init"
-      (int @-> returning int)
-  let quit =
-    foreign "IMG_Quit"
-      (void @-> returning void)
-  let load =
-    foreign "IMG_Load"
-      (string @-> returning (some_to_ok surface_opt))
-end
 
 (* Textures *)
 
@@ -3723,9 +3616,20 @@ module Event = struct
     let () = seal t
   end
 
+  module Audio_device_event = struct
+    type t
+    let t : t structure typ = structure "SDL_AudioDevice"
+    let _ = field t "type" int_as_uint32_t
+    let timestamp = field t "timestamp" int32_as_uint32_t
+    let which = field t "which" int32_as_uint32_t
+    let iscapture = field t "iscapture" int_as_uint8_t
+    let () = seal t
+  end
+
   type t
   let t : t union typ = union "SDL_Event"
   let typ = field t "type" int_as_uint32_t
+  let audio_device_event = field t "adevice" Audio_device_event.t
   let common = field t "common" Common.t
   let controller_axis_event = field t "caxis" Controller_axis_event.t
   let controller_button_event = field t "cbutton" Controller_button_event.t
@@ -3833,6 +3737,10 @@ module Event = struct
   (* Drop file event *)
 
   let drop_file = sdl_dropfile
+  let drop_text = sdl_droptext
+  let drop_begin = sdl_dropbegin
+  let drop_complete = sdl_dropcomplete
+
   let drop_file_file = F (drop_event, Drop_event.file)
 
   let drop_file_free e =
@@ -3892,6 +3800,7 @@ module Event = struct
 
   let key_down = sdl_keydown
   let key_up = sdl_keyup
+  let keymap_changed = sdl_keymapchanged
 
   let keyboard_window_id = F (keyboard_event, Keyboard_event.window_id)
   let keyboard_repeat = F (keyboard_event, Keyboard_event.repeat)
@@ -3988,6 +3897,8 @@ module Event = struct
   let window_event_focus_gained = sdl_windowevent_focus_gained
   let window_event_focus_lost = sdl_windowevent_focus_lost
   let window_event_close = sdl_windowevent_close
+  let window_event_take_focus = sdl_windowevent_take_focus
+  let window_event_hit_test = sdl_windowevent_hit_test
 
   let window_window_id = F (window_event, Window_event.window_id)
   let window_event_id = F (window_event, Window_event.event)
@@ -4014,12 +3925,33 @@ module Event = struct
       window_event_leave, `Leave;
       window_event_focus_gained, `Focus_gained;
       window_event_focus_lost, `Focus_lost;
-      window_event_close, `Close; ]
+      window_event_close, `Close;
+      window_event_take_focus, `Take_focus;
+      window_event_hit_test, `Hit_test; ]
     in
     List.fold_left add Imap.empty enums
 
   let window_event_enum id =
-    try Imap.find id enum_of_window_event_id with Not_found -> assert false
+    try Imap.find id enum_of_window_event_id with Not_found -> `Unknown id
+
+  (* Redner events *)
+
+  let render_targets_reset = sdl_render_targets_reset
+  let render_device_reset = sdl_render_device_reset
+
+  (* Audio device event *)
+
+  let audio_device_added = sdl_audiodeviceadded
+  let audio_device_removed = sdl_audiodeviceremoved
+
+  let audio_device_timestamp =
+    F (audio_device_event, Audio_device_event.timestamp)
+
+  let audio_device_which =
+    F (audio_device_event, Audio_device_event.which)
+
+  let audio_device_is_capture =
+    F (audio_device_event, Audio_device_event.iscapture)
 
   (* Event type enum *)
 
@@ -4067,7 +3999,7 @@ module Event = struct
     in
     List.fold_left add Imap.empty enums
 
-  let enum t = try Imap.find t enum_of_event_type with Not_found -> `Unknown
+  let enum t = try Imap.find t enum_of_event_type with Not_found -> `Unknown t
 
 end
 
@@ -4639,8 +4571,8 @@ module Audio = struct
   let allow_any_change = sdl_audio_allow_any_change
 end
 
-type audio_device_id = Unsigned.uint32
-let audio_device_id = uint32_t
+type audio_device_id = int32
+let audio_device_id = int32_as_uint32_t
 
 type ('a, 'b) audio_spec =
   { as_freq : int;
@@ -4650,14 +4582,7 @@ type ('a, 'b) audio_spec =
     as_samples : uint8;
     as_size : uint32;
     as_ba_kind : ('a, 'b) Bigarray.kind;
-(*
-    Support for this was removed because the audio thread
-    can't be made aware of the OCaml runtime system
-    which leads to crashes. See discussion in
-    https://github.com/dbuenzli/tsdl/issues/13
-    as_callback : (('a, 'b) bigarray -> unit) option;
- *)
- }
+    as_callback : (('a, 'b) bigarray -> unit) option; }
 
 let audio_callback =
   (ptr void @-> ptr uint8_t @-> int @-> returning void)
@@ -4673,8 +4598,8 @@ let _ = field audio_spec "padding" uint16_t
 let as_size = field audio_spec "size" int32_as_uint32_t
 let as_callback =
   field audio_spec "callback"
-    (* (funptr_opt ~runtime_lock:true audio_callback ) *)
-    (ptr void)
+    (funptr_opt ~thread_registration:true ~runtime_lock:true audio_callback)
+
 let as_userdata = field audio_spec "userdata" (ptr void)
 let () = seal audio_spec
 
@@ -4685,12 +4610,12 @@ let audio_spec_of_c c as_ba_kind =
   let as_silence = getf c as_silence in
   let as_samples = getf c as_samples in
   let as_size = getf c as_size in
-(*  let as_callback = None in *)
+  let as_callback = None in
   { as_freq; as_format; as_channels; as_silence; as_samples; as_size;
-    as_ba_kind; (* as_callback; *) }
+    as_ba_kind; as_callback; }
 
 let audio_spec_to_c a =
-(*  let wrap_cb = match a.as_callback with
+  let wrap_cb = match a.as_callback with
   | None -> None
   | Some cb ->
       let kind_bytes = ba_kind_byte_size a.as_ba_kind in
@@ -4700,7 +4625,7 @@ let audio_spec_to_c a =
         let len = len / kind_bytes in
         cb (bigarray_of_ptr array1 len a.as_ba_kind p)
       end
-  in *)
+  in
   let c = make audio_spec in
   setf c as_freq a.as_freq;
   setf c as_format a.as_format;
@@ -4708,7 +4633,7 @@ let audio_spec_to_c a =
   setf c as_silence a.as_silence; (* irrelevant *)
   setf c as_samples a.as_samples;
   setf c as_size a.as_size;       (* irrelevant *)
-  setf c as_callback null;
+  setf c as_callback wrap_cb;
   setf c as_userdata null;
   c
 
@@ -4759,14 +4684,14 @@ let lock_audio_device =
 let open_audio_device =
   foreign "SDL_OpenAudioDevice"
     (string_opt @-> bool @-> ptr audio_spec @-> ptr audio_spec @->
-     Audio.allow @-> returning uint32_t)
+     Audio.allow @-> returning int32_as_uint32_t)
 
 let open_audio_device dev capture desired allow =
   let desiredc = audio_spec_to_c desired in
   let obtained = make audio_spec in
   match open_audio_device dev capture (addr desiredc) (addr obtained) allow
   with
-  | id when id = Unsigned.UInt32.zero -> error ()
+  | id when id = Int32.zero -> error ()
   | id -> Ok (id,  audio_spec_of_c obtained desired.as_ba_kind)
 
 let pause_audio_device =
@@ -4778,7 +4703,7 @@ let unlock_audio_device =
 (* Timer *)
 
 let delay =
-  foreign "SDL_Delay" (int32_t @-> returning void)
+  foreign ~release_runtime_lock:true "SDL_Delay" (int32_t @-> returning void)
 
 let get_ticks =
   foreign "SDL_GetTicks" (void @-> returning int32_t)
@@ -4865,34 +4790,17 @@ let get_power_info () =
 end
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2013 Daniel C. Bünzli.
-   All rights reserved.
+   Copyright (c) 2013 Daniel C. Bünzli
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   1. Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-   2. Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-
-   3. Neither the name of Daniel C. Bünzli nor the names of
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
   ---------------------------------------------------------------------------*)

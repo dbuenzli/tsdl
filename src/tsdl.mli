@@ -1,7 +1,7 @@
 (*---------------------------------------------------------------------------
-   Copyright 2013 Daniel C. Bünzli. All rights reserved.
-   Distributed under the BSD3 license, see license at the end of the file.
-   tsdl release 0.9.0
+   Copyright (c) 2013 Daniel C. Bünzli. All rights reserved.
+   Distributed under the ISC license, see terms at the end of the file.
+   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
 (** SDL thin bindings.
@@ -21,7 +21,8 @@
     {ul
     {- {{:http://wiki.libsdl.org/APIByCategory}SDL API}}}
 
-    {e Release 0.9.0 — SDL version 2.0.3 — Daniel Bünzli <daniel.buenzl i\@erratique.ch> } *)
+    {e Release %%VERSION%% — SDL %%SDLVERSION%% —
+    {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
 (** {1:sdl SDL} *)
 
@@ -30,7 +31,7 @@
     {ul
     {- {!Sdl.basics}
     {ul
-    {- {{!Sdl.init}Initialization and shutdown}}
+    {- {{!section:Sdl.init}Initialization and shutdown}}
     {- {{!Sdl.hints}Hints}}
     {- {{!Sdl.errors}Errors}}
     {- {{!Sdl.log}Log}}
@@ -121,8 +122,6 @@ module Init : sig
   val events : t
   val everything : t
   val noparachute : t
-  (* SAN: *)
-  val zero : t
 end
 (** Subsystem flags. *)
 
@@ -569,11 +568,11 @@ val unsafe_ptr_of_pixel_format : pixel_format -> nativeint
 type surface
 (** {{:https://wiki.libsdl.org/SDL_Surface}SDL_Surface} *)
 
-val blit_scaled : src:surface -> rect -> dst:surface -> rect option ->
+val blit_scaled : src:surface -> rect option -> dst:surface -> rect option ->
   unit result
 (** {{:http://wiki.libsdl.org/SDL_BlitScaled}SDL_BlitScaled} *)
 
-val blit_surface : src:surface -> rect option -> dst:surface -> rect ->
+val blit_surface : src:surface -> rect option -> dst:surface -> rect option ->
   unit result
 (** {{:http://wiki.libsdl.org/SDL_BlitSurface}SDL_BlitSurface} *)
 
@@ -649,9 +648,6 @@ val get_surface_format_enum : surface -> Pixel.format_enum
 (** [get_surface_format_neum s] is the pixel format enum of the
     field [format] of [s]. *)
 
-val get_surface_format : surface -> pixel_format
-(** format field of the surface. Warning, memory ownership problem ? *)
-
 val get_surface_pitch : surface -> int
 (** [get_surface_pitch s] is the field [pitch] of [s]. *)
 
@@ -718,8 +714,6 @@ val set_surface_rle : surface -> bool -> unit result
 
 val unlock_surface : surface -> unit
 (** {{:http://wiki.libsdl.org/SDL_UnlockSurface}SDL_UnlockSurface} *)
-
-val must_lock : surface -> bool
 
 (**/**)
 val unsafe_surface_of_ptr : nativeint -> surface
@@ -940,56 +934,6 @@ val set_render_draw_color : renderer -> uint8 -> uint8 -> uint8 -> uint8 ->
 
 val set_render_target : renderer -> texture option -> unit result
 (** {{:http://wiki.libsdl.org/SDL_SetRenderTarget}SDL_SetRenderTarget} *)
-
-(** {2:fonts --  {{:http://jcatki.no-ip.org:8080/SDL_ttf/}SDL-TTF}} *)
-
-module TTF : sig
-  type font
-  val font_opt : font option Ctypes.typ
-  val font : font Ctypes.typ
-  val init : unit -> unit result
-  val quit : unit -> unit
-  val was_init : unit -> bool
-  val open_font : string -> int -> font result
-  val close_font : font -> unit
-  val render_text_blended :
-    font -> string -> color -> surface result
-  val render_utf8_blended :
-    font -> string -> color -> surface result
-  val render_unicode_blended :
-    font -> string -> color -> surface result
-  val size_utf8 :
-    font -> string -> (int * int) result
-  val font_line_skip :
-    font -> int
-  val glyph_metrics :
-    font -> int -> (int * int * int * int * int) result
-  type style
-  module Style : sig
-    val ( + ) : style -> style -> style
-    val normal : style
-    val bold : style
-    val italic : style
-    val underline : style
-    val strikethrough : style
-    val has : style -> style -> bool
-  end
-   val set_font_style : font -> style -> unit
-   val get_font_style : font -> style
-end
-
-(** {2:images --  {{:http://jcatki.no-ip.org:8080/SDL_image/SDL_image.html}sdl-image}} *)
-
-module Img : sig
-  val init_jpg : int
-  val init_png : int
-  val init_tif : int
-  val ( + ) : int -> int -> int
-  val init : int -> int
-  val quit : unit -> unit
-  val load : string -> surface result
-  (** {{:http://jcatki.no-ip.org:8080/SDL_image/SDL_image_11.html#SEC11}IMG_Load} *)
-end
 
 (** {2:textures {{:http://wiki.libsdl.org/CategoryRender}Textures}} *)
 
@@ -2565,7 +2509,9 @@ module Event : sig
       {- {!quitev}}
       {- {!syswm}}
       {- {!text}}
-      {- {!window}}} *)
+      {- {!window}}
+      {- {!render_target}}
+      {- {!audio}}} *)
 
   (** {2 Event type aliases and misc} *)
 
@@ -2641,8 +2587,11 @@ module Event : sig
       called on the event after you have finished processing it. *)
 
   val drop_file : event_type
-  val drop_file_free : event -> unit
+  val drop_text : event_type
+  val drop_begin : event_type
+  val drop_complete : event_type
 
+  val drop_file_free : event -> unit
 
   (** {3 {{:http://wiki.libsdl.org/SDL_DropEvent}SDL_DropEvent}
       fields} *)
@@ -2714,6 +2663,7 @@ module Event : sig
 
   val key_down : event_type
   val key_up : event_type
+  val keymap_changed : event_type
 
   (** {3 {{:http://wiki.libsdl.org/SDL_KeyboardEvent}SDL_KeyboardEvent}
       fields} *)
@@ -2821,8 +2771,9 @@ module Event : sig
 
   val window_event_enum : window_event_id ->
     [ `Close | `Enter | `Exposed | `Focus_gained | `Focus_lost | `Hidden
-    | `Leave | `Maximized | `Minimized | `Moved | `Resized | `Restored
-    | `Shown | `Size_changed ]
+    | `Hit_test | `Leave | `Maximized | `Minimized | `Moved | `Resized
+    | `Restored | `Shown | `Size_changed | `Take_focus
+    | `Unknown of window_event_id ]
 
   val window_event_shown : window_event_id
   val window_event_hidden : window_event_id
@@ -2838,6 +2789,8 @@ module Event : sig
   val window_event_focus_gained : window_event_id
   val window_event_focus_lost : window_event_id
   val window_event_close : window_event_id
+  val window_event_take_focus : window_event_id
+  val window_event_hit_test : window_event_id
 
   (** {3 {{:http://wiki.libsdl.org/SDL_WindowEvent}SDL_WindowEvent} fields} *)
 
@@ -2845,6 +2798,23 @@ module Event : sig
   val window_event_id : window_event_id field
   val window_data1 : int32 field
   val window_data2 : int32 field
+
+  (** {2:render Render target} *)
+
+  val render_targets_reset : event_type
+  val render_device_reset : event_type
+
+  (** {2:audio Audio hotplug events} *)
+
+  val audio_device_added : event_type
+  val audio_device_removed : event_type
+
+  (** {3 {{:https://wiki.libsdl.org/SDL_AudioDeviceEvent}SDL_AudioDeviceEvent}
+      fields} *)
+
+  val audio_device_timestamp : uint32 field
+  val audio_device_which : uint32 field
+  val audio_device_is_capture : int field
 
   (** {1:enum Event type enum} *)
 
@@ -2861,7 +2831,8 @@ module Event : sig
     | `Joy_device_removed | `Joy_hat_motion | `Key_down | `Key_up
     | `Mouse_button_down | `Mouse_button_up | `Mouse_motion
     | `Mouse_wheel | `Multi_gesture | `Quit | `Sys_wm_event
-    | `Text_editing | `Text_input | `Unknown | `User_event | `Window_event ]
+    | `Text_editing | `Text_input | `Unknown of int | `User_event
+    | `Window_event ]
 end
 
 val get_event_state : event_type -> toggle_state
@@ -3261,7 +3232,7 @@ val get_num_audio_drivers : unit -> int result
 
 (** {2:audiodevices Audio devices} *)
 
-type audio_device_id
+type audio_device_id = uint32
 
 type ('a, 'b) audio_spec =
   { as_freq : int;
@@ -3271,11 +3242,8 @@ type ('a, 'b) audio_spec =
     as_samples : uint8;
     as_size : uint32;
     as_ba_kind : ('a, 'b) Bigarray.kind;
-(*    as_callback : (('a, 'b) bigarray -> unit) option; *) }
-(** {{:http://wiki.libsdl.org/SDL_AudioSpec}SDL_AudioSpec}.
-
-    {b Note.} The callback is currently not exposed because
-    of {{:https://github.com/dbuenzli/tsdl/issues/13}this problem}. *)
+    as_callback : (('a, 'b) bigarray -> unit) option; }
+(** {{:http://wiki.libsdl.org/SDL_AudioSpec}SDL_AudioSpec} *)
 
 val close_audio_device : audio_device_id -> unit
 (** {{:http://wiki.libsdl.org/SDL_CloseAudioDevice}
@@ -3575,41 +3543,24 @@ let () = main ()
 
 This can be compiled to byte and native code with:
 {v
-> ocamlfind ocamlc -package result,tsdl -linkpkg -o min.byte min.ml
-> ocamlfind ocamlopt -package result,tsdl -linkpkg -o min.native min.ml
+> ocamlfind ocamlc -package tsdl -linkpkg -o min.byte min.ml
+> ocamlfind ocamlopt -package tsdl -linkpkg -o min.native min.ml
 v}
 
 *)
 
 (*---------------------------------------------------------------------------
-   Copyright 2013 Daniel C. Bünzli.
-   All rights reserved.
+   Copyright (c) 2013 Daniel C. Bünzli
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met:
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   1. Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-   2. Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-
-   3. Neither the name of Daniel C. Bünzli nor the names of
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
   ---------------------------------------------------------------------------*)
