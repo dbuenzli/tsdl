@@ -4658,13 +4658,13 @@ let get_num_audio_devices =
 
 let load_wav_rw =
   foreign "SDL_LoadWAV_RW"
-    (rw_ops @-> ptr audio_spec @-> ptr (ptr void) @-> ptr uint32_t @->
+    (rw_ops @-> int @-> ptr audio_spec @-> ptr (ptr void) @-> ptr uint32_t @->
      returning (some_to_ok (ptr_opt audio_spec)))
 
 let load_wav_rw ops spec =
   let d = allocate (ptr void) null in
   let len = allocate uint32_t Unsigned.UInt32.zero in
-  match load_wav_rw ops (addr (audio_spec_to_c spec)) d len with
+  match load_wav_rw ops 0 (addr (audio_spec_to_c spec)) d len with
   | Error _ as e -> e
   | Ok r ->
       let rspec = audio_spec_of_c (!@ r) spec.as_ba_kind in

@@ -1,3 +1,7 @@
+
+- Fix segfaulting `Sdl.load_raw_rw`. Thanks to @sanette for the
+  report and the patch.
+
 v0.9.2 2016-12-07 Cambridge (UK)
 --------------------------------
 
