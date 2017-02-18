@@ -520,10 +520,10 @@ val get_pixel_format_name : Pixel.format_enum -> string
 (** {{:http://wiki.libsdl.org/SDL_GetPixelFormatName}SDL_GetPixelFormatName} *)
 
 val get_pixel_format_format : pixel_format -> Pixel.format_enum
-(** [get_pixel_format_bytes_pp pf] is the field [format] of [pf]. *)
+(** [get_pixel_format_format pf] is the field [format] of [pf]. *)
 
 val get_pixel_format_bits_pp : pixel_format -> int
-(** [get_pixel_format_bytes_pp pf] is the field [BitsPerPixel] of [pf]. *)
+(** [get_pixel_format_bits_pp pf] is the field [BitsPerPixel] of [pf]. *)
 
 val get_pixel_format_bytes_pp : pixel_format -> int
 (** [get_pixel_format_bytes_pp pf] is the field [BytesPerPixel] of [pf]. *)
