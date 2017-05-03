@@ -293,6 +293,7 @@ val get_revision_number : unit -> int
 
 type rw_ops
 (** {{:https://wiki.libsdl.org/SDL_RWops}SDL_RWops} *)
+val rw_ops : rw_ops Ctypes.typ
 
 val rw_from_file : string -> string -> rw_ops result
 (** {{:https://wiki.libsdl.org/SDL_RWFromFile}SDL_RWFromFile} *)
@@ -567,6 +568,8 @@ val unsafe_ptr_of_pixel_format : pixel_format -> nativeint
 
 type surface
 (** {{:https://wiki.libsdl.org/SDL_Surface}SDL_Surface} *)
+val surface : surface Ctypes.typ
+val surface_opt : surface option Ctypes.typ
 
 val blit_scaled : src:surface -> rect option -> dst:surface -> rect option ->
   unit result
@@ -737,12 +740,17 @@ end
 type texture
 (** SDL_Texture *)
 
+val texture : texture Ctypes.typ
+val texture_opt : texture option Ctypes.typ
+
 (**/**)
 val unsafe_texture_of_ptr : nativeint -> texture
 val unsafe_ptr_of_texture : texture -> nativeint
 (**/**)
 
 type renderer
+val renderer : renderer Ctypes.typ
+val renderer_opt : renderer option Ctypes.typ
 
 (**/**)
 val unsafe_renderer_of_ptr : nativeint -> renderer
