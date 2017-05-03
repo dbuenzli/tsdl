@@ -4574,17 +4574,35 @@ end
 type audio_device_id = int32
 let audio_device_id = int32_as_uint32_t
 
-type ('a, 'b) audio_spec =
+type audio_callback =
+  unit Ctypes_static.ptr -> Unsigned.uint8 Ctypes_static.ptr -> int -> unit
+
+let audio_callback kind f =
+  let kind_bytes = ba_kind_byte_size kind in
+  let ba_ptr_typ = access_ptr_typ_of_ba_kind kind in
+  fun _ p len ->
+    let p = coerce (ptr uint8_t) ba_ptr_typ p in
+    let len = len / kind_bytes in
+    f (bigarray_of_ptr array1 len kind p)
+
+type audio_spec =
   { as_freq : int;
     as_format : Audio.format;
     as_channels : uint8;
     as_silence : uint8;
     as_samples : uint8;
     as_size : uint32;
-    as_ba_kind : ('a, 'b) Bigarray.kind;
-    as_callback : (('a, 'b) bigarray -> unit) option; }
+    as_callback : audio_callback option; }
 
-let audio_callback =
+let audio_callback kind f =
+  let kind_bytes = ba_kind_byte_size kind in
+  let ba_ptr_typ = access_ptr_typ_of_ba_kind kind in
+  fun _ p len ->
+    let p = coerce (ptr uint8_t) ba_ptr_typ p in
+    let len = len / kind_bytes in
+    f (bigarray_of_ptr array1 len kind p)
+
+let as_callback =
   (ptr void @-> ptr uint8_t @-> int @-> returning void)
 
 type _audio_spec
@@ -4598,12 +4616,12 @@ let _ = field audio_spec "padding" uint16_t
 let as_size = field audio_spec "size" int32_as_uint32_t
 let as_callback =
   field audio_spec "callback"
-    (funptr_opt ~thread_registration:true ~runtime_lock:true audio_callback)
+    (funptr_opt ~thread_registration:true ~runtime_lock:true as_callback)
 
 let as_userdata = field audio_spec "userdata" (ptr void)
 let () = seal audio_spec
 
-let audio_spec_of_c c as_ba_kind =
+let audio_spec_of_c c =
   let as_freq = getf c as_freq in
   let as_format = getf c as_format in
   let as_channels = getf c as_channels in
@@ -4612,20 +4630,9 @@ let audio_spec_of_c c as_ba_kind =
   let as_size = getf c as_size in
   let as_callback = None in
   { as_freq; as_format; as_channels; as_silence; as_samples; as_size;
-    as_ba_kind; as_callback; }
+    as_callback; }
 
 let audio_spec_to_c a =
-  let wrap_cb = match a.as_callback with
-  | None -> None
-  | Some cb ->
-      let kind_bytes = ba_kind_byte_size a.as_ba_kind in
-      let ba_ptr_typ = access_ptr_typ_of_ba_kind a.as_ba_kind in
-      Some begin fun _ p len ->
-        let p = coerce (ptr uint8_t) ba_ptr_typ p in
-        let len = len / kind_bytes in
-        cb (bigarray_of_ptr array1 len a.as_ba_kind p)
-      end
-  in
   let c = make audio_spec in
   setf c as_freq a.as_freq;
   setf c as_format a.as_format;
@@ -4633,7 +4640,7 @@ let audio_spec_to_c a =
   setf c as_silence a.as_silence; (* irrelevant *)
   setf c as_samples a.as_samples;
   setf c as_size a.as_size;       (* irrelevant *)
-  setf c as_callback wrap_cb;
+  setf c as_callback a.as_callback;
   setf c as_userdata null;
   c
 
@@ -4661,22 +4668,22 @@ let load_wav_rw =
     (rw_ops @-> int @-> ptr audio_spec @-> ptr (ptr void) @-> ptr uint32_t @->
      returning (some_to_ok (ptr_opt audio_spec)))
 
-let load_wav_rw ops spec =
+let load_wav_rw ops spec kind =
   let d = allocate (ptr void) null in
   let len = allocate uint32_t Unsigned.UInt32.zero in
   match load_wav_rw ops 0 (addr (audio_spec_to_c spec)) d len with
   | Error _ as e -> e
   | Ok r ->
-      let rspec = audio_spec_of_c (!@ r) spec.as_ba_kind in
-      let kind_size = ba_kind_byte_size spec.as_ba_kind in
+      let rspec = audio_spec_of_c (!@ r) in
+      let kind_size = ba_kind_byte_size kind in
       let len = Unsigned.UInt32.to_int (!@ len) in
       if len mod kind_size <> 0
       then invalid_arg (err_bigarray_data len kind_size)
       else
       let ba_size = len / kind_size in
-      let ba_ptr = access_ptr_typ_of_ba_kind spec.as_ba_kind in
+      let ba_ptr = access_ptr_typ_of_ba_kind kind in
       let d = coerce (ptr void)  ba_ptr (!@ d) in
-      Ok (rspec, bigarray_of_ptr array1 ba_size spec.as_ba_kind d)
+      Ok (rspec, bigarray_of_ptr array1 ba_size kind d)
 
 let lock_audio_device =
   foreign "SDL_LockAudioDevice" (audio_device_id @-> returning void)
@@ -4692,7 +4699,7 @@ let open_audio_device dev capture desired allow =
   match open_audio_device dev capture (addr desiredc) (addr obtained) allow
   with
   | id when id = Int32.zero -> error ()
-  | id -> Ok (id,  audio_spec_of_c obtained desired.as_ba_kind)
+  | id -> Ok (id,  audio_spec_of_c obtained)
 
 let pause_audio_device =
   foreign "SDL_PauseAudioDevice" (audio_device_id @-> bool @-> returning void)

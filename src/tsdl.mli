@@ -3234,15 +3234,22 @@ val get_num_audio_drivers : unit -> int result
 
 type audio_device_id = uint32
 
-type ('a, 'b) audio_spec =
+type audio_callback
+(** The type for audio callbacks. *)
+
+val audio_callback :
+    ('a, 'b) Bigarray.kind -> (('a, 'b) bigarray -> unit) -> audio_callback
+(** [audio_callback k f] is an audio callback. A reference needs to be kept
+    on the callback value until it is no longer needed. *)
+
+type audio_spec =
   { as_freq : int;
     as_format : Audio.format;
     as_channels : uint8;
     as_silence : uint8;
     as_samples : uint8;
     as_size : uint32;
-    as_ba_kind : ('a, 'b) Bigarray.kind;
-    as_callback : (('a, 'b) bigarray -> unit) option; }
+    as_callback : audio_callback option; }
 (** {{:http://wiki.libsdl.org/SDL_AudioSpec}SDL_AudioSpec} *)
 
 val close_audio_device : audio_device_id -> unit
@@ -3264,8 +3271,8 @@ val get_num_audio_devices : bool -> int result
 (** {{:http://wiki.libsdl.org/SDL_GetNumAudioDevices}
     SDL_GetNumAudioDevices} *)
 
-val load_wav_rw : rw_ops -> ('a, 'b) audio_spec ->
-  (('a, 'b) audio_spec * ('a, 'b) bigarray) result
+val load_wav_rw : rw_ops -> audio_spec -> ('a, 'b) Bigarray.kind ->
+  (audio_spec * ('a, 'b) bigarray) result
 (** {{:https://wiki.libsdl.org/SDL_LoadWAV_RW}
     SDL_LoadWAV_RW}. *)
 
@@ -3273,8 +3280,8 @@ val lock_audio_device : audio_device_id -> unit
 (** {{:http://wiki.libsdl.org/SDL_LockAudioDevice}
     SDL_LockAudioDevice} *)
 
-val open_audio_device : string option -> bool -> ('a, 'b) audio_spec ->
-  Audio.allow -> (audio_device_id * ('a, 'b) audio_spec) result
+val open_audio_device : string option -> bool -> audio_spec ->
+  Audio.allow -> (audio_device_id * audio_spec) result
 (** {{:http://wiki.libsdl.org/SDL_OpenAudioDevice}
     SDL_OpenAudioDevice} *)
 

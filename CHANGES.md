@@ -1,6 +1,14 @@
 
+
 - Fix segfaulting `Sdl.load_raw_rw`. Thanks to @sanette for the
   report and the patch.
+- Fix audio callback support. The client could not get a handle on the
+  actual callback closure which would lead to
+  `Ctypes_ffi_stubs.CallToExpiredClosure.` exceptions. The callback
+  wrapping is now done via the `Sdl.audio_callback` function. The
+  client must keep a reference on the returned value until no longer
+  needed.  As a side effect this changes the signature of
+  `Sdl.load_raw_rw`. Thanks to @sannette for the report.
 
 v0.9.2 2016-12-07 Cambridge (UK)
 --------------------------------

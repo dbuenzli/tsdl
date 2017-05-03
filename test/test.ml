@@ -1263,6 +1263,8 @@ let test_audio_drivers () =
   end; *)
   ()
 
+let audio_callback = ref None (* To avoid gc *)
+
 let test_audio_devices () =
   log "Testing audio devices";
   begin match Sdl.get_num_audio_devices false with
@@ -1286,12 +1288,12 @@ let test_audio_devices () =
             t := !t +. 1.0;
           done
       in
+      audio_callback := Some (Sdl.audio_callback Bigarray.int16_unsigned a440);
       let spec = { Sdl.as_freq = 44100;
                    as_format = Sdl.Audio.s16_sys;
                    as_channels = 1;
                    as_samples = 4096;
-                   as_ba_kind = Bigarray.int16_unsigned;
-                   as_callback = Some a440;
+                   as_callback = !audio_callback;
                    as_size = 0l;
                    as_silence = 0; }
       in
@@ -1302,6 +1304,7 @@ let test_audio_devices () =
           if not (obtained.Sdl.as_channels = 1 && obtained.Sdl.as_freq = 44100)
           then log " Did not obtain expected audio device, will not play"
           else begin
+            Gc.full_major ();
             assert (Sdl.get_audio_device_status dev = Sdl.Audio.paused);
             Sdl.pause_audio_device dev false;
             Sdl.delay 2000l;
