@@ -48,6 +48,7 @@ let main () = match Sdl.init Sdl.Init.(audio + video) with
 | Ok () ->
     let window = video_setup () in
     let device_id = audio_setup () in
+    Gc.full_major ();
     let () = Sdl.pause_audio_device device_id false in
     let e = Sdl.Event.create () in
     let rec loop () = match Sdl.wait_event (Some e) with
