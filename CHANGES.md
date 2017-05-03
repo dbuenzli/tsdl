@@ -1,4 +1,5 @@
-
+v0.9.3 2017-05-03 La Forclaz (VS)
+---------------------------------
 
 - Fix segfaulting `Sdl.load_raw_rw`. Thanks to @sanette for the
   report and the patch.
@@ -8,7 +9,9 @@
   wrapping is now done via the `Sdl.audio_callback` function. The
   client must keep a reference on the returned value until no longer
   needed.  As a side effect this changes the signature of
-  `Sdl.load_raw_rw`. Thanks to @sannette for the report.
+  `Sdl.load_raw_rw`. Thanks to @sanette for the report.
+- Fix signature of `Sdl.blit_scaled`. Thanks to Léo Andrès for the report
+  and the patch.
 
 v0.9.2 2016-12-07 Cambridge (UK)
 --------------------------------
