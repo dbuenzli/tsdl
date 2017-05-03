@@ -313,7 +313,7 @@ let test_surfaces () =
           assert (Sdl.blit_scaled ~src:s0 (Some r0) ~dst:s1 None = Ok ());
           assert (Sdl.blit_surface ~src:s0 (Some r0) ~dst:s1 (Some r1) = Ok ());
           assert (Sdl.lower_blit ~src:s0 r0 ~dst:s1 r1 = Ok ());
-          assert (Sdl.lower_blit_scaled ~src:s0 r0 ~dst:s1 r1 = Ok ());
+          assert (Sdl.lower_blit_scaled ~src:s0 (Some r0) ~dst:s1 r1 = Ok ());
           Sdl.free_surface s1
       end;
       begin match Sdl.alloc_format Sdl.Pixel.format_index8 with
