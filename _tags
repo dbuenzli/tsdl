@@ -10,7 +10,7 @@ true: bin_annot, safe_string, thread
 <src/tsdl.ml> : sdl_consts
 <src/tsdl.cm{,x}a>: custom, thread, package(ctypes), package(ctypes.foreign), \
   link_stubs(src/libtsdl)
-<src/tsdl.cm{,x}a> or <src/libtsdl.a>: pkg-config(sdl2)
+<src/tsdl.cm{,x}a> or <src/libtsdl.a>: pkg-config(sdl2), link_no_as_needed
 <src/libtsdl.a>: link_no_as_needed
 
 <src/tsdl_top.*> : package(compiler-libs.toplevel)
