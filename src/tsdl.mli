@@ -3293,6 +3293,22 @@ val unlock_audio_device : audio_device_id -> unit
 (** {{:http://wiki.libsdl.org/SDL_UnlockAudioDevice}
     SDL_UnlockAudioDevice} *)
 
+val queue_audio : audio_device_id -> ('a, 'b) bigarray -> unit result
+(** {{:http://wiki.libsdl.org/SDL_QueueAudio}
+    QueueAudio} *)
+
+val dequeue_audio : audio_device_id -> ('a, 'b) bigarray -> uint32
+(** {{:http://wiki.libsdl.org/SDL_DequeueAudio}
+    DequeueAudio} *)
+
+val get_queued_audio_size : audio_device_id -> uint32
+(** {{:http://wiki.libsdl.org/SDL_GetQueuedAudioSize}
+    GetQueuedAudioSize} *)
+
+val clear_queued_audio : audio_device_id -> unit
+(** {{:http://wiki.libsdl.org/SDL_ClearQueuedAudio}
+    ClearQueuedAudio} *)
+
 (*
 
 (** {2:audioconvert Audio conversion} *)
