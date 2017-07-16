@@ -25,4 +25,5 @@ let () =
     Pkg.test "test/test";
     Pkg.test "test/min";
     Pkg.test "test/test_audio";
+    Pkg.test "test/test_audio_queue";
     Pkg.test "test/sdlevents"; ]

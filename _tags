@@ -17,6 +17,6 @@ true: bin_annot, safe_string, thread
 
 <test> : include
 <test/*.ml>: package(result)
-<test/{sdlevents,test,min,test_audio}.{native,byte}> : package(ctypes), \
+<test/{sdlevents,test,min,test_audio,test_audio_queue}.{native,byte}> : package(ctypes), \
  package(ctypes.foreign), package(result), use_tsdl
 <test/test.byte> : custom
