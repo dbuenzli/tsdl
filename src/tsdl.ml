@@ -4714,6 +4714,9 @@ let queue_audio dev ba =
   let len = Bigarray.Array1.dim ba in
   queue_audio dev (to_voidp (bigarray_start array1 ba)) len
 
+let get_queued_audio_size =
+  foreign "SDL_GetQueuedAudioSize" (audio_device_id @-> returning int32_as_uint32_t)
+
 (* Timer *)
 
 let delay =

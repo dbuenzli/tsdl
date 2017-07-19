@@ -3295,9 +3295,11 @@ val unlock_audio_device : audio_device_id -> unit
 
 val queue_audio : audio_device_id -> ('a, 'b) bigarray -> unit result
 (** {{:http://wiki.libsdl.org/SDL_QueueAudio}
-    QueueAudio}
+    QueueAudio} *)
 
-*)
+val get_queued_audio_size : audio_device_id -> uint32
+(** {{:http://wiki.libsdl.org/SDL_GetQueuedAudioSize}
+    GetQueuedAudioSize} *)
 
 (*
 
