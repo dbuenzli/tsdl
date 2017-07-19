@@ -53,6 +53,15 @@ let queue_and_start_audio device_id buffer =
       Sdl.pause_audio_device device_id false
   | Error _ -> Sdl.log "Can't queue audio"; exit 1
 
+let queue_and_clear_audio device_id buffer =
+  match Sdl.queue_audio device_id buffer with
+  | Ok () ->
+      Sdl.get_queued_audio_size device_id |> Sdl.log "Currently queued bytes: %ld";
+      Sdl.clear_queued_audio device_id;
+      Sdl.get_queued_audio_size device_id |> Sdl.log "Queued after clearing: %ld";
+      ()
+  | Error _ -> Sdl.log "Can't queue audio"; exit 1
+
 let video_setup () =
   match Sdl.create_window ~w:640 ~h:480 "SDL Audio Test" Sdl.Window.opengl with
   | Error ( `Msg e ) -> Sdl.log "Create window error: %s" e; exit 1
@@ -64,6 +73,7 @@ let main () = match Sdl.init Sdl.Init.(audio + video) with
     let window = video_setup () in
     let (device_id, buffer) = audio_setup () in
     Gc.full_major ();
+    let () = queue_and_clear_audio device_id buffer in
     let () = queue_and_start_audio device_id buffer in
     let e = Sdl.Event.create () in
     let rec loop () = match Sdl.wait_event (Some e) with

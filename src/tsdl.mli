@@ -3301,6 +3301,10 @@ val get_queued_audio_size : audio_device_id -> uint32
 (** {{:http://wiki.libsdl.org/SDL_GetQueuedAudioSize}
     GetQueuedAudioSize} *)
 
+val clear_queued_audio : audio_device_id -> unit
+(** {{:http://wiki.libsdl.org/SDL_ClearQueuedAudio}
+    ClearQueuedAudio} *)
+
 (*
 
 (** {2:audioconvert Audio conversion} *)
