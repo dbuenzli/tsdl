@@ -4707,6 +4707,26 @@ let pause_audio_device =
 let unlock_audio_device =
   foreign "SDL_UnlockAudioDevice" (audio_device_id @-> returning void)
 
+let queue_audio =
+  foreign "SDL_QueueAudio" (audio_device_id @-> ptr void @-> int_as_uint32_t @-> returning zero_to_ok)
+
+let queue_audio dev ba =
+  let len = Bigarray.Array1.dim ba in
+  queue_audio dev (to_voidp (bigarray_start array1 ba)) len
+
+let dequeue_audio =
+  foreign "SDL_DequeueAudio" (audio_device_id @-> ptr void @-> int @-> returning int32_as_uint32_t)
+
+let dequeue_audio dev ba =
+  let len = Bigarray.Array1.dim ba in
+  dequeue_audio dev (to_voidp (bigarray_start array1 ba)) len
+
+let get_queued_audio_size =
+  foreign "SDL_GetQueuedAudioSize" (audio_device_id @-> returning int32_as_uint32_t)
+
+let clear_queued_audio =
+  foreign "SDL_ClearQueuedAudio" (audio_device_id @-> returning void)
+
 (* Timer *)
 
 let delay =
