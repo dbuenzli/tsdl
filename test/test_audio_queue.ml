@@ -56,9 +56,11 @@ let queue_and_start_audio device_id buffer =
 let queue_and_clear_audio device_id buffer =
   match Sdl.queue_audio device_id buffer with
   | Ok () ->
-      Sdl.get_queued_audio_size device_id |> Sdl.log "Currently queued bytes: %ld";
+      Sdl.get_queued_audio_size device_id |>
+      Sdl.log "Currently queued bytes: %ld";
       Sdl.clear_queued_audio device_id;
-      Sdl.get_queued_audio_size device_id |> Sdl.log "Queued after clearing: %ld";
+      Sdl.get_queued_audio_size device_id |>
+      Sdl.log "Queued after clearing: %ld";
       ()
   | Error _ -> Sdl.log "Can't queue audio"; exit 1
 
