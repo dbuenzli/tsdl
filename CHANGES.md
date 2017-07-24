@@ -1,4 +1,5 @@
-
+v0.9.5 2017-07-24 Zagreb
+------------------------
 
 - Support for audio queue API. Thanks to Erik Løvlie for the patch.
 
