@@ -29,7 +29,7 @@ let dequeue_audio device_id buffer =
   Sdl.pause_audio_device device_id false;
   Sdl.delay 1000l;
   let captured = Sdl.dequeue_audio device_id buffer in
-  Sdl.log "Dequeued bytes: %ld" captured;
+  Sdl.log "Dequeued bytes: %d" captured;
   Sdl.pause_audio_device device_id true
 
 let video_setup () =

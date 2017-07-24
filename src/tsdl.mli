@@ -3297,11 +3297,11 @@ val queue_audio : audio_device_id -> ('a, 'b) bigarray -> unit result
 (** {{:http://wiki.libsdl.org/SDL_QueueAudio}
     QueueAudio} *)
 
-val dequeue_audio : audio_device_id -> ('a, 'b) bigarray -> uint32
+val dequeue_audio : audio_device_id -> ('a, 'b) bigarray -> int
 (** {{:http://wiki.libsdl.org/SDL_DequeueAudio}
     DequeueAudio} *)
 
-val get_queued_audio_size : audio_device_id -> uint32
+val get_queued_audio_size : audio_device_id -> int
 (** {{:http://wiki.libsdl.org/SDL_GetQueuedAudioSize}
     GetQueuedAudioSize} *)
 

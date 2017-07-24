@@ -49,7 +49,7 @@ let queue_and_start_audio device_id buffer =
   match Sdl.queue_audio device_id buffer with
   | Ok () ->
       (* Let's query how much is queued up before we start playing. *)
-      Sdl.get_queued_audio_size device_id |> Sdl.log "Queued bytes: %ld";
+      Sdl.get_queued_audio_size device_id |> Sdl.log "Queued bytes: %d";
       Sdl.pause_audio_device device_id false
   | Error _ -> Sdl.log "Can't queue audio"; exit 1
 
@@ -57,10 +57,10 @@ let queue_and_clear_audio device_id buffer =
   match Sdl.queue_audio device_id buffer with
   | Ok () ->
       Sdl.get_queued_audio_size device_id |>
-      Sdl.log "Currently queued bytes: %ld";
+      Sdl.log "Currently queued bytes: %d";
       Sdl.clear_queued_audio device_id;
       Sdl.get_queued_audio_size device_id |>
-      Sdl.log "Queued after clearing: %ld";
+      Sdl.log "Queued after clearing: %d";
       ()
   | Error _ -> Sdl.log "Can't queue audio"; exit 1
 

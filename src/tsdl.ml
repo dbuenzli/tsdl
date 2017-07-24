@@ -4717,7 +4717,7 @@ let queue_audio dev ba =
 
 let dequeue_audio =
   foreign "SDL_DequeueAudio"
-    (audio_device_id @-> ptr void @-> int @-> returning int32_as_uint32_t)
+    (audio_device_id @-> ptr void @-> int @-> returning int_as_uint32_t)
 
 let dequeue_audio dev ba =
   let len = Bigarray.Array1.dim ba in
@@ -4725,7 +4725,7 @@ let dequeue_audio dev ba =
 
 let get_queued_audio_size =
   foreign "SDL_GetQueuedAudioSize"
-    (audio_device_id @-> returning int32_as_uint32_t)
+    (audio_device_id @-> returning int_as_uint32_t)
 
 let clear_queued_audio =
   foreign "SDL_ClearQueuedAudio" (audio_device_id @-> returning void)
