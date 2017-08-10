@@ -181,6 +181,7 @@ module Init = struct
   let ( + ) = Unsigned.UInt32.logor
   let test f m = Unsigned.UInt32.(compare (logand f m) zero <> 0)
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
+  let nothing = i 0
   let timer = i sdl_init_timer
   let audio = i sdl_init_audio
   let video = i sdl_init_video
