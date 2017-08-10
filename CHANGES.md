@@ -1,3 +1,7 @@
+
+
+- Add Sdl.Init.nothing. Thanks to @sanette for the patch.
+
 v0.9.5 2017-07-24 Zagreb
 ------------------------
 

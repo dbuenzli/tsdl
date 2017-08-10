@@ -113,6 +113,7 @@ module Init : sig
   val eq : t -> t -> bool
   (** [eq f f'] is [true] if the flags are equal. *)
 
+  val nothing : t
   val timer : t
   val audio : t
   val video : t
