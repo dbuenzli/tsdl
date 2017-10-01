@@ -222,6 +222,10 @@ module Hint = struct
   let render_opengl_shaders = sdl_hint_render_opengl_shaders
   let render_scale_quality = sdl_hint_render_scale_quality
   let render_vsync = sdl_hint_render_vsync
+  let no_signal_handlers = sdl_hint_no_signal_handlers
+  let thread_stack_size = sdl_hint_thread_stack_size
+  let window_frame_usable_while_cursor_hidden =
+    sdl_hint_window_frame_usable_while_cursor_hidden
 
   type priority = int
   let default = sdl_hint_default
@@ -571,6 +575,14 @@ let intersect_rect_and_line r x1 y1 x2 y2 =
   if intersect_rect_and_line (addr r) x1 y1 x2 y2
   then Some ((!@x1, !@y1), (!@x2, !@y2))
   else None
+
+let point_in_rect p r =
+  (* SDL_FORCE_INLINE *)
+  let px = Point.x p in
+  let py = Point.y p in
+  let rx = Rect.x r in
+  let ry = Rect.y r in
+  px >= rx && px < rx + Rect.w r && py >= ry && py < ry + Rect.h r
 
 let rect_empty r =
   (* symbol doesn't exist: SDL_FORCE_INLINE directive
@@ -1357,6 +1369,9 @@ let render_get_clip_rect rend =
   render_get_clip_rect rend (addr r);
   r
 
+let render_is_clip_enabled =
+  foreign "SDL_RenderIsClipEnabled" (renderer @-> returning bool)
+
 let render_get_logical_size =
   foreign "SDL_RenderGetLogicalSize"
     (renderer @-> ptr int @-> ptr int @-> returning void)
@@ -1679,6 +1694,18 @@ let get_display_bounds i =
   match get_display_bounds i (addr r) with
   | Ok () -> Ok r | Error _ as e -> e
 
+let get_display_dpi =
+  foreign "SDL_GetDisplayDPI"
+    (int @-> ptr float @-> ptr float @-> ptr float @-> returning zero_to_ok)
+
+let get_display_dpi display =
+  let diagonal = allocate float 0. in
+  let horizontal = allocate float 0. in
+  let vertical = allocate float 0. in
+  match get_display_dpi display diagonal horizontal vertical with
+  | Ok () -> Ok (!@diagonal,!@horizontal,!@vertical)
+  | Error _ as err -> err
+
 let get_display_mode =
   foreign "SDL_GetDisplayMode"
     (int @-> int @-> ptr display_mode @-> returning zero_to_ok)
@@ -1783,6 +1810,9 @@ let get_window_gamma_ramp w =
 
 let get_window_grab =
   foreign "SDL_GetWindowGrab" (window @-> returning bool)
+
+let get_grabbed_window =
+  foreign "SDL_GetGrabbedWindow" (void @-> returning window)
 
 let get_window_id =
   foreign "SDL_GetWindowID" (window @-> returning int_as_uint32_t)
@@ -1983,6 +2013,7 @@ module Gl = struct
   let context_egl = sdl_gl_context_egl
   let context_flags = sdl_gl_context_flags
   let context_profile_mask = sdl_gl_context_profile_mask
+  let context_release_behavior = sdl_gl_context_release_behavior
   let share_with_current_context = sdl_gl_share_with_current_context
   let framebuffer_srgb_capable = sdl_gl_framebuffer_srgb_capable
 end
@@ -2887,6 +2918,9 @@ module Button = struct
   let x2mask = i sdl_button_x2mask
 end
 
+let capture_mouse =
+  foreign "SDL_CaptureMouse" (bool @-> returning zero_to_ok)
+
 let create_color_cursor =
   foreign "SDL_CreateColorCursor"
     (surface @-> int @-> int @-> returning (some_to_ok cursor_opt))
@@ -2917,6 +2951,16 @@ let get_cursor =
 
 let get_default_cursor =
   foreign "SDL_GetDefaultCursor" (void @-> returning cursor_opt)
+
+let get_global_mouse_state =
+  foreign "SDL_GetGlobalMouseState"
+    (ptr int @-> ptr int @-> returning int32_as_uint32_t)
+
+let get_global_mouse_state () =
+  let x = allocate int 0 in
+  let y = allocate int 0 in
+  let s = get_global_mouse_state x y in
+  s, (!@ x, !@ y)
 
 let get_mouse_focus =
   foreign "SDL_GetMouseFocus" (void @-> returning window_opt)
@@ -2965,6 +3009,12 @@ let warp_mouse_in_window =
 
 let warp_mouse_in_window w ~x ~y =
   warp_mouse_in_window w x y
+
+let warp_mouse_global=
+  foreign "SDL_WarpMouseGlobal" (int @-> int @-> returning zero_to_ok)
+
+let warp_mouse_global ~x ~y =
+  warp_mouse_global x y
 
 (* Touch *)
 
@@ -3080,11 +3130,28 @@ module Hat = struct
   let leftdown = sdl_hat_leftdown
 end
 
+module Joystick_power_level = struct
+  type t = int
+  let unknown = sdl_joystick_power_unknown
+  let low = sdl_joystick_power_low
+  let medium = sdl_joystick_power_medium
+  let full = sdl_joystick_power_full
+  let wired = sdl_joystick_power_wired
+  let max = sdl_joystick_power_max
+end
+
 let joystick_close =
   foreign "SDL_JoystickClose" (joystick @-> returning void)
 
+let joystick_current_power_level =
+  foreign "SDL_JoystickCurrentPowerLevel"
+    (joystick @-> returning int)
+
 let joystick_event_state =
   foreign "SDL_JoystickEventState" (int @-> returning nat_to_ok)
+
+let joystick_from_instance_id =
+  foreign "SDL_JoystickFromInstanceID" (joystick_id @-> returning joystick)
 
 let joystick_get_event_state () =
   joystick_event_state sdl_query
@@ -3246,6 +3313,10 @@ let game_controller_close =
 
 let game_controller_event_state =
   foreign "SDL_GameControllerEventState" (int @-> returning nat_to_ok)
+
+let game_controller_from_instance_id =
+  foreign "SDL_GameControllerFromInstanceID"
+    (joystick_id @-> returning game_controller)
 
 let game_controller_get_event_state () =
   game_controller_event_state sdl_query
@@ -3506,6 +3577,10 @@ module Event = struct
     let () = seal t
   end
 
+    type mouse_wheel_direction = int
+    let mouse_wheel_normal = sdl_mousewheel_normal
+    let mouse_wheel_flipped = sdl_mousewheel_flipped
+
   module Mouse_wheel_event = struct
     type t
     let t : t structure typ = structure "SDL_MouseWheelEvent"
@@ -3515,6 +3590,7 @@ module Event = struct
     let which = field t "which" int32_as_uint32_t
     let x = field t "x" int_as_int32_t
     let y = field t "y" int_as_int32_t
+    let direction = field t "direction" int_as_uint32_t
     let () = seal t
   end
 
@@ -3838,6 +3914,7 @@ module Event = struct
   let mouse_wheel_which = F (mouse_wheel_event, Mouse_wheel_event.which)
   let mouse_wheel_x = F (mouse_wheel_event, Mouse_wheel_event.x)
   let mouse_wheel_y = F (mouse_wheel_event, Mouse_wheel_event.y)
+  let mouse_wheel_direction = F(mouse_wheel_event, Mouse_wheel_event.direction)
 
   (* Multi gesture events *)
 
@@ -4766,6 +4843,9 @@ let has_altivec =
 
 let has_avx =
   foreign ~stub "SDL_HasAVX" (void @-> returning bool)
+
+let has_avx2 =
+  foreign  "SDL_HasAVX2" (void @-> returning bool)
 
 let has_mmx =
   foreign "SDL_HasMMX" (void @-> returning bool)

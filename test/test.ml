@@ -166,6 +166,7 @@ let test_rectangles () =
   | Some ((0, 1), (1, 2)) -> assert true
   | None | Some _ -> assert false
   end;
+  assert (Sdl.point_in_rect (Sdl.Point.create 1 1) (Sdl.Rect.create 0 0 2 2));
   ()
 
 let test_palettes () =

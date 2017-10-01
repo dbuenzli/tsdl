@@ -176,6 +176,18 @@ module Hint : sig
   (** {{:http://wiki.libsdl.org/SDL_HINT_RENDER_VSYNC}
       SDL_HINT_RENDER_VSYNC} *)
 
+  val no_signal_handlers : t
+  (** {{:http://wiki.libsdl.org/SDL_HINT_NO_SIGNAL_HANDLERS}
+      SDL_HINT_NO_SIGNAL_HANDLERS} ( 2.04.0 ) *)
+
+  val thread_stack_size : t
+  (** {{:http://wiki.libsdl.org/SDL_HINT_THREAD_STACK_SIZE}
+      SDL_HINT_THREAD_STACK_SIZE} ( 2.04.0 ) *)
+
+  val window_frame_usable_while_cursor_hidden: t
+  (** {{:http://wiki.libsdl.org/SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN}
+      SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN} ( 2.04.0 ) *)
+
   (** {1:priority Priority} *)
 
   type priority
@@ -395,6 +407,9 @@ val intersect_rect_and_line : rect -> int -> int -> int -> int ->
 (** {{:http://wiki.libsdl.org/SDL_IntersectRectAndLine}
     SDL_IntersectRectAndLine}. Returns the clipped segment if it
     intersects. *)
+
+val point_in_rect: point -> rect -> bool
+(** {{:http://wiki.libsdl.org/SDL_PointInRect}SDL_PointInRect} ( 2.04.0 ) *)
 
 val rect_empty : rect -> bool
 (** {{:http://wiki.libsdl.org/SDL_RectEmpty}SDL_RectEmpty} *)
@@ -900,6 +915,10 @@ val render_get_scale : renderer -> float * float
 val render_get_viewport : renderer -> rect
 (** {{:http://wiki.libsdl.org/SDL_RenderGetViewport}SDL_RenderGetViewport} *)
 
+val render_is_clip_enabled: renderer -> bool
+(** {{:http://wiki.libsdl.org/SDL_RenderIsClipEnabled}SDL_RenderIsClipEnabled}
+    ( 2.04.0 ) *)
+
 val render_present : renderer -> unit
 (** {{:http://wiki.libsdl.org/SDL_RenderPresent}SDL_RenderPresent} *)
 
@@ -1058,6 +1077,9 @@ val get_desktop_display_mode : int -> display_mode result
 val get_display_bounds : int -> rect result
 (** {{:http://wiki.libsdl.org/SDL_GetDisplayBounds}SDL_GetDisplayBounds} *)
 
+val get_display_dpi: int -> (float * float * float) result
+(** {{:http://wiki.libsdl.org/SDL_GetDisplayDPI}SDL_GetDisplayDPI} ( 2.04.0 ) *)
+
 val get_display_mode : int -> int -> display_mode result
 (** {{:http://wiki.libsdl.org/SDL_GetDisplayMode}SDL_GetDisplayMode} *)
 
@@ -1153,6 +1175,10 @@ val get_window_gamma_ramp : window ->
 
 val get_window_grab : window -> bool
 (** {{:http://wiki.libsdl.org/SDL_GetWindowGrab}SDL_GetWindowGrab} *)
+
+val get_grabbed_window : unit -> window
+(** {{:http://wiki.libsdl.org/SDL_GetGrabbedWindow}SDL_GetGrabbedWindow}
+    ( 2.04.0 )*)
 
 val get_window_id : window -> int
 (** {{:http://wiki.libsdl.org/SDL_GetWindowID}SDL_GetWindowID} *)
@@ -1317,6 +1343,7 @@ module Gl : sig
   val context_egl : attr
   val context_flags : attr
   val context_profile_mask : attr
+  val context_release_behavior: attr (** 2.04.0 *)
   val share_with_current_context : attr
   val framebuffer_srgb_capable : attr
 end
@@ -2108,6 +2135,10 @@ module Button : sig
   val x2mask : uint32
 end
 
+val capture_mouse: bool -> unit result
+(** {{:http://wiki.libsdl.org/SDL_CaptureMouse}SDL_CaptureMouse}
+    ( 2.04.0 ) *)
+
 val create_color_cursor : surface -> hot_x:int -> hot_y:int -> cursor result
 (** {{:http://wiki.libsdl.org/SDL_CreateColorCursor}SDL_CreateColorCursor} *)
 
@@ -2127,6 +2158,10 @@ val get_cursor : unit -> cursor option
 
 val get_default_cursor : unit -> cursor option
 (** {{:http://wiki.libsdl.org/SDL_GetDefaultCursor}SDL_GetDefaultCursor} *)
+
+val get_global_mouse_state : unit -> uint32 * (int * int)
+(** {{:http://wiki.libsdl.org/SDL_GetGlobalMouseState}
+    SDL_GetGlobalMouseState} ( 2.04.0 ) *)
 
 val get_mouse_focus : unit -> window option
 (** {{:http://wiki.libsdl.org/SDL_GetMouseFocus}SDL_GetMouseFocus} *)
@@ -2156,6 +2191,10 @@ val set_relative_mouse_mode : bool -> unit result
 val show_cursor : bool -> bool result
 (** {{:http://wiki.libsdl.org/SDL_ShowCursor}SDL_ShowCursor}. See also
     {!get_cursor_shown}. *)
+
+val warp_mouse_global : x:int -> y:int -> unit result
+(** {{:http://wiki.libsdl.org/SDL_WarpMouseGlobal}SDL_WarpMouseGlobal}
+    ( 2.04.0 ) *)
 
 val warp_mouse_in_window : window option -> x:int -> y:int -> unit
 (** {{:http://wiki.libsdl.org/SDL_WarpMouseInWindow}SDL_WarpMouseInWindow} *)
@@ -2240,8 +2279,29 @@ module Hat : sig
   val leftdown : int
 end
 
+module Joystick_power_level: sig
+  (** {{https://wiki.libsdl.org/SDL_JoystickPowerLevel} Joystick power level}
+      ( 2.04.0 ) *)
+
+  type t
+  val unknown : t
+  val low : t
+  val medium : t
+  val full: t
+  val wired: t
+  val max: t
+end
+
 val joystick_close : joystick -> unit
 (** {{:http://wiki.libsdl.org/SDL_JoystickClose}SDL_JoystickClose} *)
+
+val joystick_current_power_level : joystick -> Joystick_power_level.t
+(** {{:http://wiki.libsdl.org/SDL_JoystickClose}SDL_JoystickCurrentPowerLevel}
+    ( 2.04.0 ) *)
+
+val joystick_from_instance_id: joystick_id -> joystick
+(** {{:http://wiki.libsdl.org/SDL_JoystickClose}SDL_JoystickFromInstanceId}
+    ( 2.04.0 ) *)
 
 val joystick_get_event_state : unit -> toggle_state result
 (** {{:http://wiki.libsdl.org/SDL_JoystickEventState}
@@ -2384,6 +2444,11 @@ val game_controller_add_mapping_from_rw : rw_ops -> bool -> int result
 val game_controller_close : game_controller -> unit
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerClose}
      SDL_GameControllerClose} *)
+
+val game_controller_from_instance_id : joystick_id -> game_controller
+(**  {{:http://wiki.libsdl.org/SDL_GameControllerFromInstanceId}
+     SDL_GameControllerFromInstanceId} ( 2.04.0 ) *)
+
 
 val game_controller_get_event_state : unit -> toggle_state result
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerEventState}
@@ -2707,10 +2772,16 @@ module Event : sig
   (** {3 {{:http://wiki.libsdl.org/SDL_MouseWheelEvent}SDL_MouseWheelEvent}
       fields} *)
 
+  (** 2.04 *)
+  type mouse_wheel_direction
+  val mouse_wheel_normal : mouse_wheel_direction
+  val mouse_wheel_flipped : mouse_wheel_direction
+
   val mouse_wheel_window_id : int field
   val mouse_wheel_which : uint32 field
   val mouse_wheel_x : int field
   val mouse_wheel_y : int field
+  val mouse_wheel_direction: mouse_wheel_direction field (** 2.04 *)
 
   (** {2:multigestureev Multi gesture events} *)
 
@@ -3369,6 +3440,9 @@ val has_altivec : unit -> bool
 val has_avx : unit -> bool
 (** {{:https://wiki.libsdl.org/SDL_HasAVX}SDL_HasAVX} (SDL 2.0.2) *)
 
+val has_avx2 : unit -> bool
+(** {{:https://wiki.libsdl.org/SDL_HasAVX2}SDL_HasAVX2} (SDL 2.0.4) *)
+
 val has_mmx : unit -> bool
 (** {{:http://wiki.libsdl.org/SDL_HasMMX}SDL_HasMMX} *)
 
@@ -3476,6 +3550,8 @@ val get_power_info : unit -> power_info
         run on another thread, thus runtime lock support in ocaml-ctypes
         is needed. Probably better to use another OCaml API anyway)}
     {- {{:http://wiki.libsdl.org/SDL_RemoveTimer}SDL_RemoveTimer}
+        (avoid callbacks from C to OCaml)}
+    {- {{:http://wiki.libsdl.org/SDL_SetWindowHitTest}SDL_SetWindowHitTest}
         (avoid callbacks from C to OCaml)}
     {- {{:http://wiki.libsdl.org/SDL_GetAudioStatus}SDL_GetAudioStatus}
         (SDL legacy function)}
