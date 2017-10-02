@@ -1778,7 +1778,6 @@ module Window = struct
   let fullscreen_desktop = i sdl_window_fullscreen_desktop
   let opengl = i sdl_window_opengl
   let shown = i sdl_window_shown
-  let shown = i sdl_window_shown
   let hidden = i sdl_window_hidden
   let borderless = i sdl_window_borderless
   let resizable = i sdl_window_resizable
@@ -1789,6 +1788,7 @@ module Window = struct
   let mouse_focus = i sdl_window_mouse_focus
   let foreign = i sdl_window_foreign
   let allow_highdpi = i sdl_window_allow_highdpi
+  let vulkan = i sdl_window_vulkan
 end
 
 let create_window =
@@ -2152,6 +2152,63 @@ let gl_swap_window =
 
 let gl_unbind_texture =
   foreign "SDL_GL_UnbindTexture" (texture @-> returning zero_to_ok)
+
+(* Vulkan *)
+
+module Vulkan = struct
+
+  type instance = unit ptr
+  let instance = ptr void
+  let unsafe_ptr_of_instance = raw_address_of_ptr
+  let unsafe_instance_of_ptr x = ptr_of_raw_address x
+
+  type surface = uint64
+  let surface = int64_t
+  let unsafe_uint64_of_surface x = x
+  let unsafe_surface_of_uint64 x = x
+
+  let load_library =
+    foreign "SDL_Vulkan_LoadLibrary" (string_opt @-> returning zero_to_ok)
+
+  let unload_library =
+    foreign "SDL_Vulkan_UnloadLibrary" (void @-> returning void)
+
+  let get_instance_extensions =
+    foreign "SDL_Vulkan_GetInstanceExtensions"
+      (window @-> ptr int @-> ptr string @-> returning bool)
+
+  let get_instance_extensions window =
+    let n = allocate int 0 in
+    match get_instance_extensions window n
+            (Ctypes.coerce (ptr void) (ptr string) null) with
+    | false -> None
+    | true ->
+        let exts = allocate_n string (!@n) in
+        match get_instance_extensions window n exts with
+        | false -> None
+        | true -> Some CArray.(to_list @@ from_ptr exts (!@n))
+
+  let create_surface =
+    foreign "SDL_Vulkan_CreateSurface"
+      (window @-> instance @-> ptr surface @-> returning bool)
+
+  let create_surface window instance =
+    let s = allocate_n surface 1 in
+    if create_surface window instance s then
+      Some !@s
+    else
+    None
+
+  let get_drawable_size =
+    foreign "SDL_Vulkan_GetDrawableSize"
+      (window @-> ptr int @-> ptr int @-> returning void)
+
+  let get_drawable_size window =
+    let w = allocate int 0 in
+    let h = allocate int 0 in
+    get_drawable_size window w h;
+    !@w, !@h
+end
 
 (* Screen saver *)
 
