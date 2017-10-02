@@ -239,6 +239,9 @@ let clear_hints =
 let get_hint =
   foreign "SDL_GetHint" (string @-> returning string_opt)
 
+let get_hint_boolean =
+  foreign "SDL_GetHintBoolean" (string @-> bool @-> returning bool)
+
 let set_hint =
   foreign "SDL_SetHint" (string @-> string @-> returning bool)
 
@@ -937,6 +940,25 @@ let create_rgb_surface_from p ~w ~h ~depth ~pitch rmask gmask bmask amask =
   let p = to_voidp (bigarray_start array1 p) in
   create_rgb_surface_from p w h depth pitch rmask gmask bmask amask
 
+let create_rgb_surface_with_format =
+  foreign "SDL_CreateRGBSurfaceWithFormat"
+    (uint32_t @-> int @-> int @-> int @-> uint32_t @->
+     returning (some_to_ok surface_opt))
+
+let create_rgb_surface_with_format ~w ~h ~depth format =
+  create_rgb_surface_with_format Unsigned.UInt32.zero w h depth format
+
+let create_rgb_surface_with_format_from =
+  foreign "SDL_CreateRGBSurfaceWithFormatFrom"
+    (ptr void @-> int @-> int @-> int @-> int @-> uint32_t @->
+     returning (some_to_ok surface_opt))
+
+let create_rgb_surface_with_format_from p ~w ~h ~depth ~pitch format =
+  (* FIXME: we could try check bounds. *)
+  let pitch = ba_kind_byte_size (Bigarray.Array1.kind p) * pitch in
+  let p = to_voidp (bigarray_start array1 p) in
+  create_rgb_surface_with_format_from p w h depth pitch format
+
 let fill_rect =
   foreign "SDL_FillRect"
     (surface @-> ptr rect @-> int32_as_uint32_t @-> returning zero_to_ok)
@@ -1372,6 +1394,10 @@ let render_get_clip_rect rend =
 let render_is_clip_enabled =
   foreign "SDL_RenderIsClipEnabled" (renderer @-> returning bool)
 
+let render_get_integer_scale =
+ foreign "SDL_RenderGetIntegerScale"
+    (renderer @-> returning bool)
+
 let render_get_logical_size =
   foreign "SDL_RenderGetLogicalSize"
     (renderer @-> ptr int @-> ptr int @-> returning void)
@@ -1420,6 +1446,9 @@ let render_set_clip_rect =
 
 let render_set_clip_rect rend r =
   render_set_clip_rect rend (Rect.opt_addr r)
+
+let render_set_integer_scale =
+  foreign "SDL_RenderSetIntegerScale" (renderer @-> bool @-> returning zero_to_ok)
 
 let render_set_logical_size =
   foreign "SDL_RenderSetLogicalSize"
@@ -1715,6 +1744,15 @@ let get_display_mode d i =
   match get_display_mode d i (addr mode) with
   | Ok () -> Ok (display_mode_of_c mode) | Error _ as e -> e
 
+let get_display_usable_bounds =
+  foreign "SDL_GetDisplayUsableBounds"
+    (int @-> ptr rect @-> returning zero_to_ok)
+
+let get_display_usable_bounds i =
+  let r = make rect in
+  match get_display_usable_bounds i (addr r) with
+  | Ok () -> Ok r | Error _ as e -> e
+
 let get_num_display_modes =
   foreign "SDL_GetNumDisplayModes" (int @-> returning nat_to_ok)
 
@@ -1778,6 +1816,19 @@ let destroy_window =
 let get_window_brightness =
   foreign "SDL_GetWindowBrightness" (window @-> returning float)
 
+let get_window_borders_size =
+  foreign "SDL_GetWindowBordersSize"
+    (window @-> ptr int @-> ptr int @-> ptr int @-> ptr int @-> returning zero_to_ok)
+
+let get_window_borders_size w =
+  let top = allocate int 0 in
+  let left = allocate int 0 in
+  let bottom = allocate int 0 in
+  let right = allocate int 0 in
+  match get_window_borders_size w top bottom left right with
+  | Ok () -> Ok (!@ top, !@ left, !@ bottom, !@ right)
+  | Error _ as err -> err
+
 let get_window_display_index =
   foreign "SDL_GetWindowDisplayIndex" (window @-> returning nat_to_ok)
 
@@ -1836,6 +1887,15 @@ let get_window_minimum_size win =
   let h = allocate int 0 in
   get_window_minimum_size win w h;
   !@ w, !@ h
+
+let get_window_opacity =
+  foreign "SDL_GetWindowOpacity" (window @-> (ptr float) @-> returning zero_to_ok)
+
+let get_window_opacity win =
+  let x = allocate float 0. in
+  match get_window_opacity win x with
+  | Ok () -> Ok !@x
+  | Error _ as e -> e
 
 let get_window_pixel_format =
   foreign "SDL_GetWindowPixelFormat" (window @-> returning uint32_t)
@@ -1930,12 +1990,23 @@ let set_window_minimum_size =
 let set_window_minimum_size win ~w ~h =
   set_window_minimum_size win w h
 
+let set_window_modal_for =
+  foreign "SDL_SetWindowModalFor" ( window @-> window @-> returning zero_to_ok)
+
+let set_window_modal_for ~modal ~parent = set_window_modal_for modal parent
+
+let set_window_opacity =
+  foreign "SDL_SetWindowOpacity" ( window @-> float @-> returning zero_to_ok)
+
 let set_window_position =
   foreign "SDL_SetWindowPosition"
     (window @-> int @-> int @-> returning void)
 
 let set_window_position win ~x ~y =
   set_window_position win x y
+
+let set_window_resizable =
+  foreign "SDL_SetWindowResizable" (window @-> bool @-> returning void)
 
 let set_window_size =
   foreign "SDL_SetWindowSize" (window @-> int @-> int @-> returning void)
