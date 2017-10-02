@@ -171,6 +171,7 @@ void consts (FILE *fd)
   int_v (SDL_WINDOW_MOUSE_FOCUS);
   int_v (SDL_WINDOW_FOREIGN);
   int_v (SDL_WINDOW_ALLOW_HIGHDPI);
+  int_v (SDL_WINDOW_VULKAN);
 
   int_v (SDL_WINDOWPOS_CENTERED);
   int_v (SDL_WINDOWPOS_UNDEFINED);

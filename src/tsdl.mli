@@ -1161,6 +1161,7 @@ module Window : sig
   val mouse_focus : flags
   val foreign : flags
   val allow_highdpi : flags
+  val vulkan: flags
 end
 
 val create_window : string -> ?x:int -> ?y:int -> w:int -> h:int ->
@@ -1440,6 +1441,30 @@ val gl_unbind_texture : texture -> unit result
 (** {{:http://wiki.libsdl.org/SDL_GL_UnbindTexture}SDL_GL_UnbindTexture}
     {b Warning} Segfaults on SDL 2.0.1
     see {{:https://bugzilla.libsdl.org/show_bug.cgi?id=2296}this report}.*)
+
+(** {2:vulkan Vulkan support} *)
+
+module Vulkan : sig
+
+  type instance
+  (** VkInstance *)
+
+  val unsafe_instance_of_ptr: nativeint -> instance
+  val unsafe_ptr_of_instance: instance -> nativeint
+
+  type surface
+  (** VkSurfaceKHR *)
+
+  val unsafe_surface_of_uint64: uint64 -> surface
+  val unsafe_uint64_of_surface: surface -> uint64
+
+  val load_library: string option -> unit result
+  val unload_library: unit -> unit
+  val get_instance_extensions: window -> string list option
+  val create_surface: window -> instance -> surface option
+  val get_drawable_size: window -> int * int
+end
+
 
 (** {2:screensaver Screen saver} *)
 
