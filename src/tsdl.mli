@@ -204,6 +204,9 @@ val clear_hints : unit -> unit
 val get_hint : Hint.t -> string option
 (** {{:http://wiki.libsdl.org/SDL_GetHint}SDL_GetHint} *)
 
+val get_hint_boolean : Hint.t -> bool -> bool
+(** {{:http://wiki.libsdl.org/SDL_GetHintBoolean}SDL_GetHintBoolean} ( 2.05.0 )*)
+
 val set_hint : Hint.t -> string -> bool
 (** {{:http://wiki.libsdl.org/SDL_SetHint}SDL_SetHint} *)
 
@@ -626,6 +629,17 @@ val create_rgb_surface_from : ('a, 'b) bigarray -> w:int -> h:int ->
     it must remain valid until {!free_surface} is called on the
     surface. *)
 
+val create_rgb_surface_with_format : w:int -> h:int -> depth:int ->
+  Pixel.format_enum -> surface result
+(** {{:http://wiki.libsdl.org/SDL_CreateRGBSurfaceWithFormat}
+    SDL_CreateRGBSurfaceWithFormat} ( 2.05.0 ) *)
+
+val create_rgb_surface_with_format_from : ('a, 'b) bigarray -> w:int -> h:int ->
+  depth:int -> pitch:int -> Pixel.format_enum -> surface result
+(** {{:http://wiki.libsdl.org/SDL_CreateRGBSurfaceWithFormatFrom}
+    SDL_CreateRGBSurfaceWithFormatFrom} ( 2.05.0 ) *)
+
+
 val fill_rect : surface -> rect option -> uint32 -> unit result
 (** {{:http://wiki.libsdl.org/SDL_FillRect}SDL_FillRect} *)
 
@@ -905,6 +919,10 @@ val render_fill_rects_ba : renderer -> (int32, Bigarray.int32_elt) bigarray ->
 val render_get_clip_rect : renderer -> rect
 (** {{:http://wiki.libsdl.org/SDL_RenderGetClipRect}SDL_RenderGetClipRect} *)
 
+val render_get_integer_scale : renderer -> bool
+(** {{:http://wiki.libsdl.org/SDL_RenderGetIntegerScale}SDL_RenderGetIntegerScale}
+    ( 2.05.0 ) *)
+
 val render_get_logical_size : renderer -> int * int
 (** {{:http://wiki.libsdl.org/SDL_RenderGetLogicalSize}
     SDL_RenderGetLogicalSize} *)
@@ -928,6 +946,10 @@ val render_read_pixels : renderer -> rect option -> Pixel.format_enum option ->
 
 val render_set_clip_rect : renderer -> rect option -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderSetClipRect}SDL_RenderSetClipRect} *)
+
+val render_set_integer_scale : renderer -> bool -> unit result
+(** {{:http://wiki.libsdl.org/SDL_RenderSetIntegerScale}SDL_RenderSetIntegerScale}
+    ( 2.05.0 ) *)
 
 val render_set_logical_size : renderer -> int -> int -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderSetLogicalSize}
@@ -1086,6 +1108,10 @@ val get_display_mode : int -> int -> display_mode result
 val get_display_name : int -> string result
 (** {{:http://wiki.libsdl.org/SDL_GetDisplayName}SDL_GetDisplayName} *)
 
+val get_display_usable_bounds : int -> rect result
+(** {{:http://wiki.libsdl.org/SDL_GetDisplayUsableBouds}
+    SDL_GetDisplayUsableBouds} ( 2.05.0 ) *)
+
 val get_num_display_modes : int -> int result
 (** {{:http://wiki.libsdl.org/SDL_GetNumDisplayModes}SDL_GetNumDisplayModes} *)
 
@@ -1151,6 +1177,10 @@ val create_window_and_renderer : w:int -> h:int -> Window.flags ->
 val destroy_window : window -> unit
 (** {{:http://wiki.libsdl.org/SDL_DestroyWindow}SDL_DestroyWindow} *)
 
+val get_window_borders_size : window -> (int * int * int * int) result
+(** {{:http://wiki.libsdl.org/SDL_GetWindowBordersSize}
+    SDL_GetWindowBordersSize} ( 2.05.0 ) *)
+
 val get_window_brightness : window -> float
 (** {{:http://wiki.libsdl.org/SDL_GetWindowBrightness}
     SDL_GetWindowBrightness} *)
@@ -1190,6 +1220,10 @@ val get_window_maximum_size : window -> int * int
 val get_window_minimum_size : window -> int * int
 (** {{:http://wiki.libsdl.org/SDL_GetWindowMinimumSize}
     SDL_GetWindowMinimumSize} *)
+
+val get_window_opacity : window -> float result
+(** {{:http://wiki.libsdl.org/SDL_GetWindowOpacity}SDL_GetWindowOpacity}
+    ( 2.05.0 ) *)
 
 val get_window_pixel_format : window -> Pixel.format_enum
 (** {{:http://wiki.libsdl.org/SDL_GetWindowPixelFormat}
@@ -1258,8 +1292,20 @@ val set_window_minimum_size : window -> w:int -> h:int -> unit
 (** {{:http://wiki.libsdl.org/SDL_SetWindowMinimumSize}
     SDL_SetWindowMinimumSize} *)
 
+val set_window_modal_for : modal:window -> parent:window -> unit result
+(** {{:http://wiki.libsdl.org/SDL_SetWindowModalFor}SDL_SetWindowModalFor}
+    ( 2.05.0 ) *)
+
+val set_window_opacity : window -> float -> unit result
+(** {{:http://wiki.libsdl.org/SDL_SetWindowOpacity}SDL_SetWindowOpacity}
+    ( 2.05.0 ) *)
+
 val set_window_position : window -> x:int -> y:int -> unit
 (** {{:http://wiki.libsdl.org/SDL_SetWindowPosition}SDL_SetWindowPosition} *)
+
+val set_window_resizable : window -> bool -> unit
+(** {{:http://wiki.libsdl.org/SDL_SetWindowResizable}SDL_SetWindowResizable}
+    ( 2.05.0 ) *)
 
 val set_window_size : window -> w:int -> h:int -> unit
 (** {{:http://wiki.libsdl.org/SDL_SetWindowSize}SDL_SetWindowSize} *)
