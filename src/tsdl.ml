@@ -215,15 +215,20 @@ let was_init = function
 
 module Hint = struct
   type t = string
+  let audio_resampling_mode = sdl_hint_audio_resampling_mode
   let framebuffer_acceleration = sdl_hint_framebuffer_acceleration
   let idle_timer_disabled = sdl_hint_idle_timer_disabled
   let orientations = sdl_hint_orientations
+  let mouse_normal_speed_scale = sdl_hint_mouse_normal_speed_scale
+  let mouse_relative_speed_scale = sdl_hint_mouse_relative_speed_scale
   let render_driver = sdl_hint_render_driver
+  let render_logical_size_mode = sdl_hint_render_logical_size_mode
   let render_opengl_shaders = sdl_hint_render_opengl_shaders
   let render_scale_quality = sdl_hint_render_scale_quality
   let render_vsync = sdl_hint_render_vsync
   let no_signal_handlers = sdl_hint_no_signal_handlers
   let thread_stack_size = sdl_hint_thread_stack_size
+  let touch_mouse_events = sdl_hint_touch_mouse_events
   let window_frame_usable_while_cursor_hidden =
     sdl_hint_window_frame_usable_while_cursor_hidden
 
@@ -392,9 +397,19 @@ let () = seal rw_ops_struct
 
 type rw_ops = _rw_ops structure ptr
 
+let load_file_rw =
+  foreign "SDL_LoadFile_RW"
+    (rw_ops @-> int @-> bool @-> returning (some_to_ok string_opt))
+
 let rw_from_file =
   foreign "SDL_RWFromFile"
     (string @-> string @-> returning (some_to_ok rw_ops_opt))
+
+
+let load_file filename datasize = (* defined as a macro in SDL_rwops.h *)
+  match rw_from_file filename "rb" with
+  | Error _ as e -> e
+  | Ok rw -> load_file_rw rw datasize false
 
 let rw_close ops =
   let close = getf (!@ ops) rw_ops_close in
@@ -689,7 +704,31 @@ module Blend = struct
   let mode_blend = sdl_blendmode_blend
   let mode_add = sdl_blendmode_add
   let mode_mod = sdl_blendmode_mod
+
+  type operation = int
+  let add = sdl_blendoperation_add
+  let subtract = sdl_blendoperation_subtract
+  let rev_subtract = sdl_blendoperation_rev_subtract
+  let minimum = sdl_blendoperation_minimum
+  let maximum = sdl_blendoperation_maximum
+
+  type factor = int
+  let zero = sdl_blendfactor_zero
+  let one = sdl_blendfactor_one
+  let src_color = sdl_blendfactor_src_color
+  let one_minus_src_color = sdl_blendfactor_one_minus_src_color
+  let src_alpha = sdl_blendfactor_src_alpha
+  let one_minus_src_alpha = sdl_blendfactor_one_minus_src_alpha
+  let dst_color = sdl_blendfactor_dst_color
+  let one_minus_dst_color = sdl_blendfactor_one_minus_dst_color
+  let dst_alpha = sdl_blendfactor_dst_alpha
+  let one_minus_dst_alpha = sdl_blendfactor_one_minus_dst_alpha
+
 end
+
+let compose_custom_blend_mode =
+  foreign "SDL_ComposeCustomBlendMode"
+    (int @-> int @-> int @-> int @-> int @-> int @-> returning int)
 
 module Pixel = struct
   type format_enum = Unsigned.UInt32.t
@@ -954,10 +993,13 @@ let create_rgb_surface_with_format_from =
      returning (some_to_ok surface_opt))
 
 let create_rgb_surface_with_format_from p ~w ~h ~depth ~pitch format =
-  (* FIXME: we could try check bounds. *)
+  (* FIXME: check bounds? *)
   let pitch = ba_kind_byte_size (Bigarray.Array1.kind p) * pitch in
   let p = to_voidp (bigarray_start array1 p) in
   create_rgb_surface_with_format_from p w h depth pitch format
+
+let duplicate_surface =
+  foreign "SDL_DuplicateSurface" (surface @-> returning surface)
 
 let fill_rect =
   foreign "SDL_FillRect"
@@ -1788,6 +1830,11 @@ module Window = struct
   let mouse_focus = i sdl_window_mouse_focus
   let foreign = i sdl_window_foreign
   let allow_highdpi = i sdl_window_allow_highdpi
+  let mouse_capture = i sdl_window_mouse_capture
+  let always_on_top = i sdl_window_always_on_top
+  let skip_taskbar = i sdl_window_skip_taskbar
+  let utility = i sdl_window_utility
+  let popup_menu = i sdl_window_popup_menu
   let vulkan = i sdl_window_vulkan
 end
 
@@ -3268,6 +3315,20 @@ module Joystick_power_level = struct
   let max = sdl_joystick_power_max
 end
 
+module Joystick_type = struct
+  type t = int
+  let unknown        = sdl_joystick_type_unknown
+  let gamecontroller = sdl_joystick_type_gamecontroller
+  let wheel          = sdl_joystick_type_wheel
+  let arcade_stick   = sdl_joystick_type_arcade_stick
+  let flight_stick   = sdl_joystick_type_flight_stick
+  let dance_pad      = sdl_joystick_type_dance_pad
+  let guitar         = sdl_joystick_type_guitar
+  let drum_kit       = sdl_joystick_type_drum_kit
+  let arcade_pad     = sdl_joystick_type_arcade_pad
+  let throttle      = sdl_joystick_type_throttle
+end
+
 let joystick_close =
   foreign "SDL_JoystickClose" (joystick @-> returning void)
 
@@ -3293,6 +3354,9 @@ let joystick_get_attached =
 let joystick_get_axis =
   foreign "SDL_JoystickGetAxis" (joystick @-> int @-> returning int16_t)
 
+let joystick_get_axis_initial_state =
+  foreign "SDL_JoystickGetAxisInitialState" (joystick @-> int @-> returning int16_t)
+
 let joystick_get_ball =
   foreign "SDL_JoystickGetBall"
     (joystick @-> int @-> (ptr int) @-> (ptr int) @-> returning int)
@@ -3309,6 +3373,21 @@ let joystick_get_button =
 
 let joystick_get_device_guid =
   foreign "SDL_JoystickGetDeviceGUID" (int @-> returning joystick_guid)
+
+let joystick_get_device_product =
+  foreign "SDL_JoystickGetDeviceProduct" (int @-> returning int_as_uint16_t)
+
+let joystick_get_device_product_version =
+  foreign "SDL_JoystickGetDeviceProductVersion" (int @-> returning int_as_uint16_t)
+
+let joystick_get_device_type =
+  foreign "SDL_JoystickGetDeviceType" (int @-> returning int)
+
+let joystick_get_device_instance_id =
+  foreign "SDL_JoystickGetDeviceInstanceID" (int @-> returning joystick_id)
+
+let joystick_get_device_vendor =
+  foreign "SDL_JoystickGetDeviceVendor" (int @-> returning int_as_uint16_t)
 
 let joystick_get_guid =
   foreign "SDL_JoystickGetGUID" (joystick @-> returning joystick_guid)
@@ -3328,6 +3407,18 @@ let joystick_get_guid_string guid =
 
 let joystick_get_hat =
   foreign "SDL_JoystickGetHat" (joystick @-> int @-> returning int_as_uint8_t)
+
+let joystick_get_product =
+  foreign "SDL_JoystickGetProduct" (joystick @-> returning int_as_uint16_t)
+
+let joystick_get_product_version =
+  foreign "SDL_JoystickGetProductVersion" (joystick @-> returning int_as_uint16_t)
+
+let joystick_get_type =
+  foreign "SDL_JoystickGetType" (joystick @-> returning int)
+
+let joystick_get_vendor =
+  foreign "SDL_JoystickGetVendor" (joystick @-> returning int_as_uint16_t)
 
 let joystick_instance_id =
   foreign "SDL_JoystickInstanceID" (joystick @-> returning joystick_id)
@@ -3482,15 +3573,31 @@ let game_controller_get_joystick =
   foreign "SDL_GameControllerGetJoystick"
     (game_controller @-> returning (some_to_ok joystick_opt))
 
+let game_controller_get_product =
+  foreign "SDL_GameControllerGetProduct"
+    (game_controller @-> returning int_as_uint16_t)
+
+let game_controller_get_product_version =
+  foreign "SDL_GameControllerGetProductVersion"
+    (game_controller @-> returning int_as_uint16_t)
+
 let game_controller_get_string_for_axis =
   foreign "SDL_GameControllerGetStringForAxis" (int @-> returning string_opt)
 
 let game_controller_get_string_for_button =
   foreign "SDL_GameControllerGetStringForButton" (int @-> returning string_opt)
 
+let game_controller_get_vendor =
+  foreign "SDL_GameControllerGetVendor"
+    (game_controller @-> returning int_as_uint16_t)
+
 let game_controller_mapping =
   foreign "SDL_GameControllerMapping"
     (game_controller @-> returning (some_to_ok string_opt))
+
+let game_controller_mapping_for_index =
+  foreign "SDL_GameControllerMappingForIndex"
+    (int @-> returning (some_to_ok string_opt))
 
 let game_controller_mapping_for_guid =
   foreign "SDL_GameControllerMappingForGUID"
@@ -3503,6 +3610,9 @@ let game_controller_name =
 let game_controller_name_for_index =
   foreign "SDL_GameControllerNameForIndex"
     (int @-> returning (some_to_ok string_opt))
+
+let game_controller_num_mappings =
+  foreign "SDL_GameControllerNumMappings" (void @-> returning int)
 
 let game_controller_open =
   foreign "SDL_GameControllerOpen"
@@ -4977,6 +5087,9 @@ let has_avx2 =
 
 let has_mmx =
   foreign "SDL_HasMMX" (void @-> returning bool)
+
+let has_neon =
+  foreign "SDL_HasNEON" (void @-> returning bool)
 
 let has_rdtsc =
   foreign "SDL_HasRDTSC" (void @-> returning bool)
