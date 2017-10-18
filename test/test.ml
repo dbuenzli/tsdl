@@ -32,8 +32,11 @@ let test_hints () =
   assert (Sdl.get_hint Sdl.Hint.framebuffer_acceleration = (Some "1"));
   let unique_hint = "ef0386b3-a8c3-4200-9393-f6b6bd9a4194" in
   assert (Sdl.get_hint unique_hint = None);
+  assert (Sdl.get_hint_boolean unique_hint true);
   assert (Sdl.set_hint_with_priority unique_hint "bli" Sdl.Hint.override);
   assert (Sdl.get_hint unique_hint = Some "bli");
+  assert (Sdl.set_hint_with_priority unique_hint "true" Sdl.Hint.override);
+  assert (Sdl.get_hint_boolean unique_hint false);
   Sdl.clear_hints ();
   assert (Sdl.get_hint unique_hint = None);
   ()
@@ -359,7 +362,16 @@ let test_surfaces () =
               assert (ba.{0} = 0x00FF0000l)
           end;
       end;
+      let s1 = Sdl.duplicate_surface s0 in
       Sdl.free_surface s0;
+      Sdl.free_surface s1
+  end;
+  begin match Sdl.create_rgb_surface_with_format
+                ~w:256 ~h:256 ~depth:32 Sdl.Pixel.format_rgba8888 with
+  | Error `Msg e -> log_err "  Could not create surface: %s" e
+  | Ok s ->
+      assert (Sdl.get_surface_format_enum s = Sdl.Pixel.format_rgba8888);
+      Sdl.free_surface s
   end;
   let pixels = create_bigarray Bigarray.int32 (256 * 256) in
   begin match Sdl.create_rgb_surface_from pixels ~w:256 ~h:256 ~depth:32
@@ -379,6 +391,14 @@ let test_surfaces () =
   with
   | Error (`Msg e) -> log_err " Could not convert pixels: %s" e
   | Ok () -> ()
+  end;
+  begin match Sdl.create_rgb_surface_with_format_from pixels
+                ~w:256 ~h:256 ~depth:32 ~pitch:256 Sdl.Pixel.format_rgba8888 with
+  | Error `Msg e -> log_err "  Could not create surface: %s" e
+  | Ok s ->
+      assert (Sdl.get_surface_format_enum s = Sdl.Pixel.format_rgba8888);
+      assert (Sdl.get_surface_pitch s = 1024);
+      Sdl.free_surface s
   end;
   ()
 
@@ -417,8 +437,11 @@ let test_renderers () =
           log " Render target supported: %b" (Sdl.render_target_supported r);
           let rect = Sdl.Rect.create 20 30 20 20 in
           assert (Sdl.render_set_clip_rect r (Some rect) = Ok ());
+          assert( Sdl.render_is_clip_enabled r);
           assert (Sdl.rect_equals (Sdl.render_get_clip_rect r) rect);
           assert (Sdl.render_set_clip_rect r None = Ok ());
+          assert (Sdl.render_set_integer_scale r true = Ok());
+          assert (Sdl.render_get_integer_scale r);
           assert (Sdl.render_set_logical_size r 320 240 = Ok ());
           assert (Sdl.render_get_logical_size r = (320, 240));
           assert (Sdl.render_get_scale r = (2., 2.));
@@ -430,6 +453,10 @@ let test_renderers () =
           assert (Sdl.render_set_viewport r None = Ok ());
           assert (Sdl.set_render_draw_blend_mode r Sdl.Blend.mode_add = Ok ());
           assert (Sdl.get_render_draw_blend_mode r = Ok Sdl.Blend.mode_add);
+          let custom_blend = Sdl.compose_custom_blend_mode
+              Sdl.Blend.src_alpha Sdl.Blend.one_minus_src_alpha Sdl.Blend.add
+              Sdl.Blend.zero Sdl.Blend.dst_alpha Sdl.Blend.add in
+          assert (Sdl.set_render_draw_blend_mode r custom_blend = Ok ());
           assert (Sdl.set_render_draw_blend_mode r Sdl.Blend.mode_blend =Ok());
           assert (Sdl.set_render_draw_color r 0x50 0xC8 0x78 0xFF = Ok ());
           assert (Sdl.get_render_draw_color r = Ok (0x50, 0xC8, 0x78, 0xFF));
@@ -611,6 +638,10 @@ let test_displays () =
         | Error (`Msg e) -> log_err "  Could not get display bounds: %s" e
         | Ok r -> log "  Bounds: @[%a@]" Fmts.pp_rect r
         end;
+        begin match Sdl.get_display_usable_bounds d with
+        | Error (`Msg e) -> log_err "  Could not get display usable bounds: %s" e
+        | Ok r -> log "  Usable bounds: @[%a@]" Fmts.pp_rect r
+        end;
         begin match Sdl.get_current_display_mode d with
         | Error (`Msg e) -> log_err "  Could not get display mode: %s" e
         | Ok m -> log "  Current mode: @[%a@]" Fmts.pp_display_mode m;
@@ -618,6 +649,10 @@ let test_displays () =
         begin match Sdl.get_desktop_display_mode d with
         | Error (`Msg e) -> log_err " Could not get desktop display mode: %s" e
         | Ok m -> log "  Desktop mode: @[%a@]" Fmts.pp_display_mode m;
+        end;
+        begin match Sdl.get_display_dpi d with
+        | Error (`Msg e) -> log_err " Could not get desktop display dpi: %s" e
+        | Ok (diag,h,v) -> log "  Dpi: @[%f,%f,%f@]" diag h v;
         end;
         begin match Sdl.get_current_display_mode d with
         | Error (`Msg e) -> log_err "  Could not get display mode: %s" e
@@ -668,6 +703,10 @@ let test_windows () =
       | Error (`Msg e) -> log_err " Could not set window brightness: %s" e
       | Ok () -> assert (Sdl.get_window_brightness w = 0.5)
       end;
+      begin match Sdl.set_window_opacity w 0.5 with
+      | Error (`Msg e) -> log_err " Could not set window opacity: %s" e
+      | Ok () -> assert (Sdl.get_window_opacity w = Ok 0.5)
+      end;
       begin match Sdl.get_window_display_index w with
       | Error (`Msg e) -> log_err " Could not get display index: %s" e
       | Ok d -> log " Window display index: %d" d;
@@ -711,8 +750,15 @@ let test_windows () =
           | Ok () -> ()
           end
       end;
+      begin match Sdl.get_window_borders_size w with
+      | Error (`Msg e) -> log_err " Could not get window boders size: %s" e
+      | Ok (top,left,bottom,right) ->
+          log "Window borders size: (%d, %d, %d, %d)" top left bottom right
+      end;
       Sdl.set_window_grab w true;
-      assert(Sdl.get_window_grab w);
+      let w' = Sdl.unsafe_ptr_of_window ( Sdl.get_grabbed_window ()) in
+      assert (Sdl.get_window_grab w);
+      assert (Sdl.unsafe_ptr_of_window w = w');
       Sdl.set_window_maximum_size w ~w:700 ~h:600;
       assert (Sdl.get_window_maximum_size w = (700, 600));
       Sdl.set_window_minimum_size w ~w:10 ~h:20;
@@ -947,6 +993,7 @@ let test_mouse () =
       ignore (Sdl.show_cursor true);
       ignore (Sdl.get_cursor_shown ());
       Sdl.pump_events ();
+      assert ( Sdl.warp_mouse_global 50 50 = Ok () );
       Sdl.warp_mouse_in_window None 50 50;
       let current_cursor = Sdl.get_cursor () in
       let default_cursor = Sdl.get_default_cursor () in
@@ -990,6 +1037,7 @@ let test_mouse () =
       end;
       ignore (Sdl.get_mouse_state ());
       ignore (Sdl.get_relative_mouse_state ());
+      ignore (Sdl.get_global_mouse_state ());
       let rm = Sdl.get_relative_mouse_mode () in
       begin match Sdl.set_relative_mouse_mode (not rm) with
       | Error (`Msg e) -> log_err " Could not set relative mouse mode: %s" e
@@ -1036,20 +1084,41 @@ let test_joysticks () =
       begin match Sdl.num_joysticks () with
       | Error (`Msg e) -> log_err " Could not get number of joysticks: %s" e
       | Ok count ->
-          for i = 0 to count - 1 do match Sdl.joystick_open i with
+          for i = 0 to count - 1 do
+            let guid = Sdl.joystick_get_device_guid i in
+            let guid_str = Sdl.joystick_get_guid_string guid in
+            let product = Sdl.joystick_get_device_product i in
+            let product_version = Sdl.joystick_get_device_product_version i in
+            let vendor = Sdl.joystick_get_device_vendor i in
+            let id = Sdl.joystick_get_device_instance_id i in
+            let typ = Sdl.joystick_get_device_type i in
+            log " Joystick %ld: %d, %s, %d-%d/%d, %a" id i
+              (Sdl.joystick_get_guid_string guid)
+              product product_version vendor
+              Fmts.pp_joystick_type typ;
+          match Sdl.joystick_open i with
           | Error (`Msg e) -> log_err " Could not open joystick: %s" e
           | Ok j ->
               let guid = Sdl.joystick_get_guid j in
-              let guid_str = Sdl.joystick_get_guid_string guid in
+              assert ( Sdl.joystick_get_guid_string guid = guid_str );
+              assert ( product = Sdl.joystick_get_product j);
+              assert (product_version = Sdl.joystick_get_product_version j);
+              assert ( vendor = Sdl.joystick_get_vendor j);
+              assert (typ = Sdl.joystick_get_type j);
+              let power_level = Sdl.joystick_current_power_level j in
               let name = match Sdl.joystick_name j with
               | Error (`Msg e) ->
                   log_err " Could not get joystick name: %s" e; "unknown"
               | Ok n -> n
               in
-              log "Joystick %d %s %s" i name guid_str;
+              log " Joystick %d %s %s" i name guid_str;
+              log " Joystick product id:%d-%d" product product_version;
+              log " Joystick vendor %d" vendor;
+              log " Joystick type:%a" Fmts.pp_joystick_type  typ;
+              log " Joystick power level:%a" Fmts.pp_joystick_power_level power_level;
               ignore (Sdl.joystick_get_guid_from_string guid_str);
               assert (Sdl.joystick_name j = Sdl.joystick_name_for_index i);
-              ignore (Sdl.joystick_instance_id j);
+              assert (Sdl.joystick_instance_id j = Ok id);
               ignore (Sdl.joystick_get_attached j);
               begin match Sdl.joystick_num_axes j with
               | Error (`Msg e) -> log_err " Could not get num axes: %s" e
@@ -1110,7 +1179,11 @@ let test_game_controllers () =
                     log_err "Could not get controller name: %s" e; "unknown"
                 | Ok n -> n
                 in
+                let product = Sdl.game_controller_get_product c in
+                let product_version = Sdl.game_controller_get_product_version c in
+                let vendor = Sdl.game_controller_get_vendor c in
                 log " Controller %d %s" i name;
+                log " Product %d-%d, vendor:%d" product product_version vendor;
                 ignore (Sdl.game_controller_mapping c);
                 ignore (Sdl.game_controller_get_joystick c);
                 ignore (Sdl.game_controller_get_button c
@@ -1124,6 +1197,13 @@ let test_game_controllers () =
                 ignore (Sdl.game_controller_get_attached c);
                 assert (Sdl.game_controller_name c =
                         Sdl.game_controller_name_for_index i);
+                let mappings = Sdl.game_controller_num_mappings () in
+                if mappings > 0 then
+                  match Sdl.game_controller_mapping_for_index 0 with
+                  | Ok s -> log "Game controller mapping %d: %s" i s
+                  | Error `Msg e ->
+                      log_err "Could not get game controller mapping %d: %s" i e
+                ;
                 Sdl.game_controller_close c
           done;
       end;
@@ -1343,7 +1423,8 @@ let test_platform_cpu_info () =
   | Ok s -> Printf.sprintf "%d" s
   in
   log " CPU: @[count:%d@ RAM:%d@ cache-line-size:%s@ 3DNow:%b@ AltiVec:%b@ \
-       MMX:%b@ RDTSC:%b@ SSE:%b@ SSE2:%b@ SSE3:%b@ SSE41:%b@ SSE42:%b@]"
+       MMX:%b@ RDTSC:%b@ SSE:%b@ SSE2:%b@ SSE3:%b@ SSE41:%b@ SSE42:%b \
+       AVX:%b AVX2:%b NEON:%b @]"
     (Sdl.get_cpu_count ())
     (Sdl.get_system_ram ())
     cache_line_size
@@ -1356,6 +1437,9 @@ let test_platform_cpu_info () =
     (Sdl.has_sse3 ())
     (Sdl.has_sse41 ())
     (Sdl.has_sse42 ())
+    (Sdl.has_avx ())
+    (Sdl.has_avx2 ())
+    (Sdl.has_neon ())
 
 let test_power_info () =
   log "Testing power information";
