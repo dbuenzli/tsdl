@@ -149,8 +149,7 @@ module Hint : sig
   type t = string
 
   val audio_resampling_mode : t
-  (** {{:http://wiki.libsdl.org/SDL_HINT_AUDIO_RESAMPLING_MODE}
-       SDL_HINT_AUDIO_RESAMPLING_MODE} ( 2.06.0 ) *)
+  (** ( 2.06.0 ) *)
 
   val framebuffer_acceleration : t
   (** {{:http://wiki.libsdl.org/SDL_HINT_FRAMEBUFFER_ACCELERATION}
@@ -161,12 +160,10 @@ module Hint : sig
        SDL_HINT_IDLE_TIMER_DISABLED} *)
 
   val mouse_normal_speed_scale : t
-  (** {{:http://wiki.libsdl.org/SDL_HINT_MOUSE_NORMAL_SPEED_SCALE}
-       SDL_HINT_MOUSE_NORMAL_SPEED_SCALE} ( 2.06.0 ) *)
+  (** ( 2.06.0 ) *)
 
   val mouse_relative_speed_scale : t
-  (** {{:http://wiki.libsdl.org/SDL_HINT_MOUSE_NORMAL_SPEED_SCALE}
-       SDL_HINT_MOUSE_NORMAL_SPEED_SCALE} ( 2.06.0 ) *)
+  (** ( 2.06.0 ) *)
 
   val orientations : t
   (** {{:http://wiki.libsdl.org/SDL_HINT_ORIENTATIONS}
@@ -177,8 +174,7 @@ module Hint : sig
       SDL_HINT_RENDER_DRIVER} *)
 
   val render_logical_size_mode : t
-  (** {{:http://wiki.libsdl.org/SDL_HINT_RENDER_LOGICAL_SIZE_MODE}
-      SDL_HINT_RENDER_LOGICAL_SIZE_MODE} ( 2.06.0 ) *)
+  (**( 2.06.0 ) *)
 
   val render_opengl_shaders : t
   (** {{:http://wiki.libsdl.org/SDL_HINT_RENDER_OPENGL_SHADERS}
@@ -201,8 +197,7 @@ module Hint : sig
       SDL_HINT_THREAD_STACK_SIZE} ( 2.04.0 ) *)
 
   val touch_mouse_events : t
-  (** {{:http://wiki.libsdl.org/SDL_HINT_TOUCH_MOUSE_EVENTS}
-      SDL_HINT_TOUCH_MOUSE_EVENTS} ( 2.06.0 ) *)
+  (** ( 2.06.0 ) *)
 
   val window_frame_usable_while_cursor_hidden: t
   (** {{:http://wiki.libsdl.org/SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN}
@@ -330,10 +325,10 @@ type rw_ops
 (** {{:https://wiki.libsdl.org/SDL_RWops}SDL_RWops} *)
 
 val load_file: string -> int -> string result
-(** {{:https://wiki.libsdl.org/SDL_LoadFile}SDL_LoadFile} ( 2.06.0 ) *)
+(** ( 2.06.0 ) *)
 
 val load_file_rw: rw_ops -> int -> bool -> string result
-(** {{:https://wiki.libsdl.org/SDL_LoadFileRW}SDL_LoadFileRW} ( 2.06.0 ) *)
+(** ( 2.06.0 ) *)
 
 val rw_from_file : string -> string -> rw_ops result
 (** {{:https://wiki.libsdl.org/SDL_RWFromFile}SDL_RWFromFile} *)
@@ -699,7 +694,7 @@ val create_rgb_surface_with_format_from : ('a, 'b) bigarray -> w:int -> h:int ->
     SDL_CreateRGBSurfaceWithFormatFrom} ( 2.05.0 ) *)
 
 val duplicate_surface: surface -> surface
-(** {{:http://wiki.libsdl.org/SDL_DuplicateSurface}SDL_DuplicateSurface} (2.06.0) *)
+(** (2.06.0) *)
 
 val fill_rect : surface -> rect option -> uint32 -> unit result
 (** {{:http://wiki.libsdl.org/SDL_FillRect}SDL_FillRect} *)
@@ -2454,24 +2449,19 @@ val joystick_from_instance_id: joystick_id -> joystick
     ( 2.04.0 ) *)
 
 val joystick_get_device_instance_id: int -> joystick_id
-(** {{:http://wiki.libsdl.org/SDL_JoystickGetDeviceInstanceId}
-    SDL_JoystickGetDeviceInstanceId} ( 2.06.0 ) *)
+(** ( 2.06.0 ) *)
 
 val joystick_get_device_product: int -> int16
-(** {{:http://wiki.libsdl.org/SDL_JoystickGetDeviceProduct}
-    SDL_JoystickGetDeviceProduct} ( 2.06.0 ) *)
+(**( 2.06.0 ) *)
 
 val joystick_get_device_product_version: int -> int16
-(** {{:http://wiki.libsdl.org/SDL_JoystickGetDeviceProductVersion}
-    SDL_JoystickGetDeviceProductVersion} ( 2.06.0 ) *)
+(** ( 2.06.0 ) *)
 
 val joystick_get_device_type: int -> Joystick_type.t
-(** {{:http://wiki.libsdl.org/SDL_JoystickGetDeviceType}
-    SDL_JoystickGetDeviceType} ( 2.06.0 ) *)
+(** ( 2.06.0 ) *)
 
 val joystick_get_device_vendor: int -> int16
-(** {{:http://wiki.libsdl.org/SDL_JoystickGetDeviceVendor}
-    SDL_JoystickGetDeviceVendor} ( 2.06.0 ) *)
+(** ( 2.06.0 ) *)
 
 val joystick_get_event_state : unit -> toggle_state result
 (** {{:http://wiki.libsdl.org/SDL_JoystickEventState}
@@ -2513,21 +2503,17 @@ val joystick_get_hat : joystick -> int -> Hat.t
 (** {{:http://wiki.libsdl.org/SDL_JoystickGetHat}SDL_JoystickGetHat} *)
 
 val joystick_get_product: joystick -> int16
-(** {{:http://wiki.libsdl.org/SDL_JoystickGetProduct}SDL_JoystickGetProduct}
-( 2.06.0) *)
+(** ( 2.06.0) *)
 
 val joystick_get_product_version: joystick -> int16
-(** {{:http://wiki.libsdl.org/SDL_JoystickGetProductVersion}
-    SDL_JoystickGetProductVersion}
-( 2.06.0) *)
+(** ( 2.06.0) *)
 
 val joystick_get_type: joystick -> Joystick_type.t
 (** {{:http://wiki.libsdl.org/SDL_JoystickGetType}SDL_JoystickGetType}
 ( 2.06.0) *)
 
 val joystick_get_vendor: joystick -> int16
-(** {{:http://wiki.libsdl.org/SDL_JoystickGetVendor}SDL_JoystickGetVendor}
-( 2.06.0) *)
+(** ( 2.06.0) *)
 
 
 val joystick_instance_id : joystick -> joystick_id result
@@ -2682,12 +2668,10 @@ val game_controller_get_joystick : game_controller -> joystick result
      SDL_GameControllerGetJoystick} *)
 
 val game_controller_get_product : game_controller -> uint16
-(**  {{:http://wiki.libsdl.org/SDL_GameControllerGetProduct}
-     SDL_GameControllerGetProduct} ( 2.06.0 ) *)
+(** ( 2.06.0 ) *)
 
 val game_controller_get_product_version : game_controller -> uint16
-(**  {{:http://wiki.libsdl.org/SDL_GameControllerGetProductVersion}
-     SDL_GameControllerGetProductVersion} ( 2.06.0 ) *)
+(** ( 2.06.0 ) *)
 
 val game_controller_get_string_for_axis : Controller.axis -> string option
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerGetStringForAxis}
@@ -2698,8 +2682,7 @@ val game_controller_get_string_for_button : Controller.button -> string option
      SDL_GameControllerGetStringForButton} *)
 
 val game_controller_get_vendor : game_controller -> uint16
-(**  {{:http://wiki.libsdl.org/SDL_GameControllerGetVendor}
-     SDL_GameControllerGetVendor} ( 2.06.0 ) *)
+(** ( 2.06.0 ) *)
 
 val game_controller_mapping : game_controller -> string result
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerMapping}
@@ -3655,9 +3638,7 @@ val has_mmx : unit -> bool
 (** {{:http://wiki.libsdl.org/SDL_HasMMX}SDL_HasMMX} *)
 
 val has_neon : unit -> bool
-(** {{:http://wiki.libsdl.org/SDL_HasNEON}SDL_HasNEON}
-    ( 2.06.0 )
-*)
+(** ( 2.06.0 ) *)
 
 val has_rdtsc : unit -> bool
 (** {{:http://wiki.libsdl.org/SDL_HasRDTSC}SDL_HasRDTSC} *)
