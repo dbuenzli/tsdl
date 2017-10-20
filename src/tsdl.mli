@@ -324,10 +324,10 @@ val get_revision_number : unit -> int
 type rw_ops
 (** {{:https://wiki.libsdl.org/SDL_RWops}SDL_RWops} *)
 
-val load_file: string -> int -> string result
+val load_file: string -> string result
 (** ( 2.06.0 ) *)
 
-val load_file_rw: rw_ops -> int -> bool -> string result
+val load_file_rw: rw_ops -> bool -> string result
 (** ( 2.06.0 ) *)
 
 val rw_from_file : string -> string -> rw_ops result

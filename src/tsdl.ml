@@ -399,17 +399,20 @@ type rw_ops = _rw_ops structure ptr
 
 let load_file_rw =
   foreign "SDL_LoadFile_RW"
-    (rw_ops @-> int @-> bool @-> returning (some_to_ok string_opt))
+    (rw_ops @-> ptr int @-> bool @-> returning (some_to_ok string_opt))
+
+let load_file_rw rw_ops close =
+  load_file_rw rw_ops (coerce (ptr void) (ptr int) null) close
 
 let rw_from_file =
   foreign "SDL_RWFromFile"
     (string @-> string @-> returning (some_to_ok rw_ops_opt))
 
 
-let load_file filename datasize = (* defined as a macro in SDL_rwops.h *)
+let load_file filename = (* defined as a macro in SDL_rwops.h *)
   match rw_from_file filename "rb" with
   | Error _ as e -> e
-  | Ok rw -> load_file_rw rw datasize false
+  | Ok rw -> load_file_rw rw true
 
 let rw_close ops =
   let close = getf (!@ ops) rw_ops_close in
