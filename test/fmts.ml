@@ -163,12 +163,22 @@ let pp_mouse_motion_event ppf e =
     Sdl.Event.(get e mouse_motion_xrel)
     Sdl.Event.(get e mouse_motion_yrel)
 
+let pp_mouse_wheel_direction ppf x =
+  if x = Sdl.Event.mouse_wheel_normal then
+    pp ppf "normal"
+  else if x = Sdl.Event.mouse_wheel_flipped then
+    pp ppf "flipped"
+  else
+  assert false
+
+
 let pp_mouse_wheel_event ppf e =
-  pp ppf "@[<1>mouse_wheel_event window_id:%d@ which:%ld@ (%d,%d)@]"
+  pp ppf "@[<1>mouse_wheel_event window_id:%d@ which:%ld@ (%d,%d) %a @]"
     Sdl.Event.(get e mouse_wheel_window_id)
     Sdl.Event.(get e mouse_wheel_which)
     Sdl.Event.(get e mouse_wheel_x)
     Sdl.Event.(get e mouse_wheel_y)
+    pp_mouse_wheel_direction Sdl.Event.(get e mouse_wheel_direction)
 
 let pp_multi_gesture_event ppf e =
   pp ppf "@[<1>multi_gesture_event touch_id:%Ld@ dtheta:%f@ ddist:%f@ \
@@ -269,6 +279,24 @@ let event_pp e =
   with Not_found -> cst "unknown"
 
 let pp_event ppf e = pp ppf "%a" (event_pp e) e
+
+let pp_joystick_power_level ppf lvl =
+  let open Sdl.Joystick_power_level in
+  pp ppf "%s" (List.assoc lvl
+                 [low, "low"; medium, "medium"; full, "full"; wired, "wired";
+                  max, "max"; unknown, "unknown"]
+              )
+
+let pp_joystick_type ppf ty =
+  let open Sdl.Joystick_type in
+  pp ppf "%s" (List.assoc ty
+                 [unknown,"unknown"; gamecontroller, "gamecontroller";
+                  wheel,"wheel";arcade_stick,"arcade_stick";
+                  flight_stick, "flight_stick";
+                  dance_pad,"dance_pad";guitar,"guitar";drum_kit, "drum_kit";
+                  arcade_pad,"arcade_pad"; throttle, "throttle" ]
+              )
+
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2013 Daniel C. Bünzli
