@@ -437,7 +437,7 @@ let test_renderers () =
           log " Render target supported: %b" (Sdl.render_target_supported r);
           let rect = Sdl.Rect.create 20 30 20 20 in
           assert (Sdl.render_set_clip_rect r (Some rect) = Ok ());
-          assert( Sdl.render_is_clip_enabled r);
+          assert (Sdl.render_is_clip_enabled r);
           assert (Sdl.rect_equals (Sdl.render_get_clip_rect r) rect);
           assert (Sdl.render_set_clip_rect r None = Ok ());
           assert (Sdl.render_set_integer_scale r true = Ok());
@@ -547,7 +547,7 @@ let test_textures () =
       with
       | Error (`Msg e) -> log_err " Could not create surface: %s" e
       | Ok s ->
-          assert(Sdl.fill_rect s None 0xFF0000FFl = Ok ());
+          assert (Sdl.fill_rect s None 0xFF0000FFl = Ok ());
           begin match Sdl.create_texture_from_surface r s with
           | Error (`Msg e) -> log_err " Could not create texture: %s" e
           | Ok t ->
@@ -993,7 +993,7 @@ let test_mouse () =
       ignore (Sdl.show_cursor true);
       ignore (Sdl.get_cursor_shown ());
       Sdl.pump_events ();
-      assert ( Sdl.warp_mouse_global 50 50 = Ok () );
+      assert (Sdl.warp_mouse_global 50 50 = Ok ());
       Sdl.warp_mouse_in_window None 50 50;
       let current_cursor = Sdl.get_cursor () in
       let default_cursor = Sdl.get_default_cursor () in
@@ -1100,10 +1100,10 @@ let test_joysticks () =
           | Error (`Msg e) -> log_err " Could not open joystick: %s" e
           | Ok j ->
               let guid = Sdl.joystick_get_guid j in
-              assert ( Sdl.joystick_get_guid_string guid = guid_str );
-              assert ( product = Sdl.joystick_get_product j);
+              assert (Sdl.joystick_get_guid_string guid = guid_str);
+              assert (product = Sdl.joystick_get_product j);
               assert (product_version = Sdl.joystick_get_product_version j);
-              assert ( vendor = Sdl.joystick_get_vendor j);
+              assert (vendor = Sdl.joystick_get_vendor j);
               assert (typ = Sdl.joystick_get_type j);
               let power_level = Sdl.joystick_current_power_level j in
               let name = match Sdl.joystick_name j with
