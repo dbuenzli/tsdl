@@ -8,8 +8,15 @@
 
     Consult the {{!conventions}binding conventions}, the
     {{!Sdl.coverage}binding coverage} and {{!examples}examples} of
-    use.  Given the thinness of the binding most functions are
-    documented by linking directly to SDL's own documentation.
+    use.
+
+    Given the thinness of the binding most functions are documented by
+    linking directly to SDL's own documentation. Unfortunately it
+    seems that the wiki that held it is no longer being updated. For
+    this reason latest API entry points no longer link to the
+    documentation for now (upstream
+    {{:https://bugzilla.libsdl.org/show_bug.cgi?id=3841}issue} about
+    the problem).
 
     Open the module to use it, this defines only the module [Sdl] in
     your scope.
@@ -56,6 +63,7 @@
     {- {{!Sdl.displays}Displays}}
     {- {{!Sdl.windows}Windows}}
     {- {{!Sdl.opengl}OpenGL contexts}}
+    {- {{!Sdl.vulkan}Vulkan}}
     {- {{!Sdl.screensaver}Screen saver}}
     {- {{!Sdl.messageboxes}Message boxes}}
     }}
@@ -1503,7 +1511,7 @@ val gl_unbind_texture : texture -> unit result
     {b Warning} Segfaults on SDL 2.0.1
     see {{:https://bugzilla.libsdl.org/show_bug.cgi?id=2296}this report}.*)
 
-(** {2:vulkan Vulkan support} *)
+(** {2:vulkan Vulkan} *)
 
 module Vulkan : sig
 
