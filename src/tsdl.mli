@@ -2411,7 +2411,7 @@ module Hat : sig
 end
 
 module Joystick_power_level: sig
-  (** {{https://wiki.libsdl.org/SDL_JoystickPowerLevel} Joystick power level}
+  (** {{:https://wiki.libsdl.org/SDL_JoystickPowerLevel} Joystick power level}
       ( 2.04.0 ) *)
 
   type t
