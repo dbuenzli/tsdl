@@ -41,7 +41,11 @@ or via `odig doc tsdl`.
 Sample programs are located in the `test` directory of the
 distribution. They can be built with:
 
-    ocamlbuild -use-ocamlfind tests.otarget
+    ./pkg/pkg.ml build --tests true
+
+and listed with
+
+    ./pkg/pkg.ml test --list
 
 The resulting binaries are in `_build/test` :
 
