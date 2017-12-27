@@ -1,6 +1,6 @@
 opam-version: "1.2"
 maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
-authors: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
+authors: ["The tsdl programmers"]
 homepage: "http://erratique.ch/software/tsdl"
 doc: "http://erratique.ch/software/tsdl/doc/Tsdl"
 dev-repo: "http://erratique.ch/repos/tsdl.git"
