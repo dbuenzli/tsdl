@@ -1,5 +1,8 @@
+v0.9.6 2017-12-27 La Forclaz (VS)
+---------------------------------
 
-
+- Add full support for 2.0.{4,5,6}. Thanks to Florian Angeletti who
+  made all the work.
 - Add Sdl.Init.nothing. Thanks to @sanette for the patch.
 
 v0.9.5 2017-07-24 Zagreb
