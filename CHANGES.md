@@ -1,3 +1,8 @@
+
+
+- Add `Message_box.button_no_default` button flag. Thanks to 
+  Simon Guilliams for the patch.
+
 v0.9.7 2019-07-19 Zagreb
 ------------------------
 

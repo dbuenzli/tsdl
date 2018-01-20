@@ -1500,6 +1500,8 @@ module Message_box : sig
   (** {1 Message box Buttons} *)
 
   type button_flags
+
+  val button_no_default : button_flags
   val button_returnkey_default : button_flags
   val button_escapekey_default : button_flags
 
