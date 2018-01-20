@@ -2280,6 +2280,7 @@ module Message_box = struct
   type button_flags = Unsigned.uint32
   let button_returnkey_default = i sdl_messagebox_button_returnkey_default
   let button_escapekey_default = i sdl_messagebox_button_escapekey_default
+  let button_no_default = i 0
 
   type button_data =
     { button_flags : button_flags;

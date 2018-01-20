@@ -1556,6 +1556,7 @@ module Message_box : sig
   type button_flags
   val button_returnkey_default : button_flags
   val button_escapekey_default : button_flags
+  val button_no_default : button_flags
 
   type button_data =
     { button_flags : button_flags;
