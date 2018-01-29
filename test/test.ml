@@ -914,6 +914,10 @@ let test_message_boxes human =
                button_id = 2;
                button_text = "Action" }
     in
+	let other = { button_flags = button_no_default;
+               button_id = 3;
+               button_text = "Other" }
+    in
     let color_scheme = { color_background = (255, 255, 255);
                          color_text = (255, 0, 0);
                          color_button_border = (0, 255, 0);
@@ -921,12 +925,12 @@ let test_message_boxes human =
                          color_button_selected = (0, 255, 255); }
     in
     { flags = warning; window = None; title = "Action";
-      message = "Do you want to action ?"; buttons = [undo; action];
+	  message = "Do you want to action ?"; buttons = [undo; action; other];
       color_scheme = Some color_scheme }
   in
   begin match Sdl.show_message_box d with
   | Error (`Msg e) -> log_err " Could not show message box: %s" e
-  | Ok 1 | Ok 2 -> ()
+  | Ok 1 | Ok 2 | Ok 3 -> ()
   | Ok _ -> assert false
   end;
   ()
