@@ -925,7 +925,7 @@ let test_message_boxes human =
                          color_button_selected = (0, 255, 255); }
     in
     { flags = warning; window = None; title = "Action";
-	  message = "Do you want to action ?"; buttons = [undo; action; other];
+      message = "Do you want to action ?"; buttons = [undo; action; other];
       color_scheme = Some color_scheme }
   in
   begin match Sdl.show_message_box d with
