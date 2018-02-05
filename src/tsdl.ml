@@ -2367,8 +2367,10 @@ module Message_box = struct
     set color_button_selected s.color_button_selected;
     st
 
+  let id = ref 0
   let data_to_c d =
-    let dt = make data in
+    let id = !id in
+    let dt = make ~finalise:(fun _ -> Printf.printf "FREE: %d\n%!" id) data in
     setf dt d_flags d.flags;
     setf dt d_window (match d.window with None -> null | Some w -> w);
     setf dt d_title d.title;
@@ -2387,11 +2389,15 @@ let show_message_box =
   foreign "SDL_ShowMessageBox"
     (ptr Message_box.data @-> ptr int @-> returning zero_to_ok)
 
+let id = ref (-1)
+
 let show_message_box d =
+  incr Message_box.id;
+  Printf.printf "IN: %d\n%!" !Message_box.id;
   let d = addr (Message_box.data_to_c d) in
   let ret = allocate int 0 in
   match show_message_box d ret with
-  | Ok () -> Ok (!@ ret) | Error _ as e -> e
+  | Ok () ->Printf.printf "OUT: %d\n%!" !Message_box.id; Ok (!@ ret) | Error _ as e -> e
 
 let show_simple_message_box =
   foreign "SDL_ShowSimpleMessageBox"
