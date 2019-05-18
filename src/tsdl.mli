@@ -3043,6 +3043,20 @@ module Event : sig
   val display_event_id : int field
   val display_data1 : int32 field
 
+  (** {2:sensor Sensor events} *)
+
+  val sensor_update : event_type
+
+  (** {3 {{:http://wiki.libsdl.org/SDL_SensorEvent}SDL_SensorEvent} fields} *)
+
+  val sensor_which : int32 field
+  val sensor_data0 : float field
+  val sensor_data1 : float field
+  val sensor_data2 : float field
+  val sensor_data3 : float field
+  val sensor_data4 : float field
+  val sensor_data5 : float field
+
   (** {2:window Window events} *)
 
   val window_event : event_type
@@ -3113,7 +3127,7 @@ module Event : sig
     | `Mouse_button_down | `Mouse_button_up | `Mouse_motion
     | `Mouse_wheel | `Multi_gesture | `Quit | `Sys_wm_event
     | `Text_editing | `Text_input | `Unknown of int | `User_event
-    | `Window_event | `Display_event ]
+    | `Window_event | `Display_event | `Sensor_update ]
 end
 
 val get_event_state : event_type -> toggle_state
