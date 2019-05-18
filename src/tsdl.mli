@@ -3033,6 +3033,16 @@ module Event : sig
   val user_window_id : int field
   val user_code : int field
 
+  (** {2:display Display events} *)
+
+  val display_event : event_type
+
+  (** {3 {{:http://wiki.libsdl.org/SDL_DisplayEvent}SDL_DisplayEvent} fields} *)
+
+  val display_display : int32 field
+  val display_event_id : int field
+  val display_data1 : int32 field
+
   (** {2:window Window events} *)
 
   val window_event : event_type
@@ -3103,7 +3113,7 @@ module Event : sig
     | `Mouse_button_down | `Mouse_button_up | `Mouse_motion
     | `Mouse_wheel | `Multi_gesture | `Quit | `Sys_wm_event
     | `Text_editing | `Text_input | `Unknown of int | `User_event
-    | `Window_event ]
+    | `Window_event | `Display_event ]
 end
 
 val get_event_state : event_type -> toggle_state
