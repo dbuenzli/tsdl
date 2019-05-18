@@ -3851,6 +3851,23 @@ module Event = struct
     let () = seal t
   end
 
+  module Sensor_event = struct
+    type t
+    let t : t structure typ = structure "SDL_SensorEvent"
+    let _ = field t "type" int_as_uint32_t
+    let _ = field t "timestamp" int32_as_uint32_t
+    let which = field t "which" int32_as_uint32_t
+    (* FIXME: No array here, see
+       https://github.com/ocamllabs/ocaml-ctypes/issues/113 *)
+    let data0 = field t "data0" float
+    let data1 = field t "data1" float
+    let data2 = field t "data2" float
+    let data3 = field t "data3" float
+    let data4 = field t "data4" float
+    let data5 = field t "data5" float
+    let () = seal t
+  end
+
   module Quit_event = struct
     type t
     let t : t structure typ = structure "SDL_QuitEvent"
@@ -3986,6 +4003,7 @@ module Event = struct
   let user_event = field t "user" User_event.t
   let window_event = field t "window" Window_event.t
   let display_event = field t "display" Display_event.t
+  let sensor_event = field t "sensor" Sensor_event.t
   let padding = field t "padding" (abstract "padding" tsdl_sdl_event_size 1)
   let () = seal t
 
@@ -4281,6 +4299,31 @@ module Event = struct
 
   let display_event = sdl_displayevent
 
+  (* Sensor event *)
+
+  let sensor_which =
+    F (sensor_event, Sensor_event.which)
+
+  let sensor_data0 =
+    F (sensor_event, Sensor_event.data0)
+
+  let sensor_data1 =
+    F (sensor_event, Sensor_event.data1)
+
+  let sensor_data2 =
+    F (sensor_event, Sensor_event.data2)
+
+  let sensor_data3 =
+    F (sensor_event, Sensor_event.data3)
+
+  let sensor_data4 =
+    F (sensor_event, Sensor_event.data4)
+
+  let sensor_data5 =
+    F (sensor_event, Sensor_event.data5)
+
+  let sensor_update = sdl_sensorupdate
+
   (* Render events *)
 
   let render_targets_reset = sdl_render_targets_reset
@@ -4343,7 +4386,8 @@ module Event = struct
                   user_event, `User_event;
                   quit, `Quit;
                   window_event, `Window_event;
-                  display_event, `Display_event; ]
+                  display_event, `Display_event;
+                  sensor_update, `Sensor_update; ]
     in
     List.fold_left add Imap.empty enums
 
