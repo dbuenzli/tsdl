@@ -3934,6 +3934,20 @@ module Event = struct
     let () = seal t
   end
 
+  module Display_event = struct
+    type t
+    let t : t structure typ = structure "SDL_DisplayEvent"
+    let _ = field t "type" int_as_uint32_t
+    let _ = field t "timestamp" int32_as_uint32_t
+    let display = field t "display" int32_as_uint32_t
+    let event = field t "event" int_as_uint8_t
+    let padding1 = field t "padding1" uint8_t
+    let padding2 = field t "padding2" uint8_t
+    let padding3 = field t "padding3" uint8_t
+    let data1 = field t "data1" int32_t
+    let () = seal t
+  end
+
   module Audio_device_event = struct
     type t
     let t : t structure typ = structure "SDL_AudioDevice"
@@ -3971,6 +3985,7 @@ module Event = struct
   let touch_finger_event = field t "tfinger" Touch_finger_event.t
   let user_event = field t "user" User_event.t
   let window_event = field t "window" Window_event.t
+  let display_event = field t "display" Display_event.t
   let padding = field t "padding" (abstract "padding" tsdl_sdl_event_size 1)
   let () = seal t
 
@@ -4253,7 +4268,20 @@ module Event = struct
   let window_event_enum id =
     try Imap.find id enum_of_window_event_id with Not_found -> `Unknown id
 
-  (* Redner events *)
+  (* Display event *)
+
+  let display_display =
+    F (display_event, Display_event.display)
+
+  let display_event_id =
+    F (display_event, Display_event.event)
+
+  let display_data1 =
+    F (display_event, Display_event.data1)
+
+  let display_event = sdl_displayevent
+
+  (* Render events *)
 
   let render_targets_reset = sdl_render_targets_reset
   let render_device_reset = sdl_render_device_reset
@@ -4314,7 +4342,8 @@ module Event = struct
                   text_input, `Text_input;
                   user_event, `User_event;
                   quit, `Quit;
-                  window_event, `Window_event; ]
+                  window_event, `Window_event;
+                  display_event, `Display_event; ]
     in
     List.fold_left add Imap.empty enums
 
