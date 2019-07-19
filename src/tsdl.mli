@@ -33,60 +33,7 @@
 
 (** {1:sdl SDL} *)
 
-(** SDL bindings.
-
-    {ul
-    {- {!Sdl.basics}
-    {ul
-    {- {{!section:Sdl.init}Initialization and shutdown}}
-    {- {{!Sdl.hints}Hints}}
-    {- {{!Sdl.errors}Errors}}
-    {- {{!Sdl.log}Log}}
-    {- {{!Sdl.version}Version}}
-    }}
-    {- {!Sdl.fileabstraction}
-    {ul
-    {- {{!Sdl.io}IO abstraction}}
-    {- {{!Sdl.fspaths}Filesystem paths}}
-    }}
-    {- {!Sdl.video}
-    {ul
-    {- {{!Sdl.colors}Colors}}
-    {- {{!Sdl.points}Points}}
-    {- {{!Sdl.rectangles}Rectangles}}
-    {- {{!Sdl.palettes}Pallettes}}
-    {- {{!Sdl.pixel_formats}Pixel formats}}
-    {- {{!Sdl.surfaces}Surfaces}}
-    {- {{!Sdl.renderers}Renderers}}
-    {- {{!Sdl.textures}Textures}}
-    {- {{!Sdl.videodrivers}Video drivers}}
-    {- {{!Sdl.displays}Displays}}
-    {- {{!Sdl.windows}Windows}}
-    {- {{!Sdl.opengl}OpenGL contexts}}
-    {- {{!Sdl.vulkan}Vulkan}}
-    {- {{!Sdl.screensaver}Screen saver}}
-    {- {{!Sdl.messageboxes}Message boxes}}
-    }}
-    {- {!Sdl.input}
-    {ul
-    {- {{!Sdl.keyboard}Keyboard}}
-    {- {{!Sdl.mouse}Mouse}}
-    {- {{!Sdl.touch}Touch and gestures}}
-    {- {{!Sdl.joystick}Joystick}}
-    {- {{!Sdl.gamecontroller}Game controller}}
-    {- {{!Sdl.events}Events}}
-    }}
-    {- {{!Sdl.forcefeedback}Force feedback}}
-    {- {{!Sdl.audio}Audio}
-    {ul
-    {- {{!Sdl.audiodrivers}Audio drivers}}
-    {- {{!Sdl.audiodevices}Audio devices}}
-    }}
-    {- {{!Sdl.timer}Timer}}
-    {- {!Sdl.platform}}
-    {- {{!Sdl.power}Power}}
-    {- {!Sdl.coverage}}}
-*)
+(** SDL bindings. *)
 module Sdl : sig
 
 (** {1:types Integer types, bigarrays and results} *)
