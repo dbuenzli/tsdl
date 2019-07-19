@@ -1,0 +1,10 @@
+{0 Tsdl {%html: <span class="version">%%VERSION%%</span>%}}
+
+Tsdl is an OCaml library providing thin bindings to the cross-platform
+SDL C library.
+
+{1:api API}
+
+{!modules:
+Tsdl
+}
