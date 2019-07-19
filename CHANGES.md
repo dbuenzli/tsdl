@@ -1,6 +1,8 @@
 
 
-- No longer build depend on `ocb-stubblr`.
+- Require OCaml 4.03 and drop
+- Drop `result` depency.
+- Drop `ocb-stubblr` dependency
 
 v0.9.6 2017-12-27 La Forclaz (VS)
 ---------------------------------

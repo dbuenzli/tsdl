@@ -99,7 +99,7 @@ type uint64 = int64
 type ('a, 'b) bigarray = ('a, 'b, Bigarray.c_layout) Bigarray.Array1.t
 (** The type for bigarrays.*)
 
-type 'a result = ('a, [ `Msg of string ]) Result.result
+type nonrec 'a result = ('a, [ `Msg of string ]) result
 (** The type for function results. In the error case,
     the string is what {!Sdl.get_error} returned. *)
 
@@ -3851,7 +3851,6 @@ This automatically loads the library and opens the [Tsdl] module.
     with SDL.
 {[
 open Tsdl
-open Result
 
 let main () = match Sdl.init Sdl.Init.video with
 | Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1

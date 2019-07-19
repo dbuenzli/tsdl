@@ -2,7 +2,6 @@
 (* Sample code provided by @psqu in issue #13. *)
 
 open Tsdl
-open Result
 
 let audio_freq    = 44100
 let audio_samples = 4096

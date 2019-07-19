@@ -83,8 +83,8 @@ let get_error =
   foreign "SDL_GetError" (void @-> returning string)
 
 (* SDL results *)
-open Result
-type 'a result = ( 'a, [ `Msg of string ] ) Result.result
+
+type nonrec 'a result = ( 'a, [ `Msg of string ] ) result
 
 let error () = Error (`Msg (get_error ()))
 
@@ -280,7 +280,7 @@ module Log = struct
   let category_custom = sdl_log_category_custom
 
   type priority = int
-  let priority_compare : int -> int -> int = Pervasives.compare
+  let priority_compare : int -> int -> int = compare
   let priority_verbose = sdl_log_priority_verbose
   let priority_debug = sdl_log_priority_debug
   let priority_info = sdl_log_priority_info

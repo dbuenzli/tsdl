@@ -6,7 +6,6 @@
 *)
 
 open Tsdl
-open Result
 
 let main () = match Sdl.init Sdl.Init.video with
 | Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1

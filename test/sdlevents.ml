@@ -4,8 +4,7 @@
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-open Tsdl;;
-open Result;;
+open Tsdl
 
 let log fmt = Format.printf (fmt ^^ "@.")
 let log_err fmt = Format.eprintf (fmt ^^ "@.")

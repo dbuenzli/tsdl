@@ -1,6 +1,6 @@
 version = "%%VERSION%%"
 description = "Thin bindings to SDL for OCaml"
-requires = "result ctypes ctypes.foreign"
+requires = "ctypes ctypes.foreign"
 archive(byte) = "tsdl.cma"
 archive(native) = "tsdl.cmxa"
 plugin(byte) = "tsdl.cma"

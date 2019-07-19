@@ -6,8 +6,7 @@
 
 (* Tsdl tests, should exit with 0. *)
 
-open Tsdl;;
-open Result;;
+open Tsdl
 
 (* Logging *)
 

@@ -6,7 +6,7 @@
 
 (* Formatters *)
 
-open Tsdl;;
+open Tsdl
 
 let button_state_str = function
 | s when s = Sdl.pressed -> "pressed"
