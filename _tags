@@ -1,22 +1,19 @@
 true: bin_annot, safe_string, thread
 
 <support> : include
-<support/consts_stub.c> : pkg-config(sdl2)
+<support/consts_stub.c> : use_sdl2
 <support/consts.{ml,native,byte}> : custom, link_consts_stub
-
 
 <src> : include
 <src/tsdl.{ml,mli}> : package(ctypes), package(result), thread
 <src/tsdl.ml> : sdl_consts
-<src/tsdl.cm{,x}a>: custom, thread, package(ctypes), package(ctypes.foreign), \
-  link_stubs(src/libtsdl)
-<src/tsdl.cm{,x}a> or <src/libtsdl.a>: pkg-config(sdl2), link_no_as_needed
-<src/libtsdl.a>: link_no_as_needed
+<src/tsdl.{cma,cmxa,cmxs}> : custom, thread, \
+ package(ctypes), package(ctypes.foreign), use_sdl2
 
+<src/libtsdl.*> : use_sdl2
 <src/tsdl_top.*> : package(compiler-libs.toplevel)
 
 <test> : include
 <test/*.ml>: package(result)
-<test/{sdlevents,test,min,test_audio,test_audio_queue,test_audio_capture}.{native,byte}> : package(ctypes), \
- package(ctypes.foreign), package(result), use_tsdl
-<test/test.byte> : custom
+<test/**> : package(ctypes), package(ctypes.foreign), package(result), \
+            use_sdl2

@@ -13,7 +13,6 @@ depends: [
   "ocamlfind" {build}
   "ocamlbuild" {build}
   "topkg" {build}
-  "ocb-stubblr" {build}
   "conf-sdl2"
   "result"
   "ctypes" {>= "0.9.0"}

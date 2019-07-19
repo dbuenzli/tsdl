@@ -1,3 +1,7 @@
+
+
+- No longer build depend on `ocb-stubblr`.
+
 v0.9.6 2017-12-27 La Forclaz (VS)
 ---------------------------------
 

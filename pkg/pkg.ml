@@ -1,7 +1,6 @@
 #!/usr/bin/env ocaml
 #use "topfind"
 #require "topkg"
-#require "ocb-stubblr.topkg"
 open Topkg
 
 let distrib =
@@ -9,10 +8,8 @@ let distrib =
   let watermarks = ("SDLVERSION", `String "2.0.6") :: Pkg.watermarks in
   Pkg.distrib ~watermarks ()
 
-let build = Pkg.build ~cmd:Ocb_stubblr_topkg.cmd ()
-
 let () =
-  Pkg.describe ~build "tsdl" ~distrib @@ fun c ->
+  Pkg.describe "tsdl" ~distrib @@ fun c ->
   Ok [
     Pkg.mllib ~api:["Tsdl"] "src/tsdl.mllib";
     Pkg.mllib ~api:[] "src/tsdl_top.mllib";
