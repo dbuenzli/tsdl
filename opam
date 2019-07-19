@@ -1,15 +1,15 @@
-opam-version: "1.2"
+opam-version: "2.0"
 maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
 authors: ["The tsdl programmers"]
-homepage: "http://erratique.ch/software/tsdl"
-doc: "http://erratique.ch/software/tsdl/doc/Tsdl"
-dev-repo: "http://erratique.ch/repos/tsdl.git"
+homepage: "https://erratique.ch/software/tsdl"
+doc: "https://erratique.ch/software/tsdl/doc/Tsdl"
+dev-repo: "https://erratique.ch/repos/tsdl.git"
 bug-reports: "https://github.com/dbuenzli/tsdl/issues"
 tags: [ "audio" "bindings" "graphics" "media" "opengl" "input" "hci"
         "org:erratique" ]
 license: "ISC"
-available: [ ocaml-version >= "4.02.0" ]
 depends: [
+  "ocaml" {>= "4.02.0"}
   "ocamlfind" {build}
   "ocamlbuild" {build}
   "topkg" {build}
@@ -20,4 +20,5 @@ depends: [
   "ctypes-foreign" ]
 build: [[
   "ocaml" "pkg/pkg.ml" "build"
-           "--pinned" "%{pinned}%" ]]
+           "--pinned" "%{pinned}%"
+]]
