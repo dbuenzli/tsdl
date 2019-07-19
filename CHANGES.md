@@ -1,6 +1,9 @@
+v0.9.7 2019-07-19 Zagreb
+------------------------
 
-
-- Require OCaml 4.03 and drop
+- Add support for `SDL_{Sensor,Display}Event`. Thanks to Florent
+  Monnier for the patches.
+- Require OCaml 4.03 and handle stdlib deprecations.
 - Drop `result` depency.
 - Drop `ocb-stubblr` dependency
 

@@ -13,7 +13,6 @@ Tsdl is distributed under the ISC license.
 [ctypes]: https://github.com/ocamllabs/ocaml-ctypes
 
 Home page: http://erratique.ch/software/tsdl  
-Contact: Daniel Bünzli `<daniel.buenzl i@erratique.ch>`
 
 
 ## Installation
