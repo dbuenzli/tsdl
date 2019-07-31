@@ -4345,6 +4345,21 @@ module Event = struct
 
   (* Event type enum *)
 
+  type enum =
+    [ `App_did_enter_background | `App_did_enter_foreground
+      | `App_low_memory | `App_terminating | `App_will_enter_background
+      | `App_will_enter_foreground | `Clipboard_update
+      | `Controller_axis_motion | `Controller_button_down
+      | `Controller_button_up | `Controller_device_added
+      | `Controller_device_remapped | `Controller_device_removed
+      | `Dollar_gesture | `Dollar_record | `Drop_file | `Finger_down
+      | `Finger_motion | `Finger_up | `Joy_axis_motion | `Joy_ball_motion
+      | `Joy_button_down | `Joy_button_up | `Joy_device_added
+      | `Joy_device_removed | `Joy_hat_motion | `Key_down | `Key_up
+      | `Mouse_button_down | `Mouse_button_up | `Mouse_motion
+      | `Mouse_wheel | `Multi_gesture | `Quit | `Sys_wm_event
+      | `Text_editing | `Text_input | `Unknown of int | `User_event
+      | `Window_event | `Display_event | `Sensor_update ]
   let enum_of_event_type =
     let add acc (k, v) = Imap.add k v acc in
     let enums = [ app_terminating, `App_terminating;
