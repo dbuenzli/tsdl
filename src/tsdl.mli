@@ -319,7 +319,7 @@ val unsafe_ptr_of_window : window -> nativeint
 (** {2:colors Colors} *)
 
 type color
-(** {{:http://wiki.libsdl.org/SDL_Rect}SDL_Color} *)
+(** {{:http://wiki.libsdl.org/SDL_Color}SDL_Color} *)
 
 module Color : sig
   val create : r:uint8 -> g:uint8 -> b:uint8 -> a:uint8 -> color
@@ -2397,11 +2397,13 @@ val joystick_close : joystick -> unit
 (** {{:http://wiki.libsdl.org/SDL_JoystickClose}SDL_JoystickClose} *)
 
 val joystick_current_power_level : joystick -> Joystick_power_level.t
-(** {{:http://wiki.libsdl.org/SDL_JoystickClose}SDL_JoystickCurrentPowerLevel}
+(** {{:http://wiki.libsdl.org/SDL_JoystickCurrentPowerLevel}
+    SDL_JoystickCurrentPowerLevel}
     ( 2.04.0 ) *)
 
 val joystick_from_instance_id: joystick_id -> joystick
-(** {{:http://wiki.libsdl.org/SDL_JoystickClose}SDL_JoystickFromInstanceId}
+(** {{:http://wiki.libsdl.org/SDL_JoystickFromInstanceID}
+    SDL_JoystickFromInstanceID}
     ( 2.04.0 ) *)
 
 val joystick_get_device_instance_id: int -> joystick_id
@@ -2466,7 +2468,7 @@ val joystick_get_product_version: joystick -> int16
 
 val joystick_get_type: joystick -> Joystick_type.t
 (** {{:http://wiki.libsdl.org/SDL_JoystickGetType}SDL_JoystickGetType}
-( 2.06.0) *)
+    ( 2.06.0) *)
 
 val joystick_get_vendor: joystick -> int16
 (** ( 2.06.0) *)
