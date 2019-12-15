@@ -2930,7 +2930,7 @@ module Event : sig
   val mouse_wheel_which : uint32 field
   val mouse_wheel_x : int field
   val mouse_wheel_y : int field
-  val mouse_wheel_direction: mouse_wheel_direction field (** 2.04 *)
+  val mouse_wheel_direction : mouse_wheel_direction field (** 2.04 *)
 
   (** {2:multigestureev Multi gesture events} *)
 
@@ -3013,11 +3013,13 @@ module Event : sig
   type window_event_id = int
   (** {{:https://wiki.libsdl.org/SDL_WindowEventID}SDL_WindowEventID} *)
 
-  val window_event_enum : window_event_id ->
+  type window_event_enum =
     [ `Close | `Enter | `Exposed | `Focus_gained | `Focus_lost | `Hidden
     | `Hit_test | `Leave | `Maximized | `Minimized | `Moved | `Resized
     | `Restored | `Shown | `Size_changed | `Take_focus
     | `Unknown of window_event_id ]
+
+  val window_event_enum : window_event_id -> window_event_enum
 
   val window_event_shown : window_event_id
   val window_event_hidden : window_event_id
@@ -3062,7 +3064,7 @@ module Event : sig
 
   (** {1:enum Event type enum} *)
 
-  val enum : event_type ->
+  type enum =
     [ `App_did_enter_background | `App_did_enter_foreground
     | `App_low_memory | `App_terminating | `App_will_enter_background
     | `App_will_enter_foreground | `Clipboard_update
@@ -3077,6 +3079,8 @@ module Event : sig
     | `Mouse_wheel | `Multi_gesture | `Quit | `Sys_wm_event
     | `Text_editing | `Text_input | `Unknown of int | `User_event
     | `Window_event | `Display_event | `Sensor_update ]
+
+  val enum : event_type -> enum
 end
 
 val get_event_state : event_type -> toggle_state
