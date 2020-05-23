@@ -5078,7 +5078,7 @@ let get_num_audio_devices =
   foreign "SDL_GetNumAudioDevices" (bool @-> returning nat_to_ok)
 
 let load_wav_rw =
-  foreign "SDL_LoadWAV_RW"
+  foreign ~release_runtime_lock:true "SDL_LoadWAV_RW"
     (rw_ops @-> int @-> ptr audio_spec @-> ptr (ptr void) @-> ptr uint32_t @->
      returning (some_to_ok (ptr_opt audio_spec)))
 
