@@ -44,7 +44,9 @@ let audio_setup () =
   (dev, buffer)
 
 let queue_and_start_audio device_id buffer =
-  Sdl.log "Size of buffer to queue: %d" (Bigarray.Array1.dim buffer);
+  let kind_size = Bigarray.kind_size_in_bytes (Bigarray.Array1.kind buffer) in
+  let size = Bigarray.Array1.dim buffer * kind_size in
+  Sdl.log "Byte size of buffer to queue: %d" size;
   match Sdl.queue_audio device_id buffer with
   | Ok () ->
       (* Let's query how much is queued up before we start playing. *)
