@@ -37,14 +37,14 @@ let audio_setup () =
   | Error _ -> Sdl.log "Can't open audio device"; exit 1
   | Ok (device_id, _) -> device_id
   in
-  (* Create a few seconds of audio data *)
-  let dim = channels * audio_freq * 10 in
+  let dim = channels * audio_freq in
   let buffer = Bigarray.(Array1.create int32 c_layout dim) in
   let () = create_audio buffer in
   (dev, buffer)
 
 let queue_and_start_audio device_id buffer =
-  Sdl.log "Size of buffer to queue: %d" (Bigarray.Array1.dim buffer);
+  (* multiply dim by 4 (int32 is 4 bytes), to account for queue_audio sizing. *)
+  Sdl.log "Size of buffer to queue: %d" (Bigarray.Array1.dim buffer * 4);
   match Sdl.queue_audio device_id buffer with
   | Ok () ->
       (* Let's query how much is queued up before we start playing. *)
