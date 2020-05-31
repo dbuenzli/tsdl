@@ -5127,7 +5127,8 @@ let queue_audio =
 
 let queue_audio dev ba =
   let len = Bigarray.Array1.dim ba in
-  queue_audio dev (to_voidp (bigarray_start array1 ba)) len
+  let kind_size = ba_kind_byte_size (Bigarray.Array1.kind ba) in
+  queue_audio dev (to_voidp (bigarray_start array1 ba)) (len * kind_size)
 
 let dequeue_audio =
   foreign "SDL_DequeueAudio"
@@ -5135,7 +5136,8 @@ let dequeue_audio =
 
 let dequeue_audio dev ba =
   let len = Bigarray.Array1.dim ba in
-  dequeue_audio dev (to_voidp (bigarray_start array1 ba)) len
+  let kind_size = ba_kind_byte_size (Bigarray.Array1.kind ba) in
+  dequeue_audio dev (to_voidp (bigarray_start array1 ba)) (len * kind_size)
 
 let get_queued_audio_size =
   foreign "SDL_GetQueuedAudioSize"

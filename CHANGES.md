@@ -1,4 +1,7 @@
 
+- Fix bug in `Sdl.{queue_audio,dequeue_audio}`, sizes 
+  were passed in terms of array length instead of bytes.
+  Thanks to Enguerrand Decorne for the report and the patch.
 - Release runtime lock during `Sdl.load_wav_rw`. Thanks 
   to Michael Bacarella for the patch.
 - Add `Message_box.button_no_default` button flag. Thanks to 
