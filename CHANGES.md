@@ -1,3 +1,5 @@
+v0.9.8 2020-06-19 Zagreb
+------------------------
 
 - Fix bug in `Sdl.{queue_audio,dequeue_audio}`, sizes 
   were passed in terms of array length instead of bytes.

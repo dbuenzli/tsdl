@@ -3,13 +3,8 @@
 #require "topkg"
 open Topkg
 
-let distrib =
-  (* FIXME OPAMv2, move this to an x-sdl-version field in the opam file. *)
-  let watermarks = ("SDLVERSION", `String "2.0.6") :: Pkg.watermarks in
-  Pkg.distrib ~watermarks ()
-
 let () =
-  Pkg.describe "tsdl" ~distrib @@ fun c ->
+  Pkg.describe "tsdl" @@ fun c ->
   Ok [
     Pkg.mllib ~api:["Tsdl"] "src/tsdl.mllib";
     Pkg.mllib ~api:[] "src/tsdl_top.mllib";

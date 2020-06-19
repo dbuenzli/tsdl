@@ -25,10 +25,7 @@
 
     {b References}
     {ul
-    {- {{:http://wiki.libsdl.org/APIByCategory}SDL API}}}
-
-    {e Release %%VERSION%% — SDL %%SDLVERSION%% —
-    {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    {- {{:http://wiki.libsdl.org/APIByCategory}SDL API}}} *)
 
 (** {1:sdl SDL} *)
 
