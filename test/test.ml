@@ -757,10 +757,14 @@ let test_windows () =
       | Ok (top,left,bottom,right) ->
           log "Window borders size: (%d, %d, %d, %d)" top left bottom right
       end;
+      (* Disable this it seems it fails on Linux, see the report in
+         https://github.com/dbuenzli/tsdl/issues/58 *)
+      (*
       Sdl.set_window_grab w true;
       let w' = Sdl.unsafe_ptr_of_window ( Sdl.get_grabbed_window ()) in
       assert (Sdl.get_window_grab w);
       assert (Sdl.unsafe_ptr_of_window w = w');
+      *)
       Sdl.set_window_maximum_size w ~w:700 ~h:600;
       assert (Sdl.get_window_maximum_size w = (700, 600));
       Sdl.set_window_minimum_size w ~w:10 ~h:20;
