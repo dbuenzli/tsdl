@@ -1,7 +1,6 @@
 /*---------------------------------------------------------------------------
    Copyright (c) 2013 The tsdl programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*/
 
 /* This is just here for ocamlbuild to generate a correct dlltsdl.so object */
