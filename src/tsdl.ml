@@ -512,6 +512,33 @@ module Point = struct
   | Some v -> addr v
 end
 
+(* Float Points *)
+
+type _fpoint
+type fpoint = _fpoint structure
+let fpoint : fpoint typ = structure "SDL_FPoint"
+let fpoint_x = field fpoint "x" float
+let fpoint_y = field fpoint "y" float
+let () = seal fpoint
+
+module FPoint = struct
+  let create ~x ~y =
+    let p = make fpoint in
+    setf p fpoint_x x;
+    setf p fpoint_y y;
+    p
+
+  let x p = getf p fpoint_x
+  let y p = getf p fpoint_y
+
+  let set_x p x = setf p fpoint_x x
+  let set_y p y = setf p fpoint_y y
+
+  let opt_addr = function
+  | None -> coerce (ptr void) (ptr fpoint) null
+  | Some v -> addr v
+end
+
 (* Rectangle *)
 
 type _rect

@@ -342,6 +342,17 @@ module Point : sig
   val set_y : point -> int -> unit
 end
 
+type fpoint
+(** structure SDL_FPoint *)(* from <SDL2/SDL_rect.h> *)
+
+module FPoint : sig
+  val create : x:float -> y:float -> fpoint
+  val x : fpoint -> float
+  val y : fpoint -> float
+  val set_x : fpoint -> float -> unit
+  val set_y : fpoint -> float -> unit
+end
+
 (** {2:rectangles
     {{:http://wiki.libsdl.org/CategoryRect}Rectangles}} *)
 
