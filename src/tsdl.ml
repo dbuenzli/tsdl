@@ -1443,6 +1443,10 @@ let render_draw_points r ps =
   let a = CArray.of_list point ps in
   render_draw_points r (to_voidp (CArray.start a)) count
 
+let render_draw_point_f =
+  foreign "SDL_RenderDrawPointF"
+    (renderer @-> float @-> float @-> returning zero_to_ok)
+
 let render_draw_rect =
   foreign "SDL_RenderDrawRect"
     (renderer @-> ptr rect @-> returning zero_to_ok)

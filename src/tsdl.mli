@@ -922,6 +922,9 @@ val render_draw_points_ba : renderer -> (int32, Bigarray.int32_elt) bigarray ->
     @raise Invalid_argument if the length of the array is not a
     multiple of 2. *)
 
+val render_draw_point_f : renderer -> float -> float -> unit result
+(** SDL_RenderDrawPointF *)
+
 val render_draw_rect : renderer -> rect option -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawRect}SDL_RenderDrawRect} *)
 
