@@ -371,6 +371,21 @@ module Rect : sig
   val set_h : rect -> int -> unit
 end
 
+type frect
+(** structure SDL_FRect *)(* from <SDL2/SDL_rect.h> *)
+
+module FRect : sig
+  val create : x:float -> y:float -> w:float -> h:float -> frect
+  val x : frect -> float
+  val y : frect -> float
+  val w : frect -> float
+  val h : frect -> float
+  val set_x : frect -> float -> unit
+  val set_y : frect -> float -> unit
+  val set_w : frect -> float -> unit
+  val set_h : frect -> float -> unit
+end
+
 val enclose_points : ?clip:rect -> point list -> rect option
 (** {{:http://wiki.libsdl.org/SDL_EnclosePoints}SDL_EnclosePoints}.
     Returns [None] if all the points were outside

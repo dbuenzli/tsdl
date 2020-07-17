@@ -574,6 +574,41 @@ module Rect = struct
   | Some v -> addr v
 end
 
+(* Float Rectangle *)
+
+type _frect
+type frect = _frect structure
+let frect : frect typ = structure "SDL_FRect"
+let frect_x = field frect "x" float
+let frect_y = field frect "y" float
+let frect_w = field frect "w" float
+let frect_h = field frect "h" float
+let () = seal frect
+
+module FRect = struct
+  let create ~x ~y ~w ~h =
+    let r = make frect in
+    setf r frect_x x;
+    setf r frect_y y;
+    setf r frect_w w;
+    setf r frect_h h;
+    r
+
+  let x r = getf r frect_x
+  let y r = getf r frect_y
+  let w r = getf r frect_w
+  let h r = getf r frect_h
+
+  let set_x r x = setf r frect_x x
+  let set_y r y = setf r frect_y y
+  let set_w r w = setf r frect_w w
+  let set_h r h = setf r frect_h h
+
+  let opt_addr = function
+  | None -> coerce (ptr void) (ptr rect) null
+  | Some v -> addr v
+end
+
 let enclose_points =
   foreign "SDL_EnclosePoints"
     (ptr void @-> int @-> ptr rect @-> ptr rect @-> returning bool)
