@@ -229,6 +229,7 @@ module Hint = struct
   let no_signal_handlers = sdl_hint_no_signal_handlers
   let thread_stack_size = sdl_hint_thread_stack_size
   let touch_mouse_events = sdl_hint_touch_mouse_events
+  let mouse_touch_events = sdl_hint_mouse_touch_events
   let window_frame_usable_while_cursor_hidden =
     sdl_hint_window_frame_usable_while_cursor_hidden
 
@@ -512,6 +513,33 @@ module Point = struct
   | Some v -> addr v
 end
 
+(* Float Points *)
+
+type _fpoint
+type fpoint = _fpoint structure
+let fpoint : fpoint typ = structure "SDL_FPoint"
+let fpoint_x = field fpoint "x" float
+let fpoint_y = field fpoint "y" float
+let () = seal fpoint
+
+module Fpoint = struct
+  let create ~x ~y =
+    let p = make fpoint in
+    setf p fpoint_x x;
+    setf p fpoint_y y;
+    p
+
+  let x p = getf p fpoint_x
+  let y p = getf p fpoint_y
+
+  let set_x p x = setf p fpoint_x x
+  let set_y p y = setf p fpoint_y y
+
+  let opt_addr = function
+  | None -> coerce (ptr void) (ptr fpoint) null
+  | Some v -> addr v
+end
+
 (* Rectangle *)
 
 type _rect
@@ -541,6 +569,41 @@ module Rect = struct
   let set_y r y = setf r rect_y y
   let set_w r w = setf r rect_w w
   let set_h r h = setf r rect_h h
+
+  let opt_addr = function
+  | None -> coerce (ptr void) (ptr rect) null
+  | Some v -> addr v
+end
+
+(* Float Rectangle *)
+
+type _frect
+type frect = _frect structure
+let frect : frect typ = structure "SDL_FRect"
+let frect_x = field frect "x" float
+let frect_y = field frect "y" float
+let frect_w = field frect "w" float
+let frect_h = field frect "h" float
+let () = seal frect
+
+module Frect = struct
+  let create ~x ~y ~w ~h =
+    let r = make frect in
+    setf r frect_x x;
+    setf r frect_y y;
+    setf r frect_w w;
+    setf r frect_h h;
+    r
+
+  let x r = getf r frect_x
+  let y r = getf r frect_y
+  let w r = getf r frect_w
+  let h r = getf r frect_h
+
+  let set_x r x = setf r frect_x x
+  let set_y r y = setf r frect_y y
+  let set_w r w = setf r frect_w w
+  let set_h r h = setf r frect_h h
 
   let opt_addr = function
   | None -> coerce (ptr void) (ptr rect) null
@@ -1345,6 +1408,10 @@ let render_draw_line =
   foreign "SDL_RenderDrawLine"
     (renderer @-> int @-> int @-> int @-> int @-> returning zero_to_ok)
 
+let render_draw_line_f =
+  foreign "SDL_RenderDrawLineF"
+    (renderer @-> float @-> float @-> float @-> float @-> returning zero_to_ok)
+
 let render_draw_lines =
   foreign "SDL_RenderDrawLines"
     (renderer @-> ptr void @-> int @-> returning zero_to_ok)
@@ -1380,6 +1447,26 @@ let render_draw_points r ps =
   let count = List.length ps in
   let a = CArray.of_list point ps in
   render_draw_points r (to_voidp (CArray.start a)) count
+
+let render_draw_point_f =
+  foreign "SDL_RenderDrawPointF"
+    (renderer @-> float @-> float @-> returning zero_to_ok)
+
+let render_draw_points_f =
+  foreign "SDL_RenderDrawPointsF"
+    (renderer @-> ptr void @-> int @-> returning zero_to_ok)
+
+let render_draw_points_f_ba r ps =
+  let len = Bigarray.Array1.dim ps in
+  if len mod 2 <> 0 then invalid_arg (err_length_mul len 2) else
+  let count = len / 2 in
+  let ps = to_voidp (bigarray_start array1 ps) in
+  render_draw_points_f r ps count
+
+let render_draw_points_f r ps =
+  let count = List.length ps in
+  let a = CArray.of_list fpoint ps in
+  render_draw_points_f r (to_voidp (CArray.start a)) count
 
 let render_draw_rect =
   foreign "SDL_RenderDrawRect"

@@ -78,6 +78,7 @@ void consts (FILE *fd)
   str_v (SDL_HINT_MOUSE_NORMAL_SPEED_SCALE);
   str_v (SDL_HINT_MOUSE_RELATIVE_SPEED_SCALE);
   str_v (SDL_HINT_TOUCH_MOUSE_EVENTS);
+  str_v (SDL_HINT_MOUSE_TOUCH_EVENTS);
 
   /* Log */
 

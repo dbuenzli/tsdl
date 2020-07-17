@@ -1,3 +1,7 @@
+
+- Add support for `SDL_F{Point,Rect}` Thanks to 
+  Florent Monnier for the patches.
+
 v0.9.8 2020-06-19 Zagreb
 ------------------------
 

@@ -442,7 +442,7 @@ let test_renderers () =
           assert (Sdl.render_is_clip_enabled r);
           assert (Sdl.rect_equals (Sdl.render_get_clip_rect r) rect);
           assert (Sdl.render_set_clip_rect r None = Ok ());
-          assert (Sdl.render_set_integer_scale r true = Ok());
+          assert (Sdl.render_set_integer_scale r true = Ok ());
           assert (Sdl.render_get_integer_scale r);
           assert (Sdl.render_set_logical_size r 320 240 = Ok ());
           assert (Sdl.render_get_logical_size r = (320, 240));
@@ -459,13 +459,15 @@ let test_renderers () =
               Sdl.Blend.src_alpha Sdl.Blend.one_minus_src_alpha Sdl.Blend.add
               Sdl.Blend.zero Sdl.Blend.dst_alpha Sdl.Blend.add in
           assert (Sdl.set_render_draw_blend_mode r custom_blend = Ok ());
-          assert (Sdl.set_render_draw_blend_mode r Sdl.Blend.mode_blend =Ok());
+          assert (Sdl.set_render_draw_blend_mode r Sdl.Blend.mode_blend = Ok ());
           assert (Sdl.set_render_draw_color r 0x50 0xC8 0x78 0xFF = Ok ());
           assert (Sdl.get_render_draw_color r = Ok (0x50, 0xC8, 0x78, 0xFF));
           assert (Sdl.render_clear r = Ok ());
           assert (Sdl.set_render_draw_color r 0x00 0x00 0x00 0xFF = Ok ());
           assert (Sdl.render_draw_point r 5 5 = Ok ());
+          assert (Sdl.render_draw_point_f r 5.0 5.0 = Ok ());
           assert (Sdl.render_draw_line r 10 10 100 100 = Ok ());
+          assert (Sdl.render_draw_line_f r 11.2 11.2 101.2 101.2 = Ok ());
           assert (Sdl.render_fill_rect r (Some rect) = Ok ());
           assert (Sdl.set_render_draw_color r 0xFF 0xFF 0xFF 0xFF = Ok ());
           assert (Sdl.render_draw_rect r (Some rect) = Ok ());
@@ -476,11 +478,23 @@ let test_renderers () =
           pts_ba.{0} <- 20l; pts_ba.{1} <- 20l;
           pts_ba.{2} <- 30l; pts_ba.{3} <- 20l;
           pts_ba.{4} <- 30l; pts_ba.{5} <- 30l;
-          assert (Sdl.render_draw_lines r pts =Ok ());
-          assert (Sdl.render_draw_lines_ba r pts_ba =Ok ());
+          assert (Sdl.render_draw_lines r pts = Ok ());
+          assert (Sdl.render_draw_lines_ba r pts_ba = Ok ());
           assert (Sdl.set_render_draw_color r 0xFF 0x00 0x00 0xFF = Ok ());
-          assert (Sdl.render_draw_points r pts =Ok ());
-          assert (Sdl.render_draw_points_ba r pts_ba =Ok ());
+          assert (Sdl.render_draw_points r pts = Ok ());
+          assert (Sdl.render_draw_points_ba r pts_ba = Ok ());
+          let pts_f = [Sdl.Fpoint.create 10. 10.;
+                       Sdl.Fpoint.create 20. 20.;
+                       Sdl.Fpoint.create 30. 30.; ]
+          in
+          let pts_f_ba = create_bigarray Bigarray.float32 6 in
+          pts_f_ba.{0} <- 40.; pts_f_ba.{1} <- 40.;
+          pts_f_ba.{2} <- 50.; pts_f_ba.{3} <- 50.;
+          pts_f_ba.{4} <- 60.; pts_f_ba.{5} <- 60.;
+          assert (Sdl.set_render_draw_color r 0x00 0xFF 0x00 0xFF = Ok ());
+          assert (Sdl.render_draw_points_f r pts_f = Ok ());
+          assert (Sdl.set_render_draw_color r 0xFF 0xFF 0x00 0xFF = Ok ());
+          assert (Sdl.render_draw_points_f_ba r pts_f_ba = Ok ());
           let rects = [Sdl.Rect.create 120 30 45 60;
                        Sdl.Rect.create 150 40 56 57]
           in

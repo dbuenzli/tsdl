@@ -151,6 +151,9 @@ module Hint : sig
   val touch_mouse_events : t
   (** ( 2.06.0 ) *)
 
+  val mouse_touch_events : t
+  (** ( 2.0.10 ) *)
+
   val window_frame_usable_while_cursor_hidden: t
   (** {{:http://wiki.libsdl.org/SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN}
       SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN} ( 2.04.0 ) *)
@@ -342,6 +345,17 @@ module Point : sig
   val set_y : point -> int -> unit
 end
 
+type fpoint
+(** structure SDL_FPoint *)(* from <SDL2/SDL_rect.h> *)
+
+module Fpoint : sig
+  val create : x:float -> y:float -> fpoint
+  val x : fpoint -> float
+  val y : fpoint -> float
+  val set_x : fpoint -> float -> unit
+  val set_y : fpoint -> float -> unit
+end
+
 (** {2:rectangles
     {{:http://wiki.libsdl.org/CategoryRect}Rectangles}} *)
 
@@ -358,6 +372,21 @@ module Rect : sig
   val set_y : rect -> int -> unit
   val set_w : rect -> int -> unit
   val set_h : rect -> int -> unit
+end
+
+type frect
+(** structure SDL_FRect *)(* from <SDL2/SDL_rect.h> *)
+
+module Frect : sig
+  val create : x:float -> y:float -> w:float -> h:float -> frect
+  val x : frect -> float
+  val y : frect -> float
+  val w : frect -> float
+  val h : frect -> float
+  val set_x : frect -> float -> unit
+  val set_y : frect -> float -> unit
+  val set_w : frect -> float -> unit
+  val set_h : frect -> float -> unit
 end
 
 val enclose_points : ?clip:rect -> point list -> rect option
@@ -871,6 +900,10 @@ val render_draw_line : renderer -> int -> int -> int -> int ->
   unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawLine}SDL_RenderDrawLine} *)
 
+val render_draw_line_f : renderer -> float -> float -> float -> float ->
+  unit result
+(** {{:http://wiki.libsdl.org/SDL_RenderDrawLineF}SDL_RenderDrawLineF} *)
+
 val render_draw_lines : renderer -> point list -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawLines}SDL_RenderDrawLines} *)
 
@@ -889,6 +922,20 @@ val render_draw_points : renderer -> point list -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawPoints}SDL_RenderDrawPoints} *)
 
 val render_draw_points_ba : renderer -> (int32, Bigarray.int32_elt) bigarray ->
+  unit result
+(** See {!render_draw_points}. Each consecutive pair in the array
+    defines a point.
+
+    @raise Invalid_argument if the length of the array is not a
+    multiple of 2. *)
+
+val render_draw_point_f : renderer -> float -> float -> unit result
+(** SDL_RenderDrawPointF *)
+
+val render_draw_points_f : renderer -> fpoint list -> unit result
+(** {{:http://wiki.libsdl.org/SDL_RenderDrawPointsF}SDL_RenderDrawPointsF} *)
+
+val render_draw_points_f_ba : renderer -> (float, Bigarray.float32_elt) bigarray ->
   unit result
 (** See {!render_draw_points}. Each consecutive pair in the array
     defines a point.
