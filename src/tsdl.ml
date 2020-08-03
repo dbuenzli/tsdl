@@ -1407,6 +1407,10 @@ let render_draw_line =
   foreign "SDL_RenderDrawLine"
     (renderer @-> int @-> int @-> int @-> int @-> returning zero_to_ok)
 
+let render_draw_line_f =
+  foreign "SDL_RenderDrawLineF"
+    (renderer @-> float @-> float @-> float @-> float @-> returning zero_to_ok)
+
 let render_draw_lines =
   foreign "SDL_RenderDrawLines"
     (renderer @-> ptr void @-> int @-> returning zero_to_ok)

@@ -897,6 +897,10 @@ val render_draw_line : renderer -> int -> int -> int -> int ->
   unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawLine}SDL_RenderDrawLine} *)
 
+val render_draw_line_f : renderer -> float -> float -> float -> float ->
+  unit result
+(** {{:http://wiki.libsdl.org/SDL_RenderDrawLineF}SDL_RenderDrawLineF} *)
+
 val render_draw_lines : renderer -> point list -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawLines}SDL_RenderDrawLines} *)
 
