@@ -467,6 +467,7 @@ let test_renderers () =
           assert (Sdl.render_draw_point r 5 5 = Ok ());
           assert (Sdl.render_draw_point_f r 5.0 5.0 = Ok ());
           assert (Sdl.render_draw_line r 10 10 100 100 = Ok ());
+          assert (Sdl.render_draw_line_f r 11.2 11.2 101.2 101.2 = Ok ());
           assert (Sdl.render_fill_rect r (Some rect) = Ok ());
           assert (Sdl.set_render_draw_color r 0xFF 0xFF 0xFF 0xFF = Ok ());
           assert (Sdl.render_draw_rect r (Some rect) = Ok ());
