@@ -345,7 +345,7 @@ end
 type fpoint
 (** structure SDL_FPoint *)(* from <SDL2/SDL_rect.h> *)
 
-module FPoint : sig
+module Fpoint : sig
   val create : x:float -> y:float -> fpoint
   val x : fpoint -> float
   val y : fpoint -> float
@@ -374,7 +374,7 @@ end
 type frect
 (** structure SDL_FRect *)(* from <SDL2/SDL_rect.h> *)
 
-module FRect : sig
+module Frect : sig
   val create : x:float -> y:float -> w:float -> h:float -> frect
   val x : frect -> float
   val y : frect -> float

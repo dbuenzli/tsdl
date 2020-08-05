@@ -521,7 +521,7 @@ let fpoint_x = field fpoint "x" float
 let fpoint_y = field fpoint "y" float
 let () = seal fpoint
 
-module FPoint = struct
+module Fpoint = struct
   let create ~x ~y =
     let p = make fpoint in
     setf p fpoint_x x;
@@ -585,7 +585,7 @@ let frect_w = field frect "w" float
 let frect_h = field frect "h" float
 let () = seal frect
 
-module FRect = struct
+module Frect = struct
   let create ~x ~y ~w ~h =
     let r = make frect in
     setf r frect_x x;
