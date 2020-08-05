@@ -229,6 +229,7 @@ module Hint = struct
   let no_signal_handlers = sdl_hint_no_signal_handlers
   let thread_stack_size = sdl_hint_thread_stack_size
   let touch_mouse_events = sdl_hint_touch_mouse_events
+  let mouse_touch_events = sdl_hint_mouse_touch_events
   let window_frame_usable_while_cursor_hidden =
     sdl_hint_window_frame_usable_while_cursor_hidden
 

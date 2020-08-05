@@ -151,6 +151,9 @@ module Hint : sig
   val touch_mouse_events : t
   (** ( 2.06.0 ) *)
 
+  val mouse_touch_events : t
+  (** ( 2.0.10 ) *)
+
   val window_frame_usable_while_cursor_hidden: t
   (** {{:http://wiki.libsdl.org/SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN}
       SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN} ( 2.04.0 ) *)
