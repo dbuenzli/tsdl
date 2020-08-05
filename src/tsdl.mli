@@ -932,6 +932,17 @@ val render_draw_points_ba : renderer -> (int32, Bigarray.int32_elt) bigarray ->
 val render_draw_point_f : renderer -> float -> float -> unit result
 (** SDL_RenderDrawPointF *)
 
+val render_draw_points_f : renderer -> fpoint list -> unit result
+(** {{:http://wiki.libsdl.org/SDL_RenderDrawPointsF}SDL_RenderDrawPointsF} *)
+
+val render_draw_points_f_ba : renderer -> (float, Bigarray.float32_elt) bigarray ->
+  unit result
+(** See {!render_draw_points}. Each consecutive pair in the array
+    defines a point.
+
+    @raise Invalid_argument if the length of the array is not a
+    multiple of 2. *)
+
 val render_draw_rect : renderer -> rect option -> unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderDrawRect}SDL_RenderDrawRect} *)
 

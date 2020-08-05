@@ -1452,6 +1452,22 @@ let render_draw_point_f =
   foreign "SDL_RenderDrawPointF"
     (renderer @-> float @-> float @-> returning zero_to_ok)
 
+let render_draw_points_f =
+  foreign "SDL_RenderDrawPointsF"
+    (renderer @-> ptr void @-> int @-> returning zero_to_ok)
+
+let render_draw_points_f_ba r ps =
+  let len = Bigarray.Array1.dim ps in
+  if len mod 2 <> 0 then invalid_arg (err_length_mul len 2) else
+  let count = len / 2 in
+  let ps = to_voidp (bigarray_start array1 ps) in
+  render_draw_points_f r ps count
+
+let render_draw_points_f r ps =
+  let count = List.length ps in
+  let a = CArray.of_list fpoint ps in
+  render_draw_points_f r (to_voidp (CArray.start a)) count
+
 let render_draw_rect =
   foreign "SDL_RenderDrawRect"
     (renderer @-> ptr rect @-> returning zero_to_ok)
