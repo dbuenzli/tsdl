@@ -483,6 +483,18 @@ let test_renderers () =
           assert (Sdl.set_render_draw_color r 0xFF 0x00 0x00 0xFF = Ok ());
           assert (Sdl.render_draw_points r pts = Ok ());
           assert (Sdl.render_draw_points_ba r pts_ba = Ok ());
+          let pts_f = [Sdl.Fpoint.create 10. 10.;
+                       Sdl.Fpoint.create 20. 20.;
+                       Sdl.Fpoint.create 30. 30.; ]
+          in
+          let pts_f_ba = create_bigarray Bigarray.float32 6 in
+          pts_f_ba.{0} <- 40.; pts_f_ba.{1} <- 40.;
+          pts_f_ba.{2} <- 50.; pts_f_ba.{3} <- 50.;
+          pts_f_ba.{4} <- 60.; pts_f_ba.{5} <- 60.;
+          assert (Sdl.set_render_draw_color r 0x00 0xFF 0x00 0xFF = Ok ());
+          assert (Sdl.render_draw_points_f r pts_f = Ok ());
+          assert (Sdl.set_render_draw_color r 0xFF 0xFF 0x00 0xFF = Ok ());
+          assert (Sdl.render_draw_points_f_ba r pts_f_ba = Ok ());
           let rects = [Sdl.Rect.create 120 30 45 60;
                        Sdl.Rect.create 150 40 56 57]
           in
