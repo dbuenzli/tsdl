@@ -1029,7 +1029,7 @@ void consts (FILE *fd)
 
 CAMLprim value output_consts (value fname)
 {
-  char *outf = String_val (fname);
+  const char *outf = String_val (fname);
   FILE *fd;
   if (strlen(outf) == 0) { fd = stdout; }
   else
