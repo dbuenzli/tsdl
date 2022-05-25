@@ -2856,6 +2856,8 @@ module Event : sig
       fields} *)
 
   val drop_file_file : event -> string
+  val drop_event_file : event -> string option
+  val drop_event_window_id : int field
 
   (** {2:touch Touch events} *)
 
@@ -3116,8 +3118,10 @@ module Event : sig
     | `Controller_axis_motion | `Controller_button_down
     | `Controller_button_up | `Controller_device_added
     | `Controller_device_remapped | `Controller_device_removed
-    | `Dollar_gesture | `Dollar_record | `Drop_file | `Finger_down
-    | `Finger_motion | `Finger_up | `Joy_axis_motion | `Joy_ball_motion
+    | `Dollar_gesture | `Dollar_record
+    | `Drop_begin | `Drop_complete | `Drop_file | `Drop_text
+    | `Finger_down | `Finger_motion | `Finger_up
+    | `Joy_axis_motion | `Joy_ball_motion
     | `Joy_button_down | `Joy_button_up | `Joy_device_added
     | `Joy_device_removed | `Joy_hat_motion | `Key_down | `Key_up
     | `Mouse_button_down | `Mouse_button_up | `Mouse_motion

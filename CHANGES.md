@@ -1,4 +1,7 @@
 
+- Add support for the `windowID` field of `SDL_DropEvent`.
+  Thanks to Maxence Guesdon for the patch.
+- Fix C compilation error due `String_val` (#72).
 - Add support for `SDL_F{Point,Rect}` Thanks to 
   Florent Monnier for the patches.
 
