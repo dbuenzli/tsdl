@@ -3789,6 +3789,7 @@ module Event = struct
     let _ = field t "type" int_as_uint32_t
     let _ = field t "timestamp" int32_as_uint32_t
     let file = field t "file" (ptr char)
+    let window_id = field t "windowID" int_as_uint32_t
     let () = seal t
   end
 
@@ -4180,14 +4181,22 @@ module Event = struct
   let drop_complete = sdl_dropcomplete
 
   let drop_file_file = F (drop_event, Drop_event.file)
+  let drop_event_window_id = F (drop_event, Drop_event.window_id)
 
   let drop_file_free e =
     sdl_free (to_voidp (get e drop_file_file))
 
-  let drop_file_file e =
+  let drop_event_file e =
     let sp = get e drop_file_file in
-    if ptr_compare (to_voidp sp) null = 0 then invalid_arg err_drop_file else
-    coerce (ptr char) string (get e drop_file_file)
+    if ptr_compare (to_voidp sp) null = 0 then
+      None
+    else
+      Some (coerce (ptr char) string (get e drop_file_file))
+
+  let drop_file_file e =
+    match drop_event_file e with
+    | None -> invalid_arg err_drop_file
+    | Some s -> s
 
   (* Touch events *)
 
@@ -4445,8 +4454,10 @@ module Event = struct
     | `Controller_axis_motion | `Controller_button_down
     | `Controller_button_up | `Controller_device_added
     | `Controller_device_remapped | `Controller_device_removed
-    | `Dollar_gesture | `Dollar_record | `Drop_file | `Finger_down
-    | `Finger_motion | `Finger_up | `Joy_axis_motion | `Joy_ball_motion
+    | `Dollar_gesture | `Dollar_record
+    | `Drop_begin | `Drop_complete | `Drop_file | `Drop_text
+    | `Finger_down | `Finger_motion | `Finger_up
+    | `Joy_axis_motion | `Joy_ball_motion
     | `Joy_button_down | `Joy_button_up | `Joy_device_added
     | `Joy_device_removed | `Joy_hat_motion | `Key_down | `Key_up
     | `Mouse_button_down | `Mouse_button_up | `Mouse_motion
@@ -4471,7 +4482,10 @@ module Event = struct
                   controller_device_removed, `Controller_device_removed;
                   dollar_gesture, `Dollar_gesture;
                   dollar_record, `Dollar_record;
+                  drop_begin, `Drop_begin;
+                  drop_complete, `Drop_complete;
                   drop_file, `Drop_file;
+                  drop_text, `Drop_text;
                   finger_down, `Finger_down;
                   finger_motion, `Finger_motion;
                   finger_up, `Finger_up;
