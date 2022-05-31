@@ -1501,29 +1501,46 @@ val gl_unbind_texture : texture -> unit result
     {b Warning} Segfaults on SDL 2.0.1
     see {{:https://bugzilla.libsdl.org/show_bug.cgi?id=2296}this report}.*)
 
-(** {2:vulkan Vulkan} *)
+(** {2:vulkan {{:https://wiki.libsdl.org/CategoryVulkan}Vulkan}} *)
 
 module Vulkan : sig
 
-  type instance
-  (** VkInstance *)
+  val load_library : string option -> unit result
+  (** {{:https://wiki.libsdl.org/SDL_Vulkan_LoadLibrary}
+      SDL_Vulkan_LoadLibrary}. *)
 
-  val unsafe_instance_of_ptr: nativeint -> instance
-  val unsafe_ptr_of_instance: instance -> nativeint
+  val unload_library : unit -> unit
+  (** {{:https://wiki.libsdl.org/SDL_Vulkan_UnloadLibrary}
+      SDL_Vulkan_UnloadLibrary}. *)
+
+  (** {1:instance Instances} *)
+
+  type instance
+  (** The type for VkInstance. *)
+
+  val get_instance_extensions : window -> string list option
+  (** {{:https://wiki.libsdl.org/SDL_Vulkan_GetInstanceExtensions}
+      SDL_Vulkan_GetInstanceExtensions} *)
+
+  val unsafe_instance_of_ptr : nativeint -> instance
+  val unsafe_ptr_of_instance : instance -> nativeint
+
+  (** {1:surfaces Surfaces} *)
 
   type surface
-  (** VkSurfaceKHR *)
+  (** The type for VkSurfaceKHR. *)
 
-  val unsafe_surface_of_uint64: uint64 -> surface
-  val unsafe_uint64_of_surface: surface -> uint64
+  val create_surface : window -> instance -> surface option
+  (** {{:https://wiki.libsdl.org/SDL_Vulkan_CreateSurface}
+      SDL_Vulkan_CreateSurface}. *)
 
-  val load_library: string option -> unit result
-  val unload_library: unit -> unit
-  val get_instance_extensions: window -> string list option
-  val create_surface: window -> instance -> surface option
-  val get_drawable_size: window -> int * int
+  val get_drawable_size : window -> int * int
+  (** {{:https://wiki.libsdl.org/SDL_Vulkan_GetDrawableSize}
+      SDL_GetDrawableSize} *)
+
+  val unsafe_surface_of_uint64 : uint64 -> surface
+  val unsafe_uint64_of_surface : surface -> uint64
 end
-
 
 (** {2:screensaver Screen saver} *)
 
