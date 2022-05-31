@@ -2578,15 +2578,20 @@ val unsafe_ptr_of_game_controller : game_controller -> nativeint
 (**/**)
 
 (** SDL_GameController *)
-
 module Controller : sig
   type bind_type
+  (** {{:https://wiki.libsdl.org/SDL_GameControllerBindType}
+      SDL_GameControllerBindType} *)
+
   val bind_type_none : bind_type
   val bind_type_button : bind_type
   val bind_type_axis : bind_type
   val bind_type_hat : bind_type
 
   type axis
+  (** {{:https://wiki.libsdl.org/SDL_GameControllerAxis}
+      SDL_GameControllerAxis} *)
+
   val axis_invalid : axis
   val axis_left_x : axis
   val axis_left_y : axis
@@ -2597,6 +2602,9 @@ module Controller : sig
   val axis_max : axis
 
   type button
+  (** {{:https://wiki.libsdl.org/SDL_GameControllerButton}
+      SDL_GameControllerButton} *)
+
   val button_invalid : button
   val button_a : button
   val button_b : button
@@ -2616,7 +2624,9 @@ module Controller : sig
   val button_max : button
 
   type button_bind
-  (** SDL_GameControllerButtonBind *)
+  (** {{:https://wiki.libsdl.org/SDL_GameControllerButtonBind}
+      SDL_GameControllerButtonBind} *)
+
   val bind_type : button_bind -> bind_type
   val bind_button_value : button_bind -> int
   val bind_axis_value : button_bind -> int
@@ -2642,7 +2652,6 @@ val game_controller_close : game_controller -> unit
 val game_controller_from_instance_id : joystick_id -> game_controller
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerFromInstanceId}
      SDL_GameControllerFromInstanceId} ( 2.04.0 ) *)
-
 
 val game_controller_get_event_state : unit -> toggle_state result
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerEventState}
@@ -2688,10 +2697,12 @@ val game_controller_get_joystick : game_controller -> joystick result
      SDL_GameControllerGetJoystick} *)
 
 val game_controller_get_product : game_controller -> uint16
-(** ( 2.06.0 ) *)
+(** {{:https://wiki.libsdl.org/SDL_GameControllerGetProduct}
+    SDL_GameControllerGetProduct} *)
 
 val game_controller_get_product_version : game_controller -> uint16
-(** ( 2.06.0 ) *)
+(** {{:https://wiki.libsdl.org/SDL_GameControllerGetProductVersion}
+    SDL_GameControllerGetProductVersion} *)
 
 val game_controller_get_string_for_axis : Controller.axis -> string option
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerGetStringForAxis}
@@ -2702,7 +2713,8 @@ val game_controller_get_string_for_button : Controller.button -> string option
      SDL_GameControllerGetStringForButton} *)
 
 val game_controller_get_vendor : game_controller -> uint16
-(** ( 2.06.0 ) *)
+(** {{:https://wiki.libsdl.org/SDL_GameControllerGetVendor}
+    SDL_GameControllerGetVendor} *)
 
 val game_controller_mapping : game_controller -> string result
 (**  {{:http://wiki.libsdl.org/SDL_GameControllerMapping}
@@ -2827,14 +2839,14 @@ module Event : sig
       SDL_ControllerAxisEvent} fields} *)
 
   val controller_axis_which : joystick_id field
-  val controller_axis_axis : uint8 field
+  val controller_axis_axis : Controller.axis field
   val controller_axis_value : int16 field
 
   (** {3 {{:http://wiki.libsdl.org/SDL_ControllerButtonEvent}
       SDL_ControllerButtonEvent} fields} *)
 
   val controller_button_which : joystick_id field
-  val controller_button_button : uint8 field
+  val controller_button_button : Controller.button field
   val controller_button_state : button_state field
 
   (** {3 {{:http://wiki.libsdl.org/SDL_ControllerDeviceEvent}

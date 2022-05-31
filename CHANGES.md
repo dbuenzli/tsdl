@@ -3,6 +3,8 @@
   Thanks to Maxence Guesdon for the patch.
 - Tweak `Sdl.Event.drop_file` to return an option an no longer raises in 
   case of null pointer.
+- Correctly type `Sdl.Event.controller_{axis_axis,button_button}`. 
+  Thanks to Romain Bardou for the report (#71).
 - Fix C compilation error due `String_val` (#72).
 - Add missing cases to `Sdl.Event.enum` (#76).
 - Add support for `SDL_F{Point,Rect}` Thanks to 
