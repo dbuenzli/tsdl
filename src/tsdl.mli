@@ -2579,7 +2579,7 @@ val unsafe_ptr_of_game_controller : game_controller -> nativeint
 
 (** SDL_GameController *)
 module Controller : sig
-  type bind_type
+  type bind_type = uint8
   (** {{:https://wiki.libsdl.org/SDL_GameControllerBindType}
       SDL_GameControllerBindType} *)
 
@@ -2588,7 +2588,7 @@ module Controller : sig
   val bind_type_axis : bind_type
   val bind_type_hat : bind_type
 
-  type axis
+  type axis = uint8
   (** {{:https://wiki.libsdl.org/SDL_GameControllerAxis}
       SDL_GameControllerAxis} *)
 
@@ -2601,7 +2601,7 @@ module Controller : sig
   val axis_trigger_right : axis
   val axis_max : axis
 
-  type button
+  type button = uint8
   (** {{:https://wiki.libsdl.org/SDL_GameControllerButton}
       SDL_GameControllerButton} *)
 
