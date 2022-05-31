@@ -49,7 +49,7 @@ type nonrec 'a result = ('a, [ `Msg of string ]) result
 (** {1:basics Basics} *)
 
 (** {2:init {{:http://wiki.libsdl.org/CategoryInit}
-             Initialization and shutdown}} *)
+    Initialization and shutdown}} *)
 
 module Init : sig
   type t
@@ -1184,7 +1184,7 @@ module Window : sig
   val pos_undefined : int
   val pos_centered : int
 
-  (** {1:position Flags} *)
+  (** {1:flags Flags} *)
 
   type flags
   (** {{:http://wiki.libsdl.org/SDL_WindowFlags}SDL_WindowFlags} *)
@@ -1558,7 +1558,7 @@ val is_screen_saver_enabled : unit -> bool
 
 module Message_box : sig
 
-  (** {1 Message box Buttons} *)
+  (** {1:buttons Message box Buttons} *)
 
   type button_flags
 
@@ -1571,14 +1571,14 @@ module Message_box : sig
       button_id : int;
       button_text : string }
 
-  (** {1 Message box flags} *)
+  (** {1:flags Message box flags} *)
 
   type flags
   val error : flags
   val warning : flags
   val information : flags
 
-  (** {1 Message box color scheme} *)
+  (** {1:color_scheme Message box color scheme} *)
 
   type color = int * int * int
   (** r, g, b from 0 to 255 *)
@@ -1590,7 +1590,7 @@ module Message_box : sig
       color_button_background : color;
       color_button_selected : color; }
 
-  (** {1 Message box data} *)
+  (** {1:data Message box data} *)
 
   type data =
     { flags : flags;
@@ -2759,7 +2759,8 @@ type event_type = int
 type event
 (** {{:http://wiki.libsdl.org/SDL_Event}SDL_Event} *)
 
-(** {!event} accessors and {!event_type} constants and {{!enum}enumeration}. *)
+(** {!event} accessors and {!event_type} constants and
+    {{!Event.type-enum}enumeration}. *)
 module Event : sig
 
   (** {1:event Event}
@@ -2780,7 +2781,7 @@ module Event : sig
   val set : event -> 'b field -> 'b -> unit
   (** [set e f v] sets the field [f] of [e] to [v]. *)
 
-  (** {1 Event types and their fields}
+  (** {1:types Event types and their fields}
 
       {ul
       {- {!common}}
@@ -2797,11 +2798,11 @@ module Event : sig
       {- {!quitev}}
       {- {!syswm}}
       {- {!text}}
-      {- {!window}}
+      {- {!section-window}}
       {- {!render_target}}
       {- {!audio}}} *)
 
-  (** {2 Event type aliases and misc} *)
+  (** {2:aliases Event type aliases and misc} *)
 
   val first_event : event_type
   val last_event : event_type
@@ -2835,21 +2836,24 @@ module Event : sig
   val controller_device_remapped : event_type
   val controller_device_removed : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_ControllerAxisEvent}
-      SDL_ControllerAxisEvent} fields} *)
+  (** {3:controller_axis_fields
+      {{:http://wiki.libsdl.org/SDL_ControllerAxisEvent}SDL_ControllerAxisEvent}
+      fields} *)
 
   val controller_axis_which : joystick_id field
   val controller_axis_axis : Controller.axis field
   val controller_axis_value : int16 field
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_ControllerButtonEvent}
+  (** {3:controller_button_fields
+      {{:http://wiki.libsdl.org/SDL_ControllerButtonEvent}
       SDL_ControllerButtonEvent} fields} *)
 
   val controller_button_which : joystick_id field
   val controller_button_button : Controller.button field
   val controller_button_state : button_state field
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_ControllerDeviceEvent}
+  (** {3:controller_device_fields
+      {{:http://wiki.libsdl.org/SDL_ControllerDeviceEvent}
       SDL_ControllerDeviceEvent} fields} *)
 
   val controller_device_which : joystick_id field
@@ -2859,7 +2863,8 @@ module Event : sig
   val dollar_gesture : event_type
   val dollar_record : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_DollarGestureEvent}
+  (** {3:controller_dollar_fields
+      {{:http://wiki.libsdl.org/SDL_DollarGestureEvent}
       SDL_DollarGestureEvent} fields} *)
 
   val dollar_gesture_touch_id : touch_id field
@@ -2881,7 +2886,7 @@ module Event : sig
 
   val drop_file_free : event -> unit
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_DropEvent}SDL_DropEvent}
+  (** {3:drop_fields {{:http://wiki.libsdl.org/SDL_DropEvent}SDL_DropEvent}
       fields} *)
 
   val drop_file_file : event -> string option
@@ -2893,7 +2898,8 @@ module Event : sig
   val finger_motion : event_type
   val finger_up : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_TouchFingerEvent}SDL_TouchFingerEvent}
+  (** {3:finger_fields
+      {{:http://wiki.libsdl.org/SDL_TouchFingerEvent}SDL_TouchFingerEvent}
       fields} *)
 
   val touch_finger_touch_id : touch_id field
@@ -2914,14 +2920,16 @@ module Event : sig
   val joy_device_removed : event_type
   val joy_hat_motion : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_JoyAxisEvent}SDL_JoyAxisEvent}
+  (** {3:joyaxis_fields
+      {{:http://wiki.libsdl.org/SDL_JoyAxisEvent}SDL_JoyAxisEvent}
       fields} *)
 
   val joy_axis_which : joystick_id field
   val joy_axis_axis : uint8 field
   val joy_axis_value : int16 field
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_JoyBallEvent}SDL_JoyBallEvent}
+  (** {3:joyball_fields
+      {{:http://wiki.libsdl.org/SDL_JoyBallEvent}SDL_JoyBallEvent}
       fields} *)
 
   val joy_ball_which : joystick_id field
@@ -2929,20 +2937,22 @@ module Event : sig
   val joy_ball_xrel : int field
   val joy_ball_yrel : int field
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_JoyButtonEvent}SDL_JoyButtonEvent}
+  (** {3:joybutton_fields
+      {{:http://wiki.libsdl.org/SDL_JoyButtonEvent}SDL_JoyButtonEvent}
       fields} *)
 
   val joy_button_which : joystick_id field
   val joy_button_button : uint8 field
   val joy_button_state : button_state field
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_JoyDeviceEvent}SDL_JoyDeviceEvent}
+  (** {3:joydevice_fields
+      {{:http://wiki.libsdl.org/SDL_JoyDeviceEvent}SDL_JoyDeviceEvent}
       fields} *)
 
   val joy_device_which : joystick_id field
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_JoyHatEvent}SDL_JoyHatEvent}
-      fields} *)
+  (** {3:joyhat_fields
+      {{:http://wiki.libsdl.org/SDL_JoyHatEvent}SDL_JoyHatEvent}fields} *)
 
   val joy_hat_which : joystick_id field
   val joy_hat_hat : uint8 field
@@ -2954,8 +2964,8 @@ module Event : sig
   val key_up : event_type
   val keymap_changed : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_KeyboardEvent}SDL_KeyboardEvent}
-      fields} *)
+  (** {3:keyboard_fields
+      {{:http://wiki.libsdl.org/SDL_KeyboardEvent}SDL_KeyboardEvent}fields} *)
 
   val keyboard_window_id : int field
   val keyboard_state : button_state field
@@ -2971,7 +2981,8 @@ module Event : sig
   val mouse_motion : event_type
   val mouse_wheel : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_MouseButtonEvent}SDL_MouseButtonEvent}
+  (** {3:mousebutton_fields
+      {{:http://wiki.libsdl.org/SDL_MouseButtonEvent}SDL_MouseButtonEvent}
       fields} *)
 
   val mouse_button_window_id : int field
@@ -2982,7 +2993,8 @@ module Event : sig
   val mouse_button_x : int field
   val mouse_button_y : int field
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_MouseMotionEvent}SDL_MouseMotionEvent}
+  (** {3:mousemotion_fields
+      {{:http://wiki.libsdl.org/SDL_MouseMotionEvent}SDL_MouseMotionEvent}
       fields} *)
 
   val mouse_motion_window_id : int field
@@ -2993,7 +3005,8 @@ module Event : sig
   val mouse_motion_xrel : int field
   val mouse_motion_yrel : int field
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_MouseWheelEvent}SDL_MouseWheelEvent}
+  (** {3:mousewheel_fields
+      {{:http://wiki.libsdl.org/SDL_MouseWheelEvent}SDL_MouseWheelEvent}
       fields} *)
 
   (** 2.04 *)
@@ -3011,7 +3024,8 @@ module Event : sig
 
   val multi_gesture : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_MultiGestureEvent}SDL_MultiGestureEvent}
+  (** {3:multigesture_fields
+      {{:http://wiki.libsdl.org/SDL_MultiGestureEvent}SDL_MultiGestureEvent}
       fields} *)
 
   val multi_gesture_touch_id : touch_id field
@@ -3034,7 +3048,8 @@ module Event : sig
   val text_editing : event_type
   val text_input : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_TextEditingEvent}SDL_TextEditingEvent}
+  (** {3:textediting_fields
+      {{:http://wiki.libsdl.org/SDL_TextEditingEvent}SDL_TextEditingEvent}
       fields}  *)
 
   val text_editing_window_id : int field
@@ -3042,7 +3057,8 @@ module Event : sig
   val text_editing_start : int field
   val text_editing_length : int field
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_TextInputEvent}SDL_TextInputEvent}
+  (** {3:textinput_fields
+      {{:http://wiki.libsdl.org/SDL_TextInputEvent}SDL_TextInputEvent}
       fields} *)
 
   val text_input_window_id : int field
@@ -3052,7 +3068,8 @@ module Event : sig
 
   val user_event : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_UserEvent}SDL_UserEvent} fields} *)
+  (** {3:user_fields
+      {{:http://wiki.libsdl.org/SDL_UserEvent}SDL_UserEvent} fields} *)
 
   val user_window_id : int field
   val user_code : int field
@@ -3061,7 +3078,8 @@ module Event : sig
 
   val display_event : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_DisplayEvent}SDL_DisplayEvent} fields} *)
+  (** {3:display_fields
+      {{:http://wiki.libsdl.org/SDL_DisplayEvent}SDL_DisplayEvent} fields} *)
 
   val display_display : int32 field
   val display_event_id : int field
@@ -3071,7 +3089,8 @@ module Event : sig
 
   val sensor_update : event_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_SensorEvent}SDL_SensorEvent} fields} *)
+  (** {3:sensor_fields
+      {{:http://wiki.libsdl.org/SDL_SensorEvent}SDL_SensorEvent} fields} *)
 
   val sensor_which : int32 field
   val sensor_data0 : float field
@@ -3113,14 +3132,15 @@ module Event : sig
   val window_event_take_focus : window_event_id
   val window_event_hit_test : window_event_id
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_WindowEvent}SDL_WindowEvent} fields} *)
+  (** {3:window_fields
+      {{:http://wiki.libsdl.org/SDL_WindowEvent}SDL_WindowEvent} fields} *)
 
   val window_window_id : int field
   val window_event_id : window_event_id field
   val window_data1 : int32 field
   val window_data2 : int32 field
 
-  (** {2:render Render target} *)
+  (** {2:render_target Render target} *)
 
   val render_targets_reset : event_type
   val render_device_reset : event_type
@@ -3130,7 +3150,8 @@ module Event : sig
   val audio_device_added : event_type
   val audio_device_removed : event_type
 
-  (** {3 {{:https://wiki.libsdl.org/SDL_AudioDeviceEvent}SDL_AudioDeviceEvent}
+  (** {3:audiodevice_fields
+      {{:https://wiki.libsdl.org/SDL_AudioDeviceEvent}SDL_AudioDeviceEvent}
       fields} *)
 
   val audio_device_timestamp : uint32 field
@@ -3214,7 +3235,7 @@ module Haptic : sig
 
   val infinity : uint32
 
-  (** {1 Features} *)
+  (** {1:features Features} *)
 
   type feature = int
   val gain : feature
@@ -3222,7 +3243,7 @@ module Haptic : sig
   val status : feature
   val pause : feature
 
-  (** {1 Directions} *)
+  (** {1:directions Directions} *)
 
   type direction_type = int
   val polar : direction_type
@@ -3238,7 +3259,7 @@ module Haptic : sig
     val dir_2 : t -> int32
   end
 
-  (** {1 Effects} *)
+  (** {1:effects Effects} *)
 
   type effect_type = int
 
@@ -3256,11 +3277,11 @@ module Haptic : sig
 
   val typ : effect_type field
 
-  (** {2 Constant effect} *)
+  (** {2:constant Constant effect} *)
 
   val constant : effect_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_HapticConstant}
+  (** {3:constant_fields {{:http://wiki.libsdl.org/SDL_HapticConstant}
       SDL_HapticConstant} fields} *)
 
   val constant_type : effect_type field
@@ -3275,7 +3296,7 @@ module Haptic : sig
   val constant_fade_length : uint16 field
   val constant_fade_level : uint16 field
 
-  (** {2 Periodic effect} *)
+  (** {2:periodic Periodic effect} *)
 
   val sine : effect_type
   val left_right : effect_type
@@ -3283,7 +3304,7 @@ module Haptic : sig
   val sawtooth_up : effect_type
   val sawtooth_down : effect_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_HapticPeriodic}
+  (** {3:periodic_fields {{:http://wiki.libsdl.org/SDL_HapticPeriodic}
       SDL_HapticPeriodic} fields} *)
 
   val periodic_type : effect_type field
@@ -3301,14 +3322,14 @@ module Haptic : sig
   val periodic_fade_length : uint16 field
   val periodic_fade_level : uint16 field
 
-  (** {2 Condition effect} *)
+  (** {2:condition Condition effect} *)
 
   val spring : effect_type
   val damper : effect_type
   val inertia : effect_type
   val friction : effect_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_HapticCondition}
+  (** {3:condition_field {{:http://wiki.libsdl.org/SDL_HapticCondition}
       SDL_HapticCondition} fields} *)
 
   val condition_type : effect_type field
@@ -3336,11 +3357,12 @@ module Haptic : sig
   val condition_center_1 : int16 field
   val condition_center_2 : int16 field
 
-  (** {2 Ramp effect} *)
+  (** {2:ramp Ramp effect} *)
 
   val ramp : effect_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_HapticRamp}SDL_HapticRamp} fields} *)
+  (** {3:ramp_fields
+      {{:http://wiki.libsdl.org/SDL_HapticRamp}SDL_HapticRamp} fields} *)
 
   val ramp_type : effect_type field
   val ramp_direction : Direction.t field
@@ -3355,11 +3377,12 @@ module Haptic : sig
   val ramp_fade_length : uint16 field
   val ramp_fade_level : uint16 field
 
-  (** {2 Left right effect}
+  (** {2:left_right Left right effect}
 
       For {!left_right}. *)
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_HapticLeftRight}SDL_HapticLeftRight}
+  (** {3:haptic_fields
+      {{:http://wiki.libsdl.org/SDL_HapticLeftRight}SDL_HapticLeftRight}
       fields} *)
 
   val left_right_type : effect_type field
@@ -3367,11 +3390,12 @@ module Haptic : sig
   val left_right_large_magnitude : uint16 field
   val left_right_small_magnitude : uint16 field
 
-  (** {2 Custom effect} *)
+  (** {2:custom Custom effect} *)
 
   val custom : effect_type
 
-  (** {3 {{:http://wiki.libsdl.org/SDL_HapticCustom}SDL_HapticCustom} fields} *)
+  (** {3:custom_fields
+      {{:http://wiki.libsdl.org/SDL_HapticCustom}SDL_HapticCustom} fields} *)
 
   val custom_type : effect_type field
   val custom_direction : Direction.t field
@@ -3384,6 +3408,7 @@ module Haptic : sig
   val custom_samples : uint16 field
   val custom_data : uint16 list field
   (** {b Note.} Only {!set}able. *)
+
   val custom_attack_length : uint16 field
   val custom_attack_level : uint16 field
   val custom_fade_length : uint16 field
@@ -3528,7 +3553,7 @@ module Audio : sig
   val f32_sys : format
   val f32 : format
 
-  (** {1:format Audio allowed changes} *)
+  (** {1:allowed Audio allowed changes} *)
 
   type allow = int
   val allow_frequency_change : int
