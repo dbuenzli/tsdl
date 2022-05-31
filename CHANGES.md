@@ -1,3 +1,5 @@
+v0.9.9 2022-05-31 Zagreb
+------------------------
 
 - Add support for the `windowID` field of `SDL_DropEvent`.
   Thanks to Maxence Guesdon for the patch.
