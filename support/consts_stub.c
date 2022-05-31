@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
-#include <caml/mlvalues.h>
 #include "SDL.h"
+#include <caml/mlvalues.h>
 
 void let (FILE *fd, const char *symb)
 {
