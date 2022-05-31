@@ -4,6 +4,7 @@
 - Tweak `Sdl.Event.drop_file` to return an option an no longer raises in 
   case of null pointer.
 - Fix C compilation error due `String_val` (#72).
+- Add missing cases to `Sdl.Event.enum` (#76).
 - Add support for `SDL_F{Point,Rect}` Thanks to 
   Florent Monnier for the patches.
 
