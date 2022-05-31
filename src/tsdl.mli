@@ -2855,9 +2855,8 @@ module Event : sig
   (** {3 {{:http://wiki.libsdl.org/SDL_DropEvent}SDL_DropEvent}
       fields} *)
 
-  val drop_file_file : event -> string
-  val drop_event_file : event -> string option
-  val drop_event_window_id : int field
+  val drop_file_file : event -> string option
+  val drop_window_id : int field
 
   (** {2:touch Touch events} *)
 

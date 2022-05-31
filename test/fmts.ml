@@ -84,8 +84,8 @@ let pp_dollar_gesture_event ppf e =
     Sdl.Event.(get e dollar_gesture_y)
 
 let pp_drop_event ppf e =
-  pp ppf "@[<1>drop_event file:%s@]"
-    Sdl.Event.(drop_file_file e)
+  pp ppf "@[<1>drop_event file:%a@]"
+    (pp_opt pp_str) Sdl.Event.(drop_file_file e)
 
 let pp_touch_finger_event ppf e =
   pp ppf "@[<1>touch_finger_event %s touch_id:%Ld@ finger_id:%Ld@ (%g,%g)@ \

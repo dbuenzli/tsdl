@@ -25,7 +25,6 @@ let kpp k fmt =
 let str = Printf.sprintf
 let err_index i = str "invalid index: %d" i
 let err_length_mul l mul = str "invalid length: %d not a multiple of %d" l mul
-let err_drop_file = "null file name (drop_file_free already called ?)"
 let err_read_field = "cannot read field"
 let err_bigarray_pitch pitch ba_el_size =
   str "invalid bigarray kind: pitch (%d bytes) not a multiple of bigarray \
@@ -4181,22 +4180,15 @@ module Event = struct
   let drop_complete = sdl_dropcomplete
 
   let drop_file_file = F (drop_event, Drop_event.file)
-  let drop_event_window_id = F (drop_event, Drop_event.window_id)
+  let drop_window_id = F (drop_event, Drop_event.window_id)
 
   let drop_file_free e =
-    sdl_free (to_voidp (get e drop_file_file))
-
-  let drop_event_file e =
-    let sp = get e drop_file_file in
-    if ptr_compare (to_voidp sp) null = 0 then
-      None
-    else
-      Some (coerce (ptr char) string (get e drop_file_file))
+    let sp = to_voidp (get e drop_file_file) in
+    if is_null sp then () else sdl_free sp
 
   let drop_file_file e =
-    match drop_event_file e with
-    | None -> invalid_arg err_drop_file
-    | Some s -> s
+    let sp = get e drop_file_file in
+    if is_null sp then None else Some (coerce (ptr char) string sp)
 
   (* Touch events *)
 
