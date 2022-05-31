@@ -110,7 +110,7 @@ let test_file_system_paths () =
 
 let test_colors () =
   log "Testing colors";
-  let c = Sdl.Color.create 1 2 3 4 in
+  let c = Sdl.Color.create ~r:1 ~g:2 ~b:3 ~a:4 in
   assert (Sdl.Color.r c = 1);
   assert (Sdl.Color.g c = 2);
   assert (Sdl.Color.b c = 3);
@@ -119,19 +119,19 @@ let test_colors () =
 
 let test_points () =
   log "Testing points";
-  let p = Sdl.Point.create 1 2 in
+  let p = Sdl.Point.create ~x:1 ~y:2 in
   assert (Sdl.Point.x p = 1);
   assert (Sdl.Point.y p = 2);
   ()
 
 let test_rectangles () =
   log "Testing rectangles";
-  let r = Sdl.Rect.create 1 2 3 4 in
+  let r = Sdl.Rect.create ~x:1 ~y:2 ~w:3 ~h:4 in
   assert (Sdl.Rect.x r = 1);
   assert (Sdl.Rect.y r = 2);
   assert (Sdl.Rect.w r = 3);
   assert (Sdl.Rect.h r = 4);
-  let bound = Sdl.Rect.create 1 2 2 3 in
+  let bound = Sdl.Rect.create ~x:1 ~y:2 ~w:2 ~h:3 in
   let ba = create_bigarray Bigarray.int32 4 in
   ba.{0} <- 1l; ba.{1} <- 2l;
   ba.{2} <- 2l; ba.{3} <- 4l;
@@ -139,10 +139,10 @@ let test_rectangles () =
   | None -> assert false
   | Some r -> assert (Sdl.rect_equals bound r)
   end;
-  let o = Sdl.Point.create 0 0 in
-  let p0 = Sdl.Point.create 1 2 in
-  let p1 = Sdl.Point.create 2 4 in
-  let p2 = Sdl.Point.create 3 5 in
+  let o = Sdl.Point.create ~x:0 ~y:0 in
+  let p0 = Sdl.Point.create ~x:1 ~y:2 in
+  let p1 = Sdl.Point.create ~x:2 ~y:4 in
+  let p2 = Sdl.Point.create ~x:3 ~y:5 in
   let a = match Sdl.enclose_points [p0; p1] with
   | None -> assert false
   | Some r -> assert (Sdl.rect_equals bound r); r
@@ -156,14 +156,15 @@ let test_rectangles () =
   | None -> assert true | Some _ -> assert false
   end;
   assert (not (Sdl.rect_empty a));
-  assert (Sdl.rect_empty (Sdl.Rect.create 1 2 0 3));
-  let b = Sdl.Rect.create 0 0 3 3 in
+  assert (Sdl.rect_empty (Sdl.Rect.create ~x:1 ~y:2 ~w:0 ~h:3));
+  let b = Sdl.Rect.create  ~x:0 ~y:0 ~w:3 ~h:3 in
   assert (Sdl.has_intersection a b);
   begin match Sdl.intersect_rect a b with
   | None -> assert false
-  | Some r -> assert (Sdl.rect_equals r (Sdl.Rect.create 1 2 2 1))
+  | Some r -> assert (Sdl.rect_equals r (Sdl.Rect.create ~x:1 ~y:2 ~w:2 ~h:1))
   end;
-  assert (Sdl.rect_equals (Sdl.union_rect a b) (Sdl.Rect.create 0 0 3 5));
+  assert (Sdl.rect_equals (Sdl.union_rect a b)
+            (Sdl.Rect.create ~x:0 ~y:0 ~w:3 ~h:5));
   begin match Sdl.intersect_rect_and_line a (-1) 0 0 2 with
   | None -> assert true | Some _ -> assert false
   end;
@@ -171,7 +172,8 @@ let test_rectangles () =
   | Some ((0, 1), (1, 2)) -> assert true
   | None | Some _ -> assert false
   end;
-  assert (Sdl.point_in_rect (Sdl.Point.create 1 1) (Sdl.Rect.create 0 0 2 2));
+  assert (Sdl.point_in_rect (Sdl.Point.create ~x:1 ~y:1)
+            (Sdl.Rect.create ~x:0 ~y:0 ~w:2 ~h:2));
   ()
 
 let test_palettes () =
@@ -179,9 +181,9 @@ let test_palettes () =
   let eq_col c0 c1 =
     Sdl.Color.(r c0 = r c1 && g c0 = g c1 && b c0 = b c1 && a c0 = a c1)
   in
-  let r = Sdl.Color.create 255 0 0 255 in
-  let g = Sdl.Color.create 0 255 0 255 in
-  let b = Sdl.Color.create 0 0 255 255 in
+  let r = Sdl.Color.create ~r:255 ~g:0 ~b:0 ~a:255 in
+  let g = Sdl.Color.create ~r:0 ~g:255 ~b:0 ~a:255 in
+  let b = Sdl.Color.create ~r:0 ~g:0 ~b:255 ~a:255 in
   let cs = [r; g; b] in
   match Sdl.alloc_palette 3 with
   | Error (`Msg e) -> log " Error while creating palette: %s" e
@@ -247,9 +249,9 @@ let test_pixel_formats () =
       begin match Sdl.alloc_palette 256 with
       | Error (`Msg e) -> log_err " Could not alloc palette: %s" e
       | Ok p ->
-          let r = Sdl.Color.create 0xFF 0x00 0x00 0xFF in
-          let g = Sdl.Color.create 0x00 0xFF 0x00 0xFF in
-          let b = Sdl.Color.create 0x00 0x00 0xFF 0xFF in
+          let r = Sdl.Color.create ~r:0xFF ~g:0x00 ~b:0x00 ~a:0xFF in
+          let g = Sdl.Color.create ~r:0x00 ~g:0xFF ~b:0x00 ~a:0xFF in
+          let b = Sdl.Color.create ~r:0x00 ~g:0x00 ~b:0xFF ~a:0xFF in
           let cs = [r; g; b] in
           begin match Sdl.set_palette_colors p cs ~fst:0 with
           | Error (`Msg e) -> log_err " Could not set palette colors: %s" e
@@ -283,8 +285,8 @@ let test_surfaces () =
   | Error (`Msg e) -> log_err " Could not create surface: %s" e
   | Ok s0 ->
       assert (Sdl.rect_equals (Sdl.get_clip_rect s0)
-                (Sdl.Rect.create 0 0 256 256));
-      let r = Sdl.Rect.create 0 0 10 10 in
+                (Sdl.Rect.create ~x:0 ~y:0 ~w:256 ~h:256));
+      let r = Sdl.Rect.create ~x:0 ~y:0 ~w:10 ~h:10 in
       assert (Sdl.set_clip_rect s0 r);
       assert (Sdl.rect_equals (Sdl.get_clip_rect s0) r);
       assert (match Sdl.get_color_key s0 with Error _ -> true | _ -> false);
@@ -306,8 +308,8 @@ let test_surfaces () =
       begin match Sdl.convert_surface_format s0 Sdl.Pixel.format_argb8888 with
       | Error (`Msg e) -> log_err " Could not convert surface: %s" e
       | Ok s1 ->
-          let r0 = Sdl.Rect.create 0 0 10 10 in
-          let r1 = Sdl.Rect.create 2 3 5 5 in
+          let r0 = Sdl.Rect.create ~x:0 ~y:0 ~w:10 ~h:10 in
+          let r1 = Sdl.Rect.create ~x:2 ~y:3 ~w:5 ~h:5 in
           let ba = create_bigarray Bigarray.int32 8 in
           assert (Sdl.fill_rect s0 (Some r0) 0xFF000000l = Ok ());
           assert (Sdl.fill_rects s0 [r0; r1] 0xFF000000l = Ok ());
@@ -437,7 +439,7 @@ let test_renderers () =
           | Ok (w,h) -> log " Renderer output size: %dx%d" w h
           end;
           log " Render target supported: %b" (Sdl.render_target_supported r);
-          let rect = Sdl.Rect.create 20 30 20 20 in
+          let rect = Sdl.Rect.create ~x:20 ~y:30 ~w:20 ~h:20 in
           assert (Sdl.render_set_clip_rect r (Some rect) = Ok ());
           assert (Sdl.render_is_clip_enabled r);
           assert (Sdl.rect_equals (Sdl.render_get_clip_rect r) rect);
@@ -448,10 +450,10 @@ let test_renderers () =
           assert (Sdl.render_get_logical_size r = (320, 240));
           assert (Sdl.render_get_scale r = (2., 2.));
           assert (Sdl.render_set_scale r 1. 1. = Ok ());
-          let vp = Sdl.Rect.create 0 0 320 240 in
+          let vp = Sdl.Rect.create ~x:0 ~y:0 ~w:320 ~h:240 in
           assert (Sdl.render_set_viewport r (Some vp) = Ok ());
           assert (Sdl.rect_equals (Sdl.render_get_viewport r)
-                    (Sdl.Rect.create 0 0 320 240));
+                    (Sdl.Rect.create ~x:0 ~y:0 ~w:320 ~h:240));
           assert (Sdl.render_set_viewport r None = Ok ());
           assert (Sdl.set_render_draw_blend_mode r Sdl.Blend.mode_add = Ok ());
           assert (Sdl.get_render_draw_blend_mode r = Ok Sdl.Blend.mode_add);
@@ -471,8 +473,9 @@ let test_renderers () =
           assert (Sdl.render_fill_rect r (Some rect) = Ok ());
           assert (Sdl.set_render_draw_color r 0xFF 0xFF 0xFF 0xFF = Ok ());
           assert (Sdl.render_draw_rect r (Some rect) = Ok ());
-          let pts = [Sdl.Point.create 100 100; Sdl.Point.create 100 200;
-                     Sdl.Point.create 200 200; ]
+          let pts = [Sdl.Point.create ~x:100 ~y:100;
+                     Sdl.Point.create ~x:100 ~y:200;
+                     Sdl.Point.create ~x:200 ~y:200; ]
           in
           let pts_ba = create_bigarray Bigarray.int32 6 in
           pts_ba.{0} <- 20l; pts_ba.{1} <- 20l;
@@ -483,9 +486,9 @@ let test_renderers () =
           assert (Sdl.set_render_draw_color r 0xFF 0x00 0x00 0xFF = Ok ());
           assert (Sdl.render_draw_points r pts = Ok ());
           assert (Sdl.render_draw_points_ba r pts_ba = Ok ());
-          let pts_f = [Sdl.Fpoint.create 10. 10.;
-                       Sdl.Fpoint.create 20. 20.;
-                       Sdl.Fpoint.create 30. 30.; ]
+          let pts_f = [Sdl.Fpoint.create ~x:10. ~y:10.;
+                       Sdl.Fpoint.create ~x:20. ~y:20.;
+                       Sdl.Fpoint.create ~x:30. ~y:30.; ]
           in
           let pts_f_ba = create_bigarray Bigarray.float32 6 in
           pts_f_ba.{0} <- 40.; pts_f_ba.{1} <- 40.;
@@ -495,8 +498,8 @@ let test_renderers () =
           assert (Sdl.render_draw_points_f r pts_f = Ok ());
           assert (Sdl.set_render_draw_color r 0xFF 0xFF 0x00 0xFF = Ok ());
           assert (Sdl.render_draw_points_f_ba r pts_f_ba = Ok ());
-          let rects = [Sdl.Rect.create 120 30 45 60;
-                       Sdl.Rect.create 150 40 56 57]
+          let rects = [Sdl.Rect.create ~x:120 ~y:30 ~w:45 ~h:60;
+                       Sdl.Rect.create ~x:150 ~y:40 ~w:56 ~h:57]
           in
           let rects_ba = create_bigarray Bigarray.int32 8 in
           rects_ba.{0} <- 200l; rects_ba.{1} <- 30l;
@@ -544,9 +547,11 @@ let test_textures () =
           assert (Sdl.update_yuv_texture t None ~y:p 256 ~u:p 256 ~v:p 256 =
                   Ok ());
           assert (Sdl.render_clear r = Ok ());
-          assert (Sdl.render_copy ~dst:(Sdl.Rect.create 10 10 256 256) r t =
+          assert (Sdl.render_copy
+                    ~dst:(Sdl.Rect.create ~x:10 ~y:10 ~w:256 ~h:256) r t =
                   Ok ());
-          assert (Sdl.render_copy_ex ~dst:(Sdl.Rect.create 150 150 256 256) r t
+          assert (Sdl.render_copy_ex
+                    ~dst:(Sdl.Rect.create ~x:150 ~y:150 ~w:256 ~h:256) r t
                     45. None Sdl.Flip.none = Ok ());
           begin match Sdl.lock_texture t None Bigarray.int8_unsigned with
           | Error (`Msg e) -> log_err " Could not lock texture: %s" e
@@ -558,7 +563,7 @@ let test_textures () =
           Sdl.render_present r;
           Sdl.destroy_texture t
       end;
-      begin match Sdl.create_rgb_surface 50 50 32
+      begin match Sdl.create_rgb_surface ~w:50 ~h:50 ~depth:32
                     0xFF000000l 0x00FF0000l 0x0000FF00l 0x000000FFl
       with
       | Error (`Msg e) -> log_err " Could not create surface: %s" e
@@ -571,7 +576,8 @@ let test_textures () =
                   Ok (Sdl.Pixel.format_argb8888, Sdl.Texture.access_static,
                        (50, 50)));
           assert (Sdl.render_clear r = Ok ());
-          assert (Sdl.render_copy ~dst:(Sdl.Rect.create 100 100 50 50) r t =
+          assert (Sdl.render_copy
+                    ~dst:(Sdl.Rect.create ~x:100 ~y:100 ~w:50 ~h:50) r t =
                   Ok ());
           Sdl.render_present r;
           let ba = create_bigarray Bigarray.int32 (50 * 50) in
@@ -580,7 +586,8 @@ let test_textures () =
           | Error (`Msg e) -> log_err " Could not update texture: %s" e
           | Ok () ->
               assert (Sdl.render_clear r = Ok ());
-              assert (Sdl.render_copy ~dst:(Sdl.Rect.create 200 200 50 50) r t
+              assert (Sdl.render_copy
+                        ~dst:(Sdl.Rect.create ~x:200 ~y:200 ~w:50 ~h:50) r t
                       = Ok ());
               Sdl.render_present r;
           end;
@@ -795,7 +802,8 @@ let test_windows () =
       | Ok s ->
           assert (Sdl.fill_rect s None 0xFF0000FFl = Ok ());
           assert (Sdl.update_window_surface w = Ok ());
-          let rs = [ Sdl.Rect.create 0 0 20 20; Sdl.Rect.create 20 20 20 20 ] in
+          let rs = [ Sdl.Rect.create ~x:0 ~y:0 ~w:20 ~h:20;
+                     Sdl.Rect.create ~x:20 ~y:20 ~w:20 ~h:20 ] in
           assert (Sdl.fill_rects s rs 0x00FF00FFl = Ok ());
           assert (Sdl.update_window_surface_rects w rs = Ok ());
           let rs = create_bigarray Bigarray.int32 8 in
@@ -1017,14 +1025,14 @@ let test_mouse () =
       ignore (Sdl.show_cursor true);
       ignore (Sdl.get_cursor_shown ());
       Sdl.pump_events ();
-      assert (Sdl.warp_mouse_global 50 50 = Ok ());
-      Sdl.warp_mouse_in_window None 50 50;
+      assert (Sdl.warp_mouse_global ~x:50 ~y:50 = Ok ());
+      Sdl.warp_mouse_in_window None ~x:50 ~y:50;
       let current_cursor = Sdl.get_cursor () in
       let default_cursor = Sdl.get_default_cursor () in
       let cd = create_bigarray Bigarray.int8_unsigned (2 * 16) in
       let cm = create_bigarray Bigarray.int8_unsigned (2 * 16) in
       for i = 0 to 2 * 16 - 1 do cd.{i} <- 0x00; cm.{i} <- 0xFF done;
-      begin match Sdl.create_cursor cd cm 16 16 7 7 with
+      begin match Sdl.create_cursor cd cm ~w:16 ~h:16 ~hot_x:7 ~hot_y:7 with
       | Error (`Msg e) -> log_err " Could not create cursor: %s" e
       | Ok c ->
           Sdl.set_cursor (Some c);
@@ -1037,7 +1045,7 @@ let test_mouse () =
       | Error (`Msg e) -> log_err " Could not create surface: %s" e
       | Ok s ->
           assert (Sdl.fill_rect s None 0x0000FF7Fl = Ok ());
-          begin match Sdl.create_color_cursor s 7 7 with
+          begin match Sdl.create_color_cursor s ~hot_x:7 ~hot_y:7 with
           | Error (`Msg e) -> log_err " Could not create color cursor: %s" e
           | Ok c ->
               Sdl.set_cursor (Some c);

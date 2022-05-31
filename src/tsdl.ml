@@ -2319,7 +2319,7 @@ module Vulkan = struct
             (Ctypes.coerce (ptr void) (ptr string) null) with
     | false -> None
     | true ->
-        let exts = allocate_n string (!@n) in
+        let exts = allocate_n string ~count:(!@n) in
         match get_instance_extensions window n exts with
         | false -> None
         | true -> Some CArray.(to_list @@ from_ptr exts (!@n))
@@ -2329,7 +2329,7 @@ module Vulkan = struct
       (window @-> instance @-> ptr surface @-> returning bool)
 
   let create_surface window instance =
-    let s = allocate_n surface 1 in
+    let s = allocate_n surface ~count:1 in
     if create_surface window instance s then
       Some !@s
     else
@@ -4091,7 +4091,8 @@ module Event = struct
   let window_event = field t "window" Window_event.t
   let display_event = field t "display" Display_event.t
   let sensor_event = field t "sensor" Sensor_event.t
-  let padding = field t "padding" (abstract "padding" tsdl_sdl_event_size 1)
+  let padding = field t "padding"
+      (abstract ~name:"padding" ~size:tsdl_sdl_event_size ~alignment:1)
   let () = seal t
 
   let create () = make t
