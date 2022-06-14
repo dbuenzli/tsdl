@@ -2112,6 +2112,9 @@ let set_window_grab =
 let set_window_icon =
   foreign "SDL_SetWindowIcon" (window @-> surface @-> returning void)
 
+let set_window_input_focus =
+  foreign "SDL_SetWindowInputFocus" (window @-> returning zero_to_ok)
+
 let set_window_maximum_size =
   foreign "SDL_SetWindowMaximumSize"
     (window @-> int @-> int @-> returning void)

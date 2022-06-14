@@ -1344,6 +1344,9 @@ val set_window_grab : window -> bool -> unit
 val set_window_icon : window -> surface -> unit
 (** {{:http://wiki.libsdl.org/SDL_SetWindowIcon}SDL_SetWindowIcon} *)
 
+val set_window_input_focus : window -> unit result
+(** {{:http://wiki.libsdl.org/SDL_SetWindowInputFocus}SDL_SetWindowInputFocus} *)
+
 val set_window_maximum_size : window -> w:int -> h:int -> unit
 (** {{:http://wiki.libsdl.org/SDL_SetWindowMaximumSize}
     SDL_SetWindowMaximumSize} *)
