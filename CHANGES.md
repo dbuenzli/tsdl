@@ -1,3 +1,7 @@
+
+- Add binding to `SDL_SetWindowInputFocus`. 
+  Thanks to Maxence Guesdon for the patch.
+
 v0.9.9 2022-05-31 Zagreb
 ------------------------
 
