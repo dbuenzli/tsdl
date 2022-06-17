@@ -1,5 +1,7 @@
 
-- Add binding to `SDL_SetWindowInputFocus`. 
+- Add binding to `SDL_SetWindowInputFocus`.
+  Thanks to Maxence Guesdon for the patch.
+- Add (-) operation for flags in `Init`, `Renderer` and `Window`.
   Thanks to Maxence Guesdon for the patch.
 
 v0.9.9 2022-05-31 Zagreb
@@ -7,24 +9,24 @@ v0.9.9 2022-05-31 Zagreb
 
 - Add support for the `windowID` field of `SDL_DropEvent`.
   Thanks to Maxence Guesdon for the patch.
-- Tweak `Sdl.Event.drop_file` to return an option an no longer raises in 
+- Tweak `Sdl.Event.drop_file` to return an option an no longer raises in
   case of null pointer.
-- Correctly type `Sdl.Event.controller_{axis_axis,button_button}`. 
+- Correctly type `Sdl.Event.controller_{axis_axis,button_button}`.
   Thanks to Romain Bardou for the report (#71).
 - Fix C compilation error due `String_val` (#72).
 - Add missing cases to `Sdl.Event.enum` (#76).
-- Add support for `SDL_F{Point,Rect}` Thanks to 
+- Add support for `SDL_F{Point,Rect}` Thanks to
   Florent Monnier for the patches.
 
 v0.9.8 2020-06-19 Zagreb
 ------------------------
 
-- Fix bug in `Sdl.{queue_audio,dequeue_audio}`, sizes 
+- Fix bug in `Sdl.{queue_audio,dequeue_audio}`, sizes
   were passed in terms of array length instead of bytes.
   Thanks to Enguerrand Decorne for the report and the patch.
-- Release runtime lock during `Sdl.load_wav_rw`. Thanks 
+- Release runtime lock during `Sdl.load_wav_rw`. Thanks
   to Michael Bacarella for the patch.
-- Add `Message_box.button_no_default` button flag. Thanks to 
+- Add `Message_box.button_no_default` button flag. Thanks to
   Simon Guilliams for the patch.
 
 v0.9.7 2019-07-19 Zagreb
@@ -119,7 +121,7 @@ v0.8.2 2015-11-20 Cambridge (UK)
 v0.8.1 2014-05-22 La Forclaz (VS)
 ---------------------------------
 
-- Fix compilation on 32 bits platforms. 
+- Fix compilation on 32 bits platforms.
 - Support for ctypes 0.3. Thanks to Jeremy Yallop for the patch.
 
 
