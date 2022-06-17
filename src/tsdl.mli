@@ -57,6 +57,9 @@ module Init : sig
   val ( + ) : t -> t -> t
   (** [f + f'] combines flags [f] and [f']. *)
 
+  val ( - ) : t -> t -> t
+  (** [f - f'] removes flag [f'] from [f]. *)
+
   val test : t -> t -> bool
   (** [test flags mask] is [true] if any of the flags in [mask] is
       set in [flags]. *)
@@ -824,6 +827,9 @@ module Renderer : sig
   val ( + ) : flags -> flags -> flags
   (** [f + f'] combines flags [f] and [f']. *)
 
+  val ( - ) : flags -> flags -> flags
+  (** [f - f'] removes flag [f'] from [f]. *)
+
   val test : flags -> flags -> bool
   (** [test flags mask] is [true] if any of the flags in [mask] is
         set in [flags]. *)
@@ -1191,6 +1197,9 @@ module Window : sig
 
   val ( + ) : flags -> flags -> flags
   (** [f + f'] combines flags [f] and [f']. *)
+
+  val ( - ) : flags -> flags -> flags
+  (** [f - f'] removes flag [f'] from [f]. *)
 
   val test : flags -> flags -> bool
   (** [test flags mask] is [true] if any of the flags in [mask] is

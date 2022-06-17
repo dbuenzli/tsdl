@@ -177,6 +177,7 @@ module Init = struct
   type t = Unsigned.uint32
   let i = Unsigned.UInt32.of_int
   let ( + ) = Unsigned.UInt32.logor
+  let ( - ) f f' = Unsigned.UInt32.(logand f (lognot f'))
   let test f m = Unsigned.UInt32.(compare (logand f m) zero <> 0)
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
   let nothing = i 0
@@ -1270,6 +1271,7 @@ module Renderer = struct
   type flags = Unsigned.uint32
   let i = Unsigned.UInt32.of_int
   let ( + ) = Unsigned.UInt32.logor
+  let ( - ) f f' = Unsigned.UInt32.(logand f (lognot f'))
   let test f m = Unsigned.UInt32.(compare (logand f m) zero <> 0)
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
   let none = Unsigned.UInt32.zero
@@ -1902,6 +1904,7 @@ module Window = struct
   type flags = Unsigned.uint32
   let i = Unsigned.UInt32.of_int
   let ( + ) = Unsigned.UInt32.logor
+  let ( - ) f f' = Unsigned.UInt32.(logand f (lognot f'))
   let test f m = Unsigned.UInt32.(compare (logand f m) zero <> 0)
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
   let windowed = i 0
