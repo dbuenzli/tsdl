@@ -219,6 +219,7 @@ module Hint = struct
   let framebuffer_acceleration = sdl_hint_framebuffer_acceleration
   let idle_timer_disabled = sdl_hint_idle_timer_disabled
   let orientations = sdl_hint_orientations
+  let mouse_focus_clickthrough = sdl_hint_mouse_focus_clickthrough
   let mouse_normal_speed_scale = sdl_hint_mouse_normal_speed_scale
   let mouse_relative_speed_scale = sdl_hint_mouse_relative_speed_scale
   let render_driver = sdl_hint_render_driver
