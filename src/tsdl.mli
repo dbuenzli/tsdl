@@ -114,6 +114,10 @@ module Hint : sig
   (** {{:http://wiki.libsdl.org/SDL_HINT_IDLE_TIMER_DISABLED}
        SDL_HINT_IDLE_TIMER_DISABLED} *)
 
+  val mouse_focus_clickthrough : t
+  (** {{:http://wiki.libsdl.org/SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH}
+       SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH} ( 2.0.5 ) *)
+
   val mouse_normal_speed_scale : t
   (** ( 2.06.0 ) *)
 
