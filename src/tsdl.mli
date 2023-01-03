@@ -295,6 +295,9 @@ val load_file_rw: rw_ops -> bool -> string result
 val rw_from_file : string -> string -> rw_ops result
 (** {{:https://wiki.libsdl.org/SDL_RWFromFile}SDL_RWFromFile} *)
 
+val rw_from_const_mem : string -> rw_ops result
+(** {{:https://wiki.libsdl.org/SDL_RWFromConstMem}SDL_RWFromConstMem} *)
+
 val rw_close : rw_ops -> unit result
 (** {{:https://wiki.libsdl.org/SDL_RWclose}SDL_RWclose} *)
 
