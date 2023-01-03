@@ -5,6 +5,8 @@
   Thanks to Maxence Guesdon for the patch.
 - Add `Hint.mouse_focus_clickthrough`.
   Thanks to Maxence Guesdon for the patch.
+- Add `rw_from_const_mem`.
+  Thanks to Maxence Guesdon for the patch.
 
 v0.9.9 2022-05-31 Zagreb
 ------------------------

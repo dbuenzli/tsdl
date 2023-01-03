@@ -410,6 +410,11 @@ let rw_from_file =
   foreign "SDL_RWFromFile"
     (string @-> string @-> returning (some_to_ok rw_ops_opt))
 
+let rw_from_const_mem =
+  foreign "SDL_RWFromConstMem"
+    (string @-> int @-> returning (some_to_ok rw_ops_opt))
+
+let rw_from_const_mem str = rw_from_const_mem str (String.length str)
 
 let load_file filename = (* defined as a macro in SDL_rwops.h *)
   match rw_from_file filename "rb" with
