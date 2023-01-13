@@ -7,6 +7,8 @@
   Thanks to Maxence Guesdon for the patch.
 - Add `rw_from_const_mem`.
   Thanks to Maxence Guesdon for the patch.
+- Use `.obj` and other non-`.o` object extensions for compilers
+  like MSVC.
 
 v0.9.9 2022-05-31 Zagreb
 ------------------------
