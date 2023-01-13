@@ -34,10 +34,15 @@ let pkg_config_lib ~lib ~has_lib ~stublib =
   flag ["link"; "ocaml"; tag] (S (link_flags @ lib_flags));
   flag ["link"; "ocaml"; "library"; "byte"; tag] (S stublib_flags)
 
+let obj s =
+  match !Ocamlbuild_plugin.Options.ext_obj with
+  | "" -> s ^ ".o"
+  | x -> s ^ "." ^ x
+
 (* tsdl_const.ml generation. *)
 
 let sdl_consts_build () =
-  dep [ "link"; "ocaml"; "link_consts_stub" ] [ "support/consts_stub.o" ];
+  dep [ "link"; "ocaml"; "link_consts_stub" ] [ obj "support/consts_stub" ];
   dep [ "sdl_consts" ] [ "src/tsdl_consts.ml" ];
   rule "sdl_consts: consts.byte -> tsdl_consts.ml"
     ~dep:"support/consts.byte"
