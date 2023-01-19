@@ -1,4 +1,6 @@
 
+- Use implicit linking on MSVC to let ctypes-foreign find SDL2
+  functions on Windows. Thanks to Jonah Beckford for the patch.
 - Add binding to `SDL_SetWindowInputFocus`.
   Thanks to Maxence Guesdon for the patch.
 - Add (-) operation for flags in `Init`, `Renderer` and `Window`.
