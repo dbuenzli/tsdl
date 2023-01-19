@@ -8,9 +8,10 @@ true: bin_annot, safe_string, thread
 
 <src> : include
 <src/tsdl.{ml,mli}> : package(ctypes), thread
-<src/tsdl.ml> : sdl_consts
+<src/tsdl.ml> : sdl_consts, package(ctypes.foreign)
 <src/tsdl.{cma,cmxa,cmxs}> : custom, thread, \
  package(ctypes), package(ctypes.foreign), use_sdl2
+<src/tsdl_stubs.c> : use_sdl2
 
 <src/libtsdl.*> : use_sdl2
 <src/tsdl_top.*> : package(compiler-libs.toplevel)
