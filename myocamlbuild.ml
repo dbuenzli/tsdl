@@ -5,18 +5,42 @@ open Command
 
 let os = Ocamlbuild_pack.My_unix.run_and_read "uname -s"
 
-let pkg_config flags package =
+let pkg_config ?(of_arg=Fun.id) flags package =
   let cmd tmp =
     Command.execute ~quiet:true &
     Cmd( S [ A "pkg-config"; A ("--" ^ flags); A package; Sh ">"; A tmp]);
-    List.map (fun arg -> A arg) (string_list_of_file tmp)
+    List.map (fun arg -> A (of_arg arg)) (string_list_of_file tmp)
   in
   with_temp_file "pkgconfig" "pkg-config" cmd
 
+(* Confer: https://github.com/ocaml/dune/issues/119 *)
+let msvc_hack_lib =
+  match !Ocamlbuild_plugin.Options.ext_lib with
+  | "lib" -> fun ~prefix ~ext lib -> (
+    let len = String.length lib in
+    if len <= 2 then
+      lib
+    else
+      (* drop `-l` prefix *)
+      match lib.[0], lib.[1] with
+      | '-', 'l' -> prefix ^ String.sub lib 2 (len - 2) ^ ext
+      | _, _ -> lib)
+  | _ -> fun ~prefix ~ext lib -> lib
+
 let pkg_config_lib ~lib ~has_lib ~stublib =
   let cflags = (A has_lib) :: pkg_config "cflags" lib in
-  let stub_l = [A (Printf.sprintf "-l%s" stublib)] in
+  (* Caution: [-l] is expected by pkg-config conventions, but MSVC does not
+     support it. Use msvc_hack_lib *)
+  let dl_stub_l = [
+    A (msvc_hack_lib ~prefix:"dll" ~ext:".dll" (Printf.sprintf "-l%s" stublib))
+  ] in
   let libs_l = pkg_config "libs-only-l" lib in
+  let cc_libs_l =
+    pkg_config
+      ~of_arg:(msvc_hack_lib ~prefix:"" ~ext:".lib")
+      "libs-only-l"
+      lib
+  in
   let libs_L = pkg_config "libs-only-L" lib in
   let linker = match os with
   | "Linux\n" -> [A "-Wl,-no-as-needed"]
@@ -25,9 +49,9 @@ let pkg_config_lib ~lib ~has_lib ~stublib =
   let make_opt o arg = S [ A o; arg ] in
   let mklib_flags = (List.map (make_opt "-ldopt") linker) @ libs_l @ libs_L in
   let compile_flags = List.map (make_opt "-ccopt") cflags in
-  let lib_flags = List.map (make_opt "-cclib") libs_l in
+  let lib_flags = List.map (make_opt "-cclib") cc_libs_l in
   let link_flags = List.map (make_opt "-ccopt") (linker @ libs_L) in
-  let stublib_flags = List.map (make_opt "-dllib") stub_l  in
+  let stublib_flags = List.map (make_opt "-dllib") dl_stub_l  in
   let tag = Printf.sprintf "use_%s" lib in
   flag ["c"; "ocamlmklib"; tag] (S mklib_flags);
   flag ["c"; "compile"; tag] (S compile_flags);
