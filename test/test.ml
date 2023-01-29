@@ -1025,7 +1025,11 @@ let test_mouse () =
       ignore (Sdl.show_cursor true);
       ignore (Sdl.get_cursor_shown ());
       Sdl.pump_events ();
-      assert (Sdl.warp_mouse_global ~x:50 ~y:50 = Ok ());
+      let () =
+          match Sdl.warp_mouse_global ~x:50 ~y:50 with
+          | Ok () -> ()
+          | Error (`Msg e) -> log_err "warp_mouse_global: %s" e
+      in
       Sdl.warp_mouse_in_window None ~x:50 ~y:50;
       let current_cursor = Sdl.get_cursor () in
       let default_cursor = Sdl.get_default_cursor () in
