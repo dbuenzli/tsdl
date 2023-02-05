@@ -27,6 +27,8 @@ let default =
     |> add description_tags
       [ "audio"; "bindings"; "graphics"; "media"; "opengl"; "input"; "hci";
         "org:erratique" ]
+    |> add B0_opam.Meta.available
+      {|[(os-distribution != "opensuse-leap" | os-version >= 16)]|}
     |> add B0_opam.Meta.depends
       [ "ocaml", {|>= "4.08.0"|};
         "ocamlfind", {|build|};
