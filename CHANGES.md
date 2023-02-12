@@ -1,4 +1,5 @@
 
+- Sdl.render_present: release runtime lock (useful for 'presentvsync')
 - Use implicit linking on MSVC to let ctypes-foreign find SDL2
   functions on Windows. Thanks to Jonah Beckford for the patch.
 - Add binding to `SDL_SetWindowInputFocus`.
