@@ -2279,8 +2279,12 @@ let gl_get_drawable_size win =
   gl_get_drawable_size win w h;
   (!@ w, !@ h)
 
+let int_to_ok =
+  let read n = Ok n in
+  view ~read ~write:write_never int
+
 let gl_get_swap_interval =
-  foreign "SDL_GL_GetSwapInterval" (void @-> returning nat_to_ok)
+  foreign "SDL_GL_GetSwapInterval" (void @-> returning int_to_ok)
 
 let gl_make_current =
   foreign "SDL_GL_MakeCurrent"
