@@ -406,6 +406,26 @@ let test_surfaces () =
   end;
   ()
 
+let test_vsync r =
+  let stop = ref false in
+  let delta = ref 0l in
+  let n = 100 in
+  let threadfun () =
+      let t0 = Sdl.get_ticks () in
+      for i = 1 to n do
+          Unix.sleepf 0.001;
+      done;
+      delta := Int32.sub (Sdl.get_ticks ()) t0;
+      stop := true;
+  in
+  let t = Thread.create threadfun () in
+  while not !stop do
+      Sdl.render_present r;
+  done;
+  log "Thread average wakeup time, during presentvsync loop: %f"
+    (Int32.to_float !delta /. float n);
+  Thread.join t
+
 let test_renderers () =
   log "Testing renderers";
   begin match Sdl.get_num_render_drivers () with
@@ -425,7 +445,8 @@ let test_renderers () =
   | Error (`Msg e) -> log_err " Could not create window: %s" e
   | Ok w ->
       assert (match Sdl.get_renderer w with Error _ -> true | _ -> false);
-      begin match Sdl.create_renderer w with
+      let flags = Sdl.Renderer.presentvsync in
+      begin match Sdl.create_renderer ~flags w with
       | Error (`Msg e) -> log_err " Could not create renderer: %s" e
       | Ok r ->
           assert (match Sdl.get_renderer w with Error _ -> false | _ -> true);
@@ -512,6 +533,7 @@ let test_renderers () =
           assert (Sdl.render_draw_rects r rects = Ok ());
           assert (Sdl.render_draw_rects_ba r rects_ba = Ok ());
           Sdl.render_present r;
+          test_vsync r;
           assert (Sdl.get_render_target r = None);
           assert (Sdl.set_render_target r None = Ok ());
           Sdl.destroy_renderer r
