@@ -1567,7 +1567,7 @@ let render_get_viewport rend =
   r
 
 let render_present =
-  foreign "SDL_RenderPresent" (renderer @-> returning void)
+  foreign ~release_runtime_lock:true "SDL_RenderPresent" (renderer @-> returning void)
 
 let render_read_pixels =
   foreign "SDL_RenderReadPixels"
