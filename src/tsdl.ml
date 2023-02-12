@@ -2279,8 +2279,18 @@ let gl_get_drawable_size win =
   gl_get_drawable_size win w h;
   (!@ w, !@ h)
 
+let nat_to_maybe_error =
+  let read = function
+       | n when n < 0 ->
+          (match error () with
+          | Error (`Msg "") -> Ok n
+          | err -> err)
+      | n -> Ok n in
+  view ~read ~write:write_never int
+
 let gl_get_swap_interval =
-  foreign "SDL_GL_GetSwapInterval" (void @-> returning nat_to_ok)
+  clear_error ();
+  foreign "SDL_GL_GetSwapInterval" (void @-> returning nat_to_maybe_error)
 
 let gl_make_current =
   foreign "SDL_GL_MakeCurrent"

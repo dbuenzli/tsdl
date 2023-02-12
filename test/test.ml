@@ -890,9 +890,17 @@ let test_opengl_contexts () =
                 (m land Sdl.Gl.context_profile_es <> 0)
           end;
           assert (Sdl.gl_extension_supported "BLA234241" = false);
+          Sdl.clear_error ();
           begin match (Sdl.gl_set_swap_interval 1) with
           | Error (`Msg e) -> log_err " Could not set swap interval: %s" e
-          | Ok () -> assert (Sdl.gl_get_swap_interval () = Ok 1)
+          | Ok () ->
+            match Sdl.gl_get_swap_interval () with
+            | Ok 1 -> ()
+            | Ok -1 ->
+                (* might be expected on wayland *)
+                log_err "swap interval is -1 (adaptive)"
+            | Ok n -> log_err "Expected swap interval 1, got %d" n; assert false
+            | Error (`Msg e) -> log_err "Cannot get GL swap interval: %s" e; assert false
           end;
           assert (Sdl.gl_make_current w ctx = Ok ());
           begin match Sdl.gl_get_current_context () with
