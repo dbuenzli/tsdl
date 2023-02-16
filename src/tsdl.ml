@@ -631,10 +631,10 @@ let enclose_points_ba ?clip ps =
   else None
 
 let enclose_points ?clip ps =
-  let count = List.length ps in
-  let ps = to_voidp (CArray.start (CArray.of_list point ps)) in
+  let a = CArray.of_list point ps in
+  let ps = to_voidp (CArray.start a) in
   let res = make rect in
-  if enclose_points ps count (Rect.opt_addr clip) (addr res)
+  if enclose_points ps (CArray.length a) (Rect.opt_addr clip) (addr res)
   then Some res
   else None
 
@@ -753,9 +753,8 @@ let set_palette_colors_ba p cs ~fst =
   set_palette_colors p cs fst count
 
 let set_palette_colors p cs ~fst =
-  let count = List.length cs in
   let a = CArray.of_list color cs in
-  set_palette_colors p (to_voidp (CArray.start a)) fst count
+  set_palette_colors p (to_voidp (CArray.start a)) fst (CArray.length a)
 
 (* Pixel formats *)
 
@@ -1093,9 +1092,8 @@ let fill_rects_ba s rs col =
   fill_rects s rs count col
 
 let fill_rects s rs col =
-  let count = List.length rs in
   let a = CArray.of_list rect rs in
-  fill_rects s (to_voidp (CArray.start a)) count col
+  fill_rects s (to_voidp (CArray.start a)) (CArray.length a) col
 
 let free_surface =
   foreign "SDL_FreeSurface" (surface @-> returning void)
@@ -1431,9 +1429,8 @@ let render_draw_lines_ba r ps =
   render_draw_lines r ps count
 
 let render_draw_lines r ps =
-  let count = List.length ps in
   let a = CArray.of_list point ps in
-  render_draw_lines r (to_voidp (CArray.start a)) count
+  render_draw_lines r (to_voidp (CArray.start a)) (CArray.length a)
 
 let render_draw_point =
   foreign "SDL_RenderDrawPoint"
@@ -1451,9 +1448,8 @@ let render_draw_points_ba r ps =
   render_draw_points r ps count
 
 let render_draw_points r ps =
-  let count = List.length ps in
   let a = CArray.of_list point ps in
-  render_draw_points r (to_voidp (CArray.start a)) count
+  render_draw_points r (to_voidp (CArray.start a)) (CArray.length a)
 
 let render_draw_point_f =
   foreign "SDL_RenderDrawPointF"
@@ -1471,9 +1467,8 @@ let render_draw_points_f_ba r ps =
   render_draw_points_f r ps count
 
 let render_draw_points_f r ps =
-  let count = List.length ps in
   let a = CArray.of_list fpoint ps in
-  render_draw_points_f r (to_voidp (CArray.start a)) count
+  render_draw_points_f r (to_voidp (CArray.start a)) (CArray.length a)
 
 let render_draw_rect =
   foreign "SDL_RenderDrawRect"
@@ -1494,9 +1489,8 @@ let render_draw_rects_ba r rs =
   render_draw_rects r rs count
 
 let render_draw_rects r rs =
-  let count = List.length rs in
   let a = CArray.of_list rect rs in
-  render_draw_rects r (to_voidp (CArray.start a)) count
+  render_draw_rects r (to_voidp (CArray.start a)) (CArray.length a)
 
 let render_fill_rect =
   foreign "SDL_RenderFillRect"
@@ -1517,9 +1511,8 @@ let render_fill_rects_ba r rs =
   render_fill_rects r rs count
 
 let render_fill_rects r rs =
-  let count = List.length rs in
   let a = CArray.of_list rect rs in
-  render_fill_rects r (to_voidp (CArray.start a)) count
+  render_fill_rects r (to_voidp (CArray.start a)) (CArray.length a)
 
 let render_get_clip_rect =
   foreign "SDL_RenderGetClipRect"
@@ -2183,9 +2176,9 @@ let update_window_surface_rects_ba w rs =
   update_window_surface_rects w rs count
 
 let update_window_surface_rects w rs =
-  let count = List.length rs in
-  let rs = to_voidp (CArray.start (CArray.of_list rect rs)) in
-  update_window_surface_rects w rs count
+  let a = CArray.of_list rect rs in
+  let rs = to_voidp (CArray.start a) in
+  update_window_surface_rects w rs (CArray.length a)
 
 (* OpenGL contexts *)
 
