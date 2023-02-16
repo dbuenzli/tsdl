@@ -1,4 +1,5 @@
-
+- Use `CArray.length` on arrays constructed via `CArray.of_list` to
+  avoid a double call to `List.length`.
 - Use implicit linking on MSVC to let ctypes-foreign find SDL2
   functions on Windows. Thanks to Jonah Beckford for the patch.
 - Add binding to `SDL_SetWindowInputFocus`.
