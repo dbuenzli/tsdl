@@ -3618,10 +3618,6 @@ end
 let game_controller_add_mapping =
   foreign "SDL_GameControllerAddMapping" (string @-> returning bool_to_ok)
 
-let game_controller_add_mapping_from_file =
-  foreign "SDL_GameControllerAddMappingsFromFile"
-    ~stub (string @-> returning nat_to_ok)
-
 let game_controller_add_mapping_from_rw =
   foreign "SDL_GameControllerAddMappingsFromRW"
     ~stub (rw_ops @-> bool @-> returning nat_to_ok)

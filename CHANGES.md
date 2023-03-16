@@ -1,3 +1,4 @@
+
 - Sdl.gl_get_swap_interval: -1 is a valid return value (adaptive vsync)
 - Sdl.render_present: release runtime lock (useful for 'presentvsync')
 - Use `CArray.length` on arrays constructed via `CArray.of_list` to
@@ -16,7 +17,10 @@
 - Use `.obj` and other non-`.o` object extensions for compilers
   like MSVC.
   Thanks to Jonah Beckford for the patch.
-
+- Remove binding `Sdl.game_controller_add_mapping_from_file`, it's 
+  a C macro (#85).
+  Thanks to Jonah Beckford for the report.
+  
 v0.9.9 2022-05-31 Zagreb
 ------------------------
 
