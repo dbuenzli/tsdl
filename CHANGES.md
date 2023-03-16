@@ -1,6 +1,10 @@
+v1.0.0 2023-03-16 La Forclaz (VS)
+---------------------------------
 
 - Sdl.gl_get_swap_interval: -1 is a valid return value (adaptive vsync)
-- Sdl.render_present: release runtime lock (useful for 'presentvsync')
+  (#90). Thanks to Edwin Török for the patch.
+- Sdl.render_present: release runtime lock (useful for 'presentvsync', 
+  #90). Thanks to Edwin Török for the patch.
 - Use `CArray.length` on arrays constructed via `CArray.of_list` to
   avoid a double call to `List.length`. Thanks to Vu Ngoc San 
   for the patch.
