@@ -35,8 +35,8 @@ depends: [
   "ocamlbuild" {build}
   "topkg" {build & >= "1.0.3"}
   "conf-sdl2"
-  "ctypes" {>= "0.14.0"}
-  "ctypes-foreign"
+  "ctypes" {>= "0.21.1"}
+  "ctypes-foreign" {>= "0.21.1"}
 ]
 available: os-distribution != "opensuse-leap" | os-version >= "16"
 build: ["ocaml" "pkg/pkg.ml" "build" "--dev-pkg" "%{dev}%"]

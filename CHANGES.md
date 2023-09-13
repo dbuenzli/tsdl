@@ -1,3 +1,7 @@
+
+
+- Use package `ctypes-foreign` instead of `ctypes.foreign`.
+
 v1.0.0 2023-03-16 La Forclaz (VS)
 ---------------------------------
 
