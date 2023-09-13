@@ -7,7 +7,6 @@ let ctypes_foreign = B0_ocaml.libname "ctypes-foreign"
 let integers = B0_ocaml.libname "integers" (* dep of ctypes *)
 let bigarray_compat = B0_ocaml.libname "bigarray-compat" (* dep of ctypes *)
 let tsdl = B0_ocaml.libname "tsdl"
-
 let compiler_libs_toplevel = B0_ocaml.libname "compiler-libs.toplevel"
 
 (* Packs *)
@@ -27,9 +26,9 @@ let default =
       [ "audio"; "bindings"; "graphics"; "media"; "opengl"; "input"; "hci";
         "org:erratique" ]
     |> B0_meta.tag B0_opam.tag
-    |> B0_meta.add B0_opam.Meta.available
+    |> B0_meta.add B0_opam.available
       {|[(os-distribution != "opensuse-leap" | os-version >= 16)]|}
-    |> B0_meta.add B0_opam.Meta.depends
+    |> B0_meta.add B0_opam.depends
       [ "ocaml", {|>= "4.08.0"|};
         "ocamlfind", {|build|};
         "ocamlbuild", {|build|};
@@ -37,8 +36,8 @@ let default =
         "conf-sdl2", "";
         "ctypes", {|>= "0.21.1"|};
         "ctypes-foreign", {|>= "0.21.1"|} ]
-    |> B0_meta.add B0_opam.Meta.build
+    |> B0_meta.add B0_opam.build
       {|[["ocaml" "pkg/pkg.ml" "build" "--dev-pkg" "%{dev}%"]]|}
   in
-  B0_pack.v "default" ~doc:"tsdl package" ~meta ~locked:true @@
+  B0_pack.make "default" ~doc:"tsdl package" ~meta ~locked:true @@
   B0_unit.list ()
