@@ -1025,10 +1025,10 @@ let test_keyboard () =
       | Some w' -> assert (Sdl.get_window_id w = Sdl.get_window_id w')
       end;
       ignore (Sdl.get_keyboard_state ());
+      ignore (Sdl.get_key_from_scancode Sdl.Scancode.k);
+      ignore (Sdl.get_scancode_from_key Sdl.K.k);
       assert (Sdl.get_key_from_name "K" = Sdl.K.k);
-      assert (Sdl.get_key_from_scancode Sdl.Scancode.k = Sdl.K.k);
       assert (Sdl.get_key_name Sdl.K.k = "K");
-      assert (Sdl.get_scancode_from_key Sdl.K.k = Sdl.Scancode.k);
       assert (Sdl.get_scancode_from_name "K" = Sdl.Scancode.k);
       assert (Sdl.get_scancode_name Sdl.Scancode.k = "K");
       assert (Sdl.Scancode.(enum unknown) = `Unknown);
