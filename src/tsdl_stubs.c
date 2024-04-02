@@ -3,7 +3,7 @@
    Distributed under the ISC license, see terms at the end of the file.
   ---------------------------------------------------------------------------*/
 
-/* This is just here for ocamlbuild to generate a correct dlltsdl.so object */
+#include "SDL.h"
 
 #ifdef _MSC_VER
 /* MSVC requires at least one extern function from SDL2 to be used.
@@ -15,11 +15,16 @@
    that all foreign DLLs are already mapped into the process address space.
    Implicit linking is the simplest way to do that.
  */
-#include "SDL.h"
 void tsdl_nop (void) { SDL_WasInit(0); return; }
 #else
 void tsdl_nop (void) { return; }
 #endif
+
+/* Fixed arity function for OCaml, especially for macOS/clang. */
+void caml_tsdl_log1arg (char* fmt, char* arg1) {
+   /* varargs */
+   SDL_Log(fmt, arg1);
+}
 
 /*---------------------------------------------------------------------------
    Copyright (c) 2013 The tsdl programmers

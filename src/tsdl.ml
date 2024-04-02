@@ -293,7 +293,7 @@ end
 let log_fun_t = (int @-> string @-> string @-> returning void)
 
 let log =
-  foreign "SDL_Log" (string @-> string @-> returning void)
+  foreign "caml_tsdl_log1arg" (string @-> string @-> returning void)
 
 let log fmt =
   kpp (fun s -> ignore (log "%s" s)) fmt
