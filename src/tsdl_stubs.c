@@ -20,7 +20,7 @@ void tsdl_nop (void) { SDL_WasInit(0); return; }
 void tsdl_nop (void) { return; }
 #endif
 
-/* Fixed arity function for OCaml, especially for macOS/clang. */
+/* Fixed arity function, libffi does not support varargs. */
 void caml_tsdl_log1arg (char* fmt, char* arg1) {
    /* varargs */
    SDL_Log(fmt, arg1);
