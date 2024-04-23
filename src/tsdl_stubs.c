@@ -6,6 +6,7 @@
 #include "SDL.h"
 
 #ifdef _MSC_VER
+#define _DLLAPI __declspec(dllexport)
 /* MSVC requires at least one extern function from SDL2 to be used.
    If not, MSVC will not link the SDL2 import library and subsequently the
    SDL2 DLL will not be implicitly linked (aka. load-time dynamic linking)
@@ -17,11 +18,12 @@
  */
 void tsdl_nop (void) { SDL_WasInit(0); return; }
 #else
+#define _DLLAPI extern
 void tsdl_nop (void) { return; }
 #endif
 
 /* Fixed arity function, libffi does not support varargs. */
-void caml_tsdl_log1arg (char* fmt, char* arg1) {
+_DLLAPI void caml_tsdl_log1arg (char* fmt, char* arg1) {
    /* varargs */
    SDL_Log(fmt, arg1);
 }
