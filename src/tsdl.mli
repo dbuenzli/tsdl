@@ -435,6 +435,18 @@ val rect_equals : rect -> rect -> bool
 val union_rect : rect -> rect -> rect
 (** {{:http://wiki.libsdl.org/SDL_UnionRect}SDL_UnionRect} *)
 
+type vertex
+
+module Vertex : sig
+  val create : position:fpoint -> color:color -> tex_coord:fpoint -> vertex
+  val position : vertex -> fpoint
+  val color : vertex -> color
+  val tex_coord : vertex -> fpoint
+  val set_position : vertex -> fpoint -> unit
+  val set_color : vertex -> color -> unit
+  val set_tex_coord : vertex -> fpoint -> unit
+end
+
 (** {2:palettes {{:http://wiki.libsdl.org/CategoryPixels}Palettes}} *)
 
 type palette
@@ -983,6 +995,10 @@ val render_fill_rects_ba : renderer -> (int32, Bigarray.int32_elt) bigarray ->
 
     @raise Invalid_argument if the length of the array is not a
     multiple of 4. *)
+
+val render_geometry : ?indices:(int list) -> ?texture:texture -> renderer -> vertex list -> 
+  unit result
+(** {{:http://wiki.libsdl.org/SDL_RenderGeometry}SDL_RenderGeometry} *)
 
 val render_get_clip_rect : renderer -> rect
 (** {{:http://wiki.libsdl.org/SDL_RenderGetClipRect}SDL_RenderGetClipRect} *)

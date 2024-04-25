@@ -694,6 +694,37 @@ let union_rect a b =
   union_rect (addr a) (addr b) (addr res);
   res
 
+(* Vertices *)
+
+type _vertex
+type vertex = _vertex structure
+let vertex : vertex typ = structure "SDL_Vertex"
+let vertex_position = field vertex "position" fpoint
+let vertex_color = field vertex "color" color
+let vertex_tex_coord = field vertex "tex_coord" fpoint
+let () = seal vertex
+
+module Vertex = struct
+  let create ~position ~color ~tex_coord =
+    let v = make vertex in
+    setf v vertex_position position;
+    setf v vertex_color color;
+    setf v vertex_tex_coord tex_coord;
+    v
+
+  let position v = getf v vertex_position
+  let color v = getf v vertex_color
+  let tex_coord v = getf v vertex_tex_coord
+
+  let set_position v position = setf v vertex_position position
+  let set_color v color = setf v vertex_color color 
+  let set_tex_coord v tex_coord = setf v vertex_tex_coord tex_coord
+
+  let opt_addr = function
+  | None -> coerce (ptr void) (ptr vertex) null
+  | Some v -> addr v
+end
+
 (* Palettes *)
 
 type _palette
@@ -1513,6 +1544,26 @@ let render_fill_rects_ba r rs =
 let render_fill_rects r rs =
   let a = CArray.of_list rect rs in
   render_fill_rects r (to_voidp (CArray.start a)) (CArray.length a)
+
+let render_geometry =
+  foreign "SDL_RenderGeometry"
+    (renderer @-> texture @-> ptr void @-> int @-> ptr void @-> int @-> returning zero_to_ok)
+
+let render_geometry ?indices ?texture r vertices =
+  let a1 = CArray.of_list vertex vertices in
+  let t = 
+    match texture with
+    | None -> null
+    | Some texture -> texture
+  in
+  let a2_ptr, a2_len =
+    match indices with
+    | None -> (null, 0)
+    | Some is ->
+      let a2 = CArray.of_list int is in
+      (to_voidp (CArray.start a2), CArray.length a2)
+  in
+  render_geometry r t (to_voidp (CArray.start a1)) (CArray.length a1) a2_ptr a2_len 
 
 let render_get_clip_rect =
   foreign "SDL_RenderGetClipRect"
