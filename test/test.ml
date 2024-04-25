@@ -124,6 +124,30 @@ let test_points () =
   assert (Sdl.Point.y p = 2);
   ()
 
+let test_vertices () =
+  log "Testing vertices";
+  let eq_fpoint f1 f2 = Sdl.Fpoint.(x f1 = x f2 && y f1 = y f2) in
+  let eq_color c1 c2 =
+    Sdl.Color.(r c1 = r c2 && g c1 = g c2 && b c1 = b c2 && a c1 = a c2)
+  in
+  let position = Sdl.Fpoint.create ~x:123.0 ~y:456.0 in
+  let color = Sdl.Color.create ~r:70 ~g:200 ~b:135 ~a:50 in
+  let tex_coord = Sdl.Fpoint.create ~x:1.1 ~y:2.2 in
+  let vertex = Sdl.Vertex.create ~position ~color ~tex_coord in
+  assert (eq_fpoint (Sdl.Vertex.position vertex) position);
+  assert (eq_color (Sdl.Vertex.color vertex) color);
+  assert (eq_fpoint (Sdl.Vertex.tex_coord vertex) tex_coord);
+  let position' = Sdl.Fpoint.create ~x:987.0 ~y:444.0 in
+  let color' = Sdl.Color.create ~r:88 ~g:123 ~b:95 ~a:254 in
+  let tex_coord' = Sdl.Fpoint.create ~x:2.3 ~y:4.1 in
+  Sdl.Vertex.set_position vertex position';
+  assert (eq_fpoint (Sdl.Vertex.position vertex) position');
+  Sdl.Vertex.set_color vertex color';
+  assert (eq_color (Sdl.Vertex.color vertex) color');
+  Sdl.Vertex.set_tex_coord vertex tex_coord';
+  assert (eq_fpoint (Sdl.Vertex.tex_coord vertex) tex_coord');
+  ()
+
 let test_rectangles () =
   log "Testing rectangles";
   let r = Sdl.Rect.create ~x:1 ~y:2 ~w:3 ~h:4 in
@@ -532,6 +556,36 @@ let test_renderers () =
           assert (Sdl.set_render_draw_color r 0xFF 0xFF 0xFF 0xFF = Ok ());
           assert (Sdl.render_draw_rects r rects = Ok ());
           assert (Sdl.render_draw_rects_ba r rects_ba = Ok ());
+          let v1 =
+            Sdl.Vertex.create
+              ~position:(Sdl.Fpoint.create ~x:10.5 ~y:10.5)
+              ~color:(Sdl.Color.create ~r:255 ~g:0 ~b:0 ~a:255)
+              ~tex_coord:(Sdl.Fpoint.create ~x:1.0 ~y:1.0)
+          in
+          let v2 =
+            Sdl.Vertex.create
+              ~position:(Sdl.Fpoint.create ~x:20.5 ~y:10.5)
+              ~color:(Sdl.Color.create ~r:255 ~g:0 ~b:0 ~a:255)
+              ~tex_coord:(Sdl.Fpoint.create ~x:1.0 ~y:1.0)
+          in
+          let v3 =
+            Sdl.Vertex.create
+              ~position:(Sdl.Fpoint.create ~x:10.5 ~y:20.5)
+              ~color:(Sdl.Color.create ~r:255 ~g:0 ~b:0 ~a:255)
+              ~tex_coord:(Sdl.Fpoint.create ~x:1.0 ~y:1.0)
+          in
+          let vertices = [v1; v2; v3] in
+          let indices = [2; 1; 0] in
+          let t =
+            match Sdl.create_texture r Sdl.Pixel.format_rgba8888 Sdl.Texture.access_target ~w:100 ~h:100 with
+            | Ok t -> t
+            | Error _ -> assert false
+          in
+          assert (Sdl.render_geometry r vertices = Ok ());
+          assert (Sdl.render_geometry r vertices ~indices = Ok ());
+          assert (Sdl.render_geometry r vertices ~texture:t = Ok ());
+          assert (Sdl.render_geometry r vertices ~texture:t ~indices = Ok ());
+          Sdl.destroy_texture t;
           Sdl.render_present r;
           test_vsync r;
           assert (Sdl.get_render_target r = None);
@@ -1541,6 +1595,7 @@ let tests human = match Sdl.init Sdl.Init.everything with
     test_file_system_paths ();
     test_colors ();
     test_points ();
+    test_vertices ();
     test_rectangles ();
     test_palettes ();
     test_pixel_formats ();

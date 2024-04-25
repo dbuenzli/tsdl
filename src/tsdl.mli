@@ -340,7 +340,7 @@ module Color : sig
   val set_a : color -> uint8 -> unit
 end
 
-(** {2:points Points} *)
+(** {2:points Points and vertices} *)
 
 type point
 (** {{:http://wiki.libsdl.org/SDL2/SDL_Point}SDL_Point} *)
@@ -362,6 +362,19 @@ module Fpoint : sig
   val y : fpoint -> float
   val set_x : fpoint -> float -> unit
   val set_y : fpoint -> float -> unit
+end
+
+type vertex
+(** {{:https://wiki.libsdl.org/SDL2/SDL_Vertex}SDL_Vertex} *)
+
+module Vertex : sig
+  val create : position:fpoint -> color:color -> tex_coord:fpoint -> vertex
+  val position : vertex -> fpoint
+  val color : vertex -> color
+  val tex_coord : vertex -> fpoint
+  val set_position : vertex -> fpoint -> unit
+  val set_color : vertex -> color -> unit
+  val set_tex_coord : vertex -> fpoint -> unit
 end
 
 (** {2:rectangles
@@ -981,6 +994,10 @@ val render_fill_rects_ba : renderer -> (int32, Bigarray.int32_elt) bigarray ->
 
     @raise Invalid_argument if the length of the array is not a
     multiple of 4. *)
+
+val render_geometry : ?indices:(int list) -> ?texture:texture -> renderer ->
+  vertex list -> unit result
+(** {{:http://wiki.libsdl.org/SDL2/SDL_RenderGeometry}SDL_RenderGeometry} *)
 
 val render_get_clip_rect : renderer -> rect
 (** {{:http://wiki.libsdl.org/SDL2/SDL_RenderGetClipRect}SDL_RenderGetClipRect} *)
