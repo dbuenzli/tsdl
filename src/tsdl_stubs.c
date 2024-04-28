@@ -18,7 +18,7 @@
  */
 void tsdl_nop (void) { SDL_WasInit(0); return; }
 #else
-#define _DLLAPI extern
+#define _DLLAPI
 void tsdl_nop (void) { return; }
 #endif
 
