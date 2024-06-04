@@ -1,5 +1,8 @@
-
-
+- Fix `rw_from_const_mem` to pass the ocaml string rather
+  than a copy.
+  Thanks to Maxence Guesdon for the patch.
+- Add `rw_from_mem`.
+  Thanks to Maxence Guesdon for the patch.
 - Use package `ctypes-foreign` instead of `ctypes.foreign`.
 
 v1.0.0 2023-03-16 La Forclaz (VS)
@@ -7,10 +10,10 @@ v1.0.0 2023-03-16 La Forclaz (VS)
 
 - Sdl.gl_get_swap_interval: -1 is a valid return value (adaptive vsync)
   (#90). Thanks to Edwin Török for the patch.
-- Sdl.render_present: release runtime lock (useful for 'presentvsync', 
+- Sdl.render_present: release runtime lock (useful for 'presentvsync',
   #90). Thanks to Edwin Török for the patch.
 - Use `CArray.length` on arrays constructed via `CArray.of_list` to
-  avoid a double call to `List.length`. Thanks to Vu Ngoc San 
+  avoid a double call to `List.length`. Thanks to Vu Ngoc San
   for the patch.
 - Use implicit linking on MSVC to let ctypes-foreign find SDL2
   functions on Windows. Thanks to Jonah Beckford for the patch.
@@ -25,10 +28,10 @@ v1.0.0 2023-03-16 La Forclaz (VS)
 - Use `.obj` and other non-`.o` object extensions for compilers
   like MSVC.
   Thanks to Jonah Beckford for the patch.
-- Remove binding `Sdl.game_controller_add_mapping_from_file`, it's 
+- Remove binding `Sdl.game_controller_add_mapping_from_file`, it's
   a C macro (#85).
   Thanks to Jonah Beckford for the report.
-  
+
 v0.9.9 2022-05-31 Zagreb
 ------------------------
 

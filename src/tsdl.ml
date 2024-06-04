@@ -412,9 +412,16 @@ let rw_from_file =
 
 let rw_from_const_mem =
   foreign "SDL_RWFromConstMem"
-    (string @-> int @-> returning (some_to_ok rw_ops_opt))
+    (ocaml_string @-> int @-> returning (some_to_ok rw_ops_opt))
 
-let rw_from_const_mem str = rw_from_const_mem str (String.length str)
+let rw_from_const_mem str = rw_from_const_mem
+  (ocaml_string_start str) (String.length str)
+
+let rw_from_mem =
+  foreign "SDL_RWFromMem"
+    (ocaml_bytes @-> int @-> returning (some_to_ok rw_ops_opt))
+
+let rw_from_mem b = rw_from_mem (ocaml_bytes_start b) (Bytes.length b)
 
 let load_file filename = (* defined as a macro in SDL_rwops.h *)
   match rw_from_file filename "rb" with
