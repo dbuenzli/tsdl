@@ -3,9 +3,10 @@
    Distributed under the ISC license, see terms at the end of the file.
   ---------------------------------------------------------------------------*/
 
-/* This is just here for ocamlbuild to generate a correct dlltsdl.so object */
+#include "SDL.h"
 
 #ifdef _MSC_VER
+#define _DLLAPI __declspec(dllexport)
 /* MSVC requires at least one extern function from SDL2 to be used.
    If not, MSVC will not link the SDL2 import library and subsequently the
    SDL2 DLL will not be implicitly linked (aka. load-time dynamic linking)
@@ -15,11 +16,17 @@
    that all foreign DLLs are already mapped into the process address space.
    Implicit linking is the simplest way to do that.
  */
-#include "SDL.h"
 void tsdl_nop (void) { SDL_WasInit(0); return; }
 #else
+#define _DLLAPI
 void tsdl_nop (void) { return; }
 #endif
+
+/* Fixed arity function, libffi does not support varargs. */
+_DLLAPI void caml_tsdl_log1arg (char* fmt, char* arg1) {
+   /* varargs */
+   SDL_Log(fmt, arg1);
+}
 
 /*---------------------------------------------------------------------------
    Copyright (c) 2013 The tsdl programmers
