@@ -15,17 +15,27 @@ let pkg_config flags package =
 
 let pkg_config_lib ~lib ~has_lib ~stublib =
   let cflags = (A has_lib) :: pkg_config "cflags" lib in
-  let stub_l = [A (Printf.sprintf "-l%s" stublib)] in
+  let stub_l = match !Ocamlbuild_plugin.Options.ext_lib with
+  | "lib" -> [A (Printf.sprintf "dll%s.dll" stublib)]
+  | _ -> [A (Printf.sprintf "-l%s" stublib)]
+  in
   let libs_l = pkg_config "libs-only-l" lib in
   let libs_L = pkg_config "libs-only-L" lib in
+  let libs_other = pkg_config "libs-only-other" lib in
+  let mklib_extra = match !Ocamlbuild_plugin.Options.ext_lib with
+  | "lib" -> [ S libs_L ]
+  | _ -> []
+  in
   let linker = match os with
   | "Linux\n" -> [A "-Wl,-no-as-needed"]
   | _ -> []
   in
   let make_opt o arg = S [ A o; arg ] in
-  let mklib_flags = (List.map (make_opt "-ldopt") linker) @ libs_l @ libs_L in
+  let mklib_flags = (List.map (make_opt "-ldopt") linker)
+    @ libs_l @ libs_L @ mklib_extra
+  in
   let compile_flags = List.map (make_opt "-ccopt") cflags in
-  let lib_flags = List.map (make_opt "-cclib") libs_l in
+  let lib_flags = List.map (make_opt "-cclib") (libs_l @ libs_other) in
   let link_flags = List.map (make_opt "-ccopt") (linker @ libs_L) in
   let stublib_flags = List.map (make_opt "-dllib") stub_l  in
   let tag = Printf.sprintf "use_%s" lib in
