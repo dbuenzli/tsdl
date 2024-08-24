@@ -345,6 +345,27 @@ module Color : sig
   val set_a : color -> uint8 -> unit
 end
 
+module Color_ba : sig
+  type t = (int, Bigarray.int8_unsigned_elt) bigarray
+  val create : int -> t
+  val set : int -> r:int -> g:int -> b:int -> a:int -> t -> unit
+  val set_color : int -> color -> t -> unit
+  val get : int -> t -> int * int * int * int
+  (** Colors are returned as (R, G, B, A) *)
+
+  val get_color : int -> t -> color
+end
+(** Used to store a packed array of colors. SDL's color
+    representation is sensitive to endianness (see
+    {{:https://wiki.libsdl.org/SDL_Color}SDL_Color}). This
+    module takes care of endianness concerns.
+
+    Note that the indices used by set, get, etc. are the
+    indices of the colors, rather than the bytes. Accessing
+    the 3rd color, for instance, will access bytes 12, 13,
+    14 and 15. *)
+
+
 (** {2:points Points} *)
 
 type point
@@ -1002,6 +1023,30 @@ val render_fill_rects_ba : renderer -> (int32, Bigarray.int32_elt) bigarray ->
 val render_geometry : ?indices:(int list) -> ?texture:texture -> renderer -> vertex list -> 
   unit result
 (** {{:http://wiki.libsdl.org/SDL_RenderGeometry}SDL_RenderGeometry} *)
+
+val render_geometry_raw : ?indices:(int32, Bigarray.int32_elt) bigarray -> ?texture:texture -> renderer -> (float, Bigarray.float32_elt) bigarray -> (int, Bigarray.int8_unsigned_elt) bigarray -> (float, Bigarray.float32_elt) bigarray -> unit result
+(** {{:http://wiki.libsdl.org/SDL_RenderGeometryRaw}SDL_RenderGeometryRaw}
+
+    This function is provided with only a bigarray interface. In
+    contrast to SDL's version, this version does not provide 'stride'
+    arguments. Indices are assumed to be signed 32-bit integers as the
+    type signature suggests.
+
+    Each consecutive pair in xy is a coordinate. Each consecutive quadruple
+    in color is a color. On little-endian machines, colors should be encoded
+    in the byte order R, G, B, A from lowest to highest index; and on
+    big-endian machines, they should be encoded as A, B, G, R, again
+    lowest to highest index. Each consecutive pair in uv is a coordinate.
+
+    @raise Invalid_argument if the length of the xy and uv arrays are
+    not multiples of 2.
+
+    @raise Invalid_argument if the length of the color array is not a
+    multiple of 4.
+
+    @raise Invalid_argument if the number of xy points, colors, and uv
+    points is not equal.
+  *)
 
 val render_get_clip_rect : renderer -> rect
 (** {{:http://wiki.libsdl.org/SDL_RenderGetClipRect}SDL_RenderGetClipRect} *)

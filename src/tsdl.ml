@@ -499,6 +499,49 @@ module Color = struct
   let set_a c a = setf c color_a (Unsigned.UInt8.of_int a)
 end
 
+(* Color Bigarray *)
+module Color_ba = struct
+  type t = (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
+
+  let create len = Bigarray.(Array1.create int8_unsigned c_layout (4*len))
+
+  let set i ~r ~g ~b ~a ba =
+    (* From least-significant to most-significant byte, we have:
+       Big-endian: A, B, G, R
+       Little-endian: R, G, B, A *)
+    let ri, gi, bi, ai =
+      if Sys.big_endian then
+        (4*i + 3, 4*i + 2, 4*i + 1, 4*i)
+      else
+        (4*i, 4*i + 1, 4*i + 2, 4*i + 3)
+    in
+    ba.{ri} <- r; ba.{gi} <- g; ba.{bi} <- b; ba.{ai} <- a
+
+  let set_color i color ba =
+    set
+      i
+      ~r:(Color.r color)
+      ~g:(Color.g color)
+      ~b:(Color.b color)
+      ~a:(Color.a color)
+      ba
+
+  (* returned as (r, g, b, a) *)
+  let get i ba =
+    let ri, gi, bi, ai =
+      if Sys.big_endian then
+        (4*i + 3, 4*i + 2, 4*i + 1, 4*i)
+      else
+        (4*i, 4*i + 1, 4*i + 2, 4*i + 3)
+    in
+    (ba.{ri}, ba.{gi}, ba.{bi}, ba.{ai})
+
+  let get_color i ba =
+    let r, g, b, a = get i ba in
+    Color.create ~r ~g ~b ~a
+end
+
+
 (* Points *)
 
 type _point
@@ -1571,6 +1614,50 @@ let render_geometry ?indices ?texture r vertices =
       (to_voidp (CArray.start a2), CArray.length a2)
   in
   render_geometry r t (to_voidp (CArray.start a1)) (CArray.length a1) a2_ptr a2_len 
+
+let render_geometry_raw =
+  foreign "SDL_RenderGeometryRaw"
+    (renderer @-> texture @-> ptr void @-> int @-> ptr void @-> int
+              @-> ptr void @-> int @-> int @-> ptr void @-> int @-> int @-> returning zero_to_ok)
+
+
+let render_geometry_raw ?indices ?texture r xy colors uv =
+  let t =
+    match texture with
+    | None -> null
+    | Some texture -> texture
+  in
+  let i_ptr, i_len =
+    match indices with
+    | None -> null, 0
+    | Some is ->
+      to_voidp (bigarray_start array1 is), Bigarray.Array1.dim is
+  in
+  (* indices are assumed to be 4-byte integers *)
+  let i_stride = 4 in
+  let xy_ptr = to_voidp (bigarray_start array1 xy) in
+  let xy_len = Bigarray.Array1.dim xy in
+  (* one pair of single-precision floats is 8 bytes *)
+  let xy_stride = 8 in
+  let color_ptr = to_voidp (bigarray_start array1 colors) in
+  let color_len = Bigarray.Array1.dim colors in
+  (* one color is 4 bytes (rgba) *)
+  let color_stride = 4 in
+  let uv_ptr = to_voidp (bigarray_start array1 uv) in
+  let uv_len = Bigarray.Array1.dim uv in
+  (* one pair of single-precision floats is 8 bytes *)
+  let uv_stride = 8 in
+  let num_vertices = xy_len / 2 in
+  if xy_len mod 2 <> 0 then
+    invalid_arg (err_length_mul xy_len 2)
+  else if color_len mod 4 <> 0 then
+    invalid_arg (err_length_mul color_len 4)
+  else if uv_len mod 2 <> 0 then
+    invalid_arg (err_length_mul uv_len 2)
+  else if num_vertices <> color_len / 4 || num_vertices <> uv_len / 2 then
+    invalid_arg "render_geometry_raw_ba: xy, colors, and uv have differing lengths"
+  else
+    render_geometry_raw r t xy_ptr xy_stride color_ptr color_stride uv_ptr uv_stride num_vertices i_ptr i_len i_stride
 
 let render_get_clip_rect =
   foreign "SDL_RenderGetClipRect"

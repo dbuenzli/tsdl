@@ -117,6 +117,24 @@ let test_colors () =
   assert (Sdl.Color.a c = 4);
   ()
 
+let test_color_bas () =
+  log "Testing color_bas";
+  let cs = Sdl.Color_ba.create 1 in
+  let c = Sdl.Color.create ~r:101 ~g:102 ~b:103 ~a:104 in
+  Sdl.Color_ba.set 0 ~r:123 ~g:222 ~b:211 ~a:100 cs;
+  (* testing Color_ba.get and Color_ba.set *)
+  assert (Sdl.Color_ba.get 0 cs = (123, 222, 211, 100));
+  Sdl.Color_ba.set_color 0 c cs;
+  (* testing Color_ba.set_color *)
+  assert (Sdl.Color_ba.get 0 cs = (101, 102, 103, 104));
+  let c' = Sdl.Color_ba.get_color 0 cs in
+  (* testing Color_ba.get_color *)
+  assert (Sdl.Color.r c' = 101);
+  assert (Sdl.Color.g c' = 102);
+  assert (Sdl.Color.b c' = 103);
+  assert (Sdl.Color.a c' = 104);
+  ()
+
 let test_points () =
   log "Testing points";
   let p = Sdl.Point.create ~x:1 ~y:2 in
@@ -585,6 +603,24 @@ let test_renderers () =
           assert (Sdl.render_geometry r vertices ~indices = Ok ());
           assert (Sdl.render_geometry r vertices ~texture:t = Ok ());
           assert (Sdl.render_geometry r vertices ~texture:t ~indices = Ok ());
+          let xy_ba = create_bigarray Bigarray.float32 6 in
+          let color_ba = create_bigarray Bigarray.int8_unsigned 12 in
+          let uv_ba = create_bigarray Bigarray.float32 6 in
+          let indices_ba = create_bigarray Bigarray.int32 3 in
+          xy_ba.{0} <- 10.5; xy_ba.{1} <- 10.5;
+          xy_ba.{2} <- 20.5; xy_ba.{3} <- 10.5;
+          xy_ba.{4} <- 10.5; xy_ba.{5} <- 20.5;
+          color_ba.{0} <- 255; color_ba.{1} <- 0; color_ba.{2} <- 0; color_ba.{3} <- 255;
+          color_ba.{4} <- 0; color_ba.{5} <- 255; color_ba.{6} <- 0; color_ba.{7} <- 255;
+          color_ba.{8} <- 0; color_ba.{9} <- 0; color_ba.{10} <- 255; color_ba.{11} <- 255;
+          uv_ba.{0} <- 1.; uv_ba.{1} <- 1.;
+          uv_ba.{2} <- 1.; uv_ba.{3} <- 1.;
+          uv_ba.{4} <- 1.; uv_ba.{5} <- 1.;
+          indices_ba.{0} <- 2l; indices_ba.{1} <- 1l; indices_ba.{2} <- 0l;
+          assert (Sdl.render_geometry_raw r xy_ba color_ba uv_ba = Ok ());
+          assert (Sdl.render_geometry_raw ~indices:indices_ba r xy_ba color_ba uv_ba = Ok ());
+          assert (Sdl.render_geometry_raw ~texture:t r xy_ba color_ba uv_ba = Ok ());
+          assert (Sdl.render_geometry_raw ~texture:t ~indices:indices_ba r xy_ba color_ba uv_ba = Ok ());
           Sdl.destroy_texture t;
           Sdl.render_present r;
           test_vsync r;
@@ -1590,6 +1626,7 @@ let tests human = match Sdl.init Sdl.Init.everything with
     test_rw_ops ();
     test_file_system_paths ();
     test_colors ();
+    test_color_bas ();
     test_points ();
     test_rectangles ();
     test_vertices ();
