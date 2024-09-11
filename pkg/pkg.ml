@@ -7,12 +7,10 @@ let () =
   Pkg.describe "tsdl" @@ fun c ->
   Ok [
     Pkg.mllib ~api:["Tsdl"] "src/tsdl.mllib";
+    Pkg.clib "src/libtsdl.clib";
     Pkg.mllib ~api:[] "src/tsdl_top.mllib";
     Pkg.lib "src/tsdl_top_init.ml";
-    Pkg.clib "src/libtsdl.clib";
     Pkg.doc "doc/index.mld" ~dst:"odoc-pages/index.mld";
-    Pkg.doc "README.md";
-    Pkg.doc "CHANGES.md";
     Pkg.doc "test/min.ml";
     Pkg.doc "test/minc.c";
     Pkg.test "test/test";

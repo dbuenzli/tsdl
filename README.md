@@ -1,6 +1,5 @@
 Tsdl — Thin bindings to SDL for OCaml
 -------------------------------------------------------------------------------
-%%VERSION%%
 
 Tsdl is an OCaml library providing thin bindings to the cross-platform
 SDL C library.
