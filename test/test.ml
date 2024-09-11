@@ -627,7 +627,6 @@ let test_textures () =
           | Ok () ->
               assert (Sdl.set_render_draw_color r 0x50 0xC8 0x78 0xFF = Ok ());
               assert (Sdl.render_clear r = Ok ());
-              Sdl.render_present r;
               let pixels = create_bigarray Bigarray.int32 (50 * 50) in
               begin match Sdl.render_read_pixels r None
                             (Some Sdl.Pixel.format_rgba8888) pixels (50 * 4)
