@@ -6,8 +6,8 @@
 (** SDL thin bindings.
 
     Consult the {{!conventions}binding conventions}, the
-    {{!Sdl.coverage}binding coverage} and {{!examples}examples} of
-    use.
+    {{!Sdl.coverage}binding coverage} and the {{!page-index.quick}
+    quick start}.
 
     Given the thinness of the binding most functions are documented by
     linking directly to SDL's own documentation. Unfortunately it
@@ -3909,48 +3909,6 @@ match Sdl.init Sdl.Init.(video + timer + audio) with
     function and of limited use since most of the time bit fields are
     given to setup state and, as such, are less likley to be used for
     pattern matching. *)
-
-(** {1:examples Examples}
-
-    {2:toplevel Toplevel}
-
-To use [Tsdl] in the toplevel with [findlib] just issue:
-{[
-> #use "topfind";;
-> #require "tsdl.top";;
-]}
-
-This automatically loads the library and opens the [Tsdl] module.
-
-    {2:opengl OpenGL window}
-
-    The following is the minimum you need to get a working OpenGL window
-    with SDL.
-{[
-open Tsdl
-
-let main () = match Sdl.init Sdl.Init.(video + events) with
-| Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1
-| Ok () ->
-    match Sdl.create_window ~w:640 ~h:480 "SDL OpenGL" Sdl.Window.opengl with
-    | Error (`Msg e) -> Sdl.log "Create window error: %s" e; exit 1
-    | Ok w ->
-        Sdl.pump_events ();
-        Sdl.delay 3000l;
-        Sdl.destroy_window w;
-        Sdl.quit ();
-        exit 0
-
-let () = main ()
-]}
-
-This can be compiled to byte and native code with:
-{v
-> ocamlfind ocamlc -package tsdl -thread -linkpkg -o min.byte min.ml
-> ocamlfind ocamlopt -package tsdl -thread -linkpkg -o min.native min.ml
-v}
-
-*)
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2013 The tsdl programmers
