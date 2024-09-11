@@ -5,6 +5,8 @@ open Command
 
 let os = Ocamlbuild_pack.My_unix.run_and_read "uname -s"
 
+let strf = Printf.sprintf
+
 let pkg_config flags package =
   let cmd tmp =
     Command.execute ~quiet:true &
@@ -13,35 +15,53 @@ let pkg_config flags package =
   in
   with_temp_file "pkgconfig" "pkg-config" cmd
 
-let pkg_config_lib ~lib ~has_lib ~stublib =
-  let cflags = (A has_lib) :: pkg_config "cflags" lib in
-  let stub_l = [A (Printf.sprintf "-l%s" stublib)] in
-  let libs_l = pkg_config "libs-only-l" lib in
-  let libs_L = pkg_config "libs-only-L" lib in
-  let linker = match os with
-  | "Linux\n" -> [A "-Wl,-no-as-needed"]
-  | _ -> []
+let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
+  let ar s = match !Ocamlbuild_plugin.Options.ext_lib with
+  | "" -> s ^ ".a" | x -> s ^ "." ^ x
   in
   let make_opt o arg = S [ A o; arg ] in
-  let mklib_flags = (List.map (make_opt "-ldopt") linker) @ libs_l @ libs_L in
-  let compile_flags = List.map (make_opt "-ccopt") cflags in
-  let lib_flags = List.map (make_opt "-cclib") libs_l in
-  let link_flags = List.map (make_opt "-ccopt") (linker @ libs_L) in
-  let stublib_flags = List.map (make_opt "-dllib") stub_l  in
-  let tag = Printf.sprintf "use_%s" lib in
-  flag ["c"; "ocamlmklib"; tag] (S mklib_flags);
-  flag ["c"; "compile"; tag] (S compile_flags);
-  flag ["link"; "ocaml"; tag] (S (link_flags @ lib_flags));
-  flag ["link"; "ocaml"; "library"; "byte"; tag] (S stublib_flags)
+  let ccopts = List.map (make_opt "-ccopt") in
+  let cclibs = List.map (make_opt "-cclib") in
+  let dllibs = List.map (make_opt "-dllib") in
+  let use_lib = strf "use_%s" lib in
+  let use_clib = strf "use_%s" clib in
+  let record_stub_lib = strf "record_%s" stublib in
+  let link_stub_archive = strf "link_%s_archive" stublib in
+  let stub_ar = ar (strf "%s/lib%s" src_dir stublib) in
+  let stub_l = A (strf "-l%s" stublib) in
+  let clib_l = pkg_config "libs-only-l" clib in
+  let clib_L = pkg_config "libs-only-L" clib in
+  let clib_cflags = ccopts @@ (A has_lib) :: pkg_config "cflags" clib in
+  let clib_cclibs = cclibs @@ clib_l in
+  let clib_ccopts = ccopts @@ clib_L in
+  begin
+    dep [record_stub_lib] [stub_ar];
 
-let obj s =
-  match !Ocamlbuild_plugin.Options.ext_obj with
-  | "" -> s ^ ".o"
-  | x -> s ^ "." ^ x
+    flag ["c"; "compile"; use_clib] (S clib_cflags);
+
+    flag ["c"; "ocamlmklib"; use_clib] (S (clib_L @ clib_l));
+
+    flag ["link"; "ocaml"; "library"; "byte"; record_stub_lib]
+      (S (dllibs [stub_l] @ clib_ccopts @ clib_cclibs));
+
+    flag ["link"; "ocaml"; "library"; "native"; record_stub_lib]
+      (S (clib_ccopts @ cclibs [stub_l] @ clib_cclibs));
+
+    flag_and_dep ["link"; "ocaml"; link_stub_archive] (P stub_ar);
+
+    flag ["link"; "ocaml"; "library"; "shared"; link_stub_archive]
+      (S (clib_ccopts @ clib_cclibs));
+
+    ocaml_lib ~tag_name:use_lib ~dir:src_dir (strf "%s/%s" src_dir lib)
+  end
 
 (* tsdl_const.ml generation. *)
 
 let sdl_consts_build () =
+  let obj s = match !Ocamlbuild_plugin.Options.ext_obj with
+  | "" -> s ^ ".o"
+  | x -> s ^ "." ^ x
+  in
   dep [ "link"; "ocaml"; "link_consts_stub" ] [ obj "support/consts_stub" ];
   dep [ "sdl_consts" ] [ "src/tsdl_consts.ml" ];
   rule "sdl_consts: consts.byte -> tsdl_consts.ml"
@@ -57,7 +77,8 @@ let sdl_consts_build () =
 let () =
   dispatch begin function
   | After_rules ->
-      pkg_config_lib ~lib:"sdl2" ~has_lib:"-DHAS_SDL2" ~stublib:"tsdl";
+      lib_with_clib ~lib:"tsdl" ~clib:"sdl2" ~has_lib:"-DHAS_SDL2"
+        ~src_dir:"src" ~stublib:"tsdl_stubs";
       sdl_consts_build ()
   | _ -> ()
   end

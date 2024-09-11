@@ -1,20 +1,16 @@
 true: bin_annot, safe_string, thread
-
 <_b0> : -traverse
 
-<support> : include
 <support/consts_stub.c> : use_sdl2
 <support/consts.{ml,native,byte}> : custom, link_consts_stub
 
-<src> : include
-<src/tsdl.{ml,mli}> : package(ctypes), thread
-<src/tsdl.ml> : sdl_consts, package(ctypes-foreign)
-<src/tsdl.{cma,cmxa,cmxs}> : custom, thread, \
- package(ctypes), package(ctypes-foreign), use_sdl2
+<src/tsdl.{mli,ml,cma,cmxa,cmxs}> : package(ctypes ctypes-foreign)
+<src/tsdl.ml> : sdl_consts
 <src/tsdl_stubs.c> : use_sdl2
+<src/libtsdl_stubs.*> : use_sdl2
+<src/tsdl.{cma,cmxa}> : record_tsdl_stubs
+<src/tsdl.cmxs> : link_tsdl_stubs_archive
 
-<src/libtsdl.*> : use_sdl2
 <src/tsdl_top.*> : package(compiler-libs.toplevel)
 
-<test> : include
-<test/**> : package(ctypes), package(ctypes-foreign), use_sdl2
+<test/**> : package(ctypes ctypes-foreign), use_tsdl
