@@ -3392,7 +3392,7 @@ module Haptic : sig
 
   (** {2:left_right Left right effect}
 
-      For {!left_right}. *)
+      For {!val-left_right}. *)
 
   (** {3:haptic_fields
       {{:http://wiki.libsdl.org/SDL2/SDL_HapticLeftRight}SDL_HapticLeftRight}
