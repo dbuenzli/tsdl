@@ -28,7 +28,10 @@ let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
   let record_stub_lib = strf "record_%s" stublib in
   let link_stub_archive = strf "link_%s_archive" stublib in
   let stub_ar = ar (strf "%s/lib%s" src_dir stublib) in
-  let stub_l = A (strf "-l%s" stublib) in
+  let stub_l = match !Ocamlbuild_plugin.Options.ext_lib with
+  | "lib" (* Windows *) -> A (strf "dll%s.dll" stublib)
+  | _ -> A (strf "-l%s" stublib)
+  in
   let clib_l = pkg_config "libs-only-l" clib in
   let clib_L = pkg_config "libs-only-L" clib in
   let clib_cflags = ccopts @@ (A has_lib) :: pkg_config "cflags" clib in
