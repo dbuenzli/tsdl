@@ -19,6 +19,7 @@ To use [Tsdl] in the toplevel with just issue:
 {@shell[
 ocaml
 # #use "topfind";;
+# #thread;; (* Only needed if you are using ocaml and < 5.0.0 *)
 # #require "tsdl.top";;
 ]}
 
