@@ -290,11 +290,8 @@ module Log = struct
   let priority_critical = sdl_log_priority_critical
 end
 
-let log_message =
-  foreign "SDL_LogMessage"
-    (int @-> int @-> string @-> string @-> returning void)
-
-let log_message c p fmt = kpp (fun s -> ignore (log_message c p "%s" s)) fmt
+external log_message : int -> int -> string -> unit = "ocaml_tsdl_log_message"
+let log_message c p fmt = kpp (fun s -> log_message c p s) fmt
 
 let log fmt = log_message Log.category_application Log.priority_info fmt
 let log_critical c fmt = log_message c Log.priority_critical fmt

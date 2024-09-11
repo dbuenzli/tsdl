@@ -3,7 +3,8 @@
    Distributed under the ISC license, see terms at the end of the file.
   ---------------------------------------------------------------------------*/
 
-/* This is just here for ocamlbuild to generate a correct dlltsdl.so object */
+#include "SDL.h"
+#include <caml/mlvalues.h>
 
 #ifdef _MSC_VER
 /* MSVC requires at least one extern function from SDL2 to be used.
@@ -15,11 +16,18 @@
    that all foreign DLLs are already mapped into the process address space.
    Implicit linking is the simplest way to do that.
  */
-#include "SDL.h"
 void tsdl_nop (void) { SDL_WasInit(0); return; }
 #else
 void tsdl_nop (void) { return; }
 #endif
+
+CAMLprim value ocaml_tsdl_log_message (value c, value p, value m)
+{
+  /* XXX we assume users know what they are logging and
+     avoid the caml_string_is_c_safe (m) scan for now.  */
+  SDL_LogMessage (Int_val (c), Int_val (p), "%s", String_val (m));
+  return Val_unit;
+}
 
 /*---------------------------------------------------------------------------
    Copyright (c) 2013 The tsdl programmers
