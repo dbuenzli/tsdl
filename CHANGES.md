@@ -1,5 +1,8 @@
-- Fix `rw_from_const_mem` to pass the ocaml string rather
-  than a copy.
+
+- Fix segmentation fault on macOS arm64 when using varargs functions
+  through ctypes (#99). Thanks to Jonah Beckford for the report and
+  the help.
+- Fix `rw_from_const_mem` to pass the ocaml string rather than a copy.
   Thanks to Maxence Guesdon for the patch.
 - Add `rw_from_mem`.
   Thanks to Maxence Guesdon for the patch.
