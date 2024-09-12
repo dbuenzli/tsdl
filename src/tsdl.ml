@@ -1629,7 +1629,8 @@ let render_get_viewport rend =
   r
 
 let render_present =
-  foreign ~release_runtime_lock:true "SDL_RenderPresent" (renderer @-> returning void)
+  foreign ~release_runtime_lock:true "SDL_RenderPresent"
+    (renderer @-> returning void)
 
 let render_read_pixels =
   foreign "SDL_RenderReadPixels"
@@ -1649,7 +1650,8 @@ let render_set_clip_rect rend r =
   render_set_clip_rect rend (Rect.opt_addr r)
 
 let render_set_integer_scale =
-  foreign "SDL_RenderSetIntegerScale" (renderer @-> bool @-> returning zero_to_ok)
+  foreign "SDL_RenderSetIntegerScale"
+    (renderer @-> bool @-> returning zero_to_ok)
 
 let render_set_logical_size =
   foreign "SDL_RenderSetLogicalSize"
@@ -2025,7 +2027,8 @@ let get_window_brightness =
 
 let get_window_borders_size =
   foreign "SDL_GetWindowBordersSize"
-    (window @-> ptr int @-> ptr int @-> ptr int @-> ptr int @-> returning zero_to_ok)
+    (window @-> ptr int @-> ptr int @-> ptr int @-> ptr int @->
+     returning zero_to_ok)
 
 let get_window_borders_size w =
   let top = allocate int 0 in
@@ -2096,7 +2099,8 @@ let get_window_minimum_size win =
   !@ w, !@ h
 
 let get_window_opacity =
-  foreign "SDL_GetWindowOpacity" (window @-> (ptr float) @-> returning zero_to_ok)
+  foreign "SDL_GetWindowOpacity"
+    (window @-> (ptr float) @-> returning zero_to_ok)
 
 let get_window_opacity win =
   let x = allocate float 0. in
@@ -3523,7 +3527,8 @@ let joystick_get_axis =
   foreign "SDL_JoystickGetAxis" (joystick @-> int @-> returning int16_t)
 
 let joystick_get_axis_initial_state =
-  foreign "SDL_JoystickGetAxisInitialState" (joystick @-> int @-> returning int16_t)
+  foreign "SDL_JoystickGetAxisInitialState"
+    (joystick @-> int @-> returning int16_t)
 
 let joystick_get_ball =
   foreign "SDL_JoystickGetBall"
@@ -3546,7 +3551,8 @@ let joystick_get_device_product =
   foreign "SDL_JoystickGetDeviceProduct" (int @-> returning int_as_uint16_t)
 
 let joystick_get_device_product_version =
-  foreign "SDL_JoystickGetDeviceProductVersion" (int @-> returning int_as_uint16_t)
+  foreign "SDL_JoystickGetDeviceProductVersion"
+    (int @-> returning int_as_uint16_t)
 
 let joystick_get_device_type =
   foreign "SDL_JoystickGetDeviceType" (int @-> returning int)
@@ -3580,7 +3586,8 @@ let joystick_get_product =
   foreign "SDL_JoystickGetProduct" (joystick @-> returning int_as_uint16_t)
 
 let joystick_get_product_version =
-  foreign "SDL_JoystickGetProductVersion" (joystick @-> returning int_as_uint16_t)
+  foreign "SDL_JoystickGetProductVersion"
+    (joystick @-> returning int_as_uint16_t)
 
 let joystick_get_type =
   foreign "SDL_JoystickGetType" (joystick @-> returning int)
@@ -5418,5 +5425,4 @@ let get_power_info () =
   let pi_secs = match !@ secs with -1 -> None | secs -> Some secs in
   let pi_pct = match !@ pct with -1 -> None | pct -> Some pct in
   { pi_state; pi_secs; pi_pct }
-
 end
