@@ -117,24 +117,6 @@ let test_colors () =
   assert (Sdl.Color.a c = 4);
   ()
 
-let test_color_bas () =
-  log "Testing color_bas";
-  let cs = Sdl.Color_ba.create 1 in
-  let c = Sdl.Color.create ~r:101 ~g:102 ~b:103 ~a:104 in
-  Sdl.Color_ba.set 0 ~r:123 ~g:222 ~b:211 ~a:100 cs;
-  (* testing Color_ba.get and Color_ba.set *)
-  assert (Sdl.Color_ba.get 0 cs = (123, 222, 211, 100));
-  Sdl.Color_ba.set_color 0 c cs;
-  (* testing Color_ba.set_color *)
-  assert (Sdl.Color_ba.get 0 cs = (101, 102, 103, 104));
-  let c' = Sdl.Color_ba.get_color 0 cs in
-  (* testing Color_ba.get_color *)
-  assert (Sdl.Color.r c' = 101);
-  assert (Sdl.Color.g c' = 102);
-  assert (Sdl.Color.b c' = 103);
-  assert (Sdl.Color.a c' = 104);
-  ()
-
 let test_points () =
   log "Testing points";
   let p = Sdl.Point.create ~x:1 ~y:2 in
@@ -1632,7 +1614,6 @@ let tests human = match Sdl.init Sdl.Init.everything with
     test_rw_ops ();
     test_file_system_paths ();
     test_colors ();
-    test_color_bas ();
     test_points ();
     test_vertices ();
     test_rectangles ();

@@ -340,26 +340,6 @@ module Color : sig
   val set_a : color -> uint8 -> unit
 end
 
-module Color_ba : sig
-  type t = (int, Bigarray.int8_unsigned_elt) bigarray
-  val create : int -> t
-  val set : int -> r:int -> g:int -> b:int -> a:int -> t -> unit
-  val set_color : int -> color -> t -> unit
-  val get : int -> t -> int * int * int * int
-  (** Colors are returned as (R, G, B, A) *)
-
-  val get_color : int -> t -> color
-end
-(** Used to store a packed array of colors. SDL's color
-    representation is sensitive to endianness (see
-    {{:https://wiki.libsdl.org/SDL2/SDL_Color}SDL_Color}). This
-    module takes care of endianness concerns.
-
-    Note that the indices used by set, get, etc. are the
-    indices of the colors, rather than the bytes. Accessing
-    the 3rd color, for instance, will access bytes 12, 13,
-    14 and 15. *)
-
 (** {2:points Points and vertices} *)
 
 type point
