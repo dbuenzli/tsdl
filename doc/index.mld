@@ -33,7 +33,7 @@ This automatically loads the library and opens the {!Tsdl} module.
 open Tsdl
 
 let main () = match Sdl.init Sdl.Init.(video + events) with
-| Error (`Msg e) -> Sdl.log "Init error: %s" e; exit 1
+| Error (`Msg e) -> Sdl.log "Init error: %s" e; 1
 | Ok () ->
     match Sdl.create_window ~w:640 ~h:480 "SDL OpenGL" Sdl.Window.opengl with
     | Error (`Msg e) -> Sdl.log "Create window error: %s" e; exit 1
@@ -42,9 +42,9 @@ let main () = match Sdl.init Sdl.Init.(video + events) with
         Sdl.delay 3000l;
         Sdl.destroy_window w;
         Sdl.quit ();
-        exit 0
+        0
 
-let () = main ()
+let () = if !Sys.interactive then () else exit (main ())
 ]}
 
 This can be compiled to byte and native code with:

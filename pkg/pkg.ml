@@ -13,8 +13,9 @@ let () =
     Pkg.doc "doc/index.mld" ~dst:"odoc-pages/index.mld";
     Pkg.doc "test/min.ml";
     Pkg.doc "test/minc.c";
-    Pkg.test "test/test";
+    Pkg.test "test/test_tsdl";
     Pkg.test "test/min";
+    Pkg.test "test/examples";
     Pkg.test "test/test_audio";
     Pkg.test "test/test_audio_queue";
     Pkg.test "test/test_audio_capture";

@@ -4,6 +4,7 @@
   ---------------------------------------------------------------------------*)
 
 open Tsdl
+open Testing_tsdl
 
 let log fmt = Format.printf (fmt ^^ "@.")
 let log_err fmt = Format.eprintf (fmt ^^ "@.")
@@ -32,7 +33,7 @@ let event_loop () =
   let rec loop () = match Sdl.wait_event (Some e) with
   | Error (`Msg e) -> log_err " Could not wait event: %s" e; ()
   | Ok () ->
-      log "%a" Fmts.pp_event e;
+      log "%a" pp_event e;
       match Sdl.Event.(enum (get e typ)) with
       | `Quit -> ()
       | `Drop_file -> Sdl.Event.drop_file_free e; loop ()
@@ -44,17 +45,17 @@ let event_loop () =
 let main () =
   let inits = Sdl.Init.(video + joystick + gamecontroller + events) in
   match Sdl.init inits with
-  | Error (`Msg e) -> log_err " SDL init: %s" e
+  | Error (`Msg e) -> log_err " SDL init: %s" e; 1
   | Ok () ->
       let flags = Sdl.Window.(shown + mouse_focus + resizable) in
       match Sdl.create_window ~w:640 ~h:480 "SDL events" flags with
-      | Error (`Msg e) -> log_err " Create window: %s" e
+      | Error (`Msg e) -> log_err " Create window: %s" e; 1
       | Ok w ->
           let joysticks = open_joysticks () in
           event_loop ();
           close_joysticks joysticks;
           Sdl.destroy_window w;
           Sdl.quit ();
-          exit 0
+          0
 
-let () = main ()
+let () = if !Sys.interactive then () else exit (main ())

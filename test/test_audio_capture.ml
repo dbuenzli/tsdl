@@ -1,3 +1,8 @@
+(*---------------------------------------------------------------------------
+   Copyright (c) 2013 The tsdl programmers. All rights reserved.
+   SPDX-License-Identifier: ISC
+  ---------------------------------------------------------------------------*)
+
 open Tsdl
 
 let audio_freq    = 44100
@@ -37,7 +42,7 @@ let video_setup () =
   | Ok w -> w
 
 let main () = match Sdl.init Sdl.Init.(audio + video) with
-| Error ( `Msg e ) -> Sdl.log "Init error: %s" e; exit 1
+| Error ( `Msg e ) -> Sdl.log "Init error: %s" e; 1
 | Ok () ->
     let window = video_setup () in
     let (device_id, buffer) = audio_setup () in
@@ -45,15 +50,16 @@ let main () = match Sdl.init Sdl.Init.(audio + video) with
     let () = dequeue_audio device_id buffer in
     let e = Sdl.Event.create () in
     let rec loop () = match Sdl.wait_event (Some e) with
-    | Error ( `Msg err ) -> Sdl.log "Could not wait event: %s" err; ()
+    | Error ( `Msg err ) -> Sdl.log "Could not wait event: %s" err; 1
     | Ok () ->
         match Sdl.Event.(enum (get e typ)) with
         | `Quit ->
             Sdl.pause_audio_device device_id true;
             Sdl.destroy_window window;
-            Sdl.quit()
+            Sdl.quit();
+            0
         | _ -> loop ()
     in
     loop ()
 
-let () = main ()
+let () = if !Sys.interactive then () else exit (main ())

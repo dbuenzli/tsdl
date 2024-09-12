@@ -6,6 +6,7 @@
 (* Tsdl tests, should exit with 0. *)
 
 open Tsdl
+open Testing_tsdl
 
 (* Logging *)
 
@@ -460,7 +461,7 @@ let test_renderers () =
         | Error (`Msg e) ->
             log_err " Could not driver info for driver %d: %s" n e
         | Ok i ->
-            log " Driver %d @[%a@]" n Fmts.pp_render_info i
+            log " Driver %d @[%a@]" n pp_render_info i
         end
       done
   end;
@@ -476,7 +477,7 @@ let test_renderers () =
           assert (match Sdl.get_renderer w with Error _ -> false | _ -> true);
           begin match Sdl.get_renderer_info r with
           | Error (`Msg e) -> log_err " Could not get renderer info: %s" e
-          | Ok i -> log " Renderer @[%a@]" Fmts.pp_render_info i
+          | Ok i -> log " Renderer @[%a@]" pp_render_info i
           end;
           begin match Sdl.get_renderer_output_size r with
           | Error (`Msg e) ->
@@ -725,7 +726,7 @@ let test_textures () =
 let test_video_drivers () =
   log "Testing video drivers";
   let driver = Sdl.get_current_video_driver () in
-  log " Current video driver: %a" (Fmts.pp_opt Fmts.pp_str) driver;
+  log " Current video driver: %a" (pp_opt pp_str) driver;
   begin match Sdl.get_num_video_drivers () with
   | Error (`Msg e) -> log_err " Could not get number of video drivers: %s" e
   | Ok count ->
@@ -739,7 +740,7 @@ let test_video_drivers () =
   end;
   log " Quit video";
   Sdl.video_quit ();
-  log " Init video with: %a" (Fmts.pp_opt Fmts.pp_str) driver;
+  log " Init video with: %a" (pp_opt pp_str) driver;
   begin match Sdl.video_init None with
   | Error (`Msg e) -> log_err " Could not init video: %s" e
   | Ok () -> ()
@@ -760,19 +761,19 @@ let test_displays () =
         end;
         begin match Sdl.get_display_bounds d with
         | Error (`Msg e) -> log_err "  Could not get display bounds: %s" e
-        | Ok r -> log "  Bounds: @[%a@]" Fmts.pp_rect r
+        | Ok r -> log "  Bounds: @[%a@]" pp_rect r
         end;
         begin match Sdl.get_display_usable_bounds d with
         | Error (`Msg e) -> log_err "  Could not get display usable bounds: %s" e
-        | Ok r -> log "  Usable bounds: @[%a@]" Fmts.pp_rect r
+        | Ok r -> log "  Usable bounds: @[%a@]" pp_rect r
         end;
         begin match Sdl.get_current_display_mode d with
         | Error (`Msg e) -> log_err "  Could not get display mode: %s" e
-        | Ok m -> log "  Current mode: @[%a@]" Fmts.pp_display_mode m;
+        | Ok m -> log "  Current mode: @[%a@]" pp_display_mode m;
         end;
         begin match Sdl.get_desktop_display_mode d with
         | Error (`Msg e) -> log_err " Could not get desktop display mode: %s" e
-        | Ok m -> log "  Desktop mode: @[%a@]" Fmts.pp_display_mode m;
+        | Ok m -> log "  Desktop mode: @[%a@]" pp_display_mode m;
         end;
         begin match Sdl.get_display_dpi d with
         | Error (`Msg e) -> log_err " Could not get desktop display dpi: %s" e
@@ -789,10 +790,10 @@ let test_displays () =
             begin match Sdl.get_closest_display_mode d m' with
             | None ->
                 log "  @[No closest display mode of %a found@]"
-                  Fmts.pp_display_mode m'
+                  pp_display_mode m'
             | Some m ->
                 log "  @[<1>Closest display mode of %a:@ %a@]"
-                  Fmts.pp_display_mode m'  Fmts.pp_display_mode m
+                  pp_display_mode m'  pp_display_mode m
             end
         end;
         begin match Sdl.get_num_display_modes d with
@@ -808,7 +809,7 @@ let test_displays () =
                   match Sdl.get_display_mode d i with
                   | Error (`Msg e) ->
                       log_err "   Could not get display mode: %s" e
-                  | Ok m -> log "   @[%a@]" Fmts.pp_display_mode m
+                  | Ok m -> log "   @[%a@]" pp_display_mode m
                 done
             end
         end;
@@ -838,7 +839,7 @@ let test_windows () =
       begin match Sdl.get_window_display_mode w with
       | Error (`Msg e) -> log_err " Could not get display mode: %s" e
       | Ok m ->
-          log " Window display mode: %a" Fmts.pp_display_mode m;
+          log " Window display mode: %a" pp_display_mode m;
           let m' = { m with dm_w = m.Sdl.dm_w / 2;
                             dm_h = m.Sdl.dm_h / 2;
                             dm_refresh_rate = Some 60;
@@ -1241,7 +1242,7 @@ let test_joysticks () =
             log " Joystick %ld: %d, %s, %d-%d/%d, %a" id i
               (Sdl.joystick_get_guid_string guid)
               product product_version vendor
-              Fmts.pp_joystick_type typ;
+              pp_joystick_type typ;
           match Sdl.joystick_open i with
           | Error (`Msg e) -> log_err " Could not open joystick: %s" e
           | Ok j ->
@@ -1260,8 +1261,8 @@ let test_joysticks () =
               log " Joystick %d %s %s" i name guid_str;
               log " Joystick product id:%d-%d" product product_version;
               log " Joystick vendor %d" vendor;
-              log " Joystick type:%a" Fmts.pp_joystick_type  typ;
-              log " Joystick power level:%a" Fmts.pp_joystick_power_level power_level;
+              log " Joystick type:%a" pp_joystick_type  typ;
+              log " Joystick power level:%a" pp_joystick_power_level power_level;
               ignore (Sdl.joystick_get_guid_from_string guid_str);
               assert (Sdl.joystick_name j = Sdl.joystick_name_for_index i);
               assert (Sdl.joystick_instance_id j = Ok id);
@@ -1469,7 +1470,7 @@ let test_haptic () =
 let test_audio_drivers () =
   log "Testing audio drivers";
   let driver = Sdl.get_current_audio_driver () in
-  log " Current audio driver: %a" (Fmts.pp_opt Fmts.pp_str) driver;
+  log " Current audio driver: %a" (pp_opt pp_str) driver;
   begin match Sdl.get_num_audio_drivers () with
   | Error (`Msg e) -> log_err " Could not get number of audio drivers: %s" e
   | Ok count ->
@@ -1483,7 +1484,7 @@ let test_audio_drivers () =
   end;
 (*  log " Quit audio";
   Sdl.audio_quit ();
-  log " Init audio with: %a" (Fmts.pp_opt Fmts.pp_str) driver;
+  log " Init audio with: %a" (pp_opt pp_str) driver;
   begin match Sdl.audio_init driver with
   | Error (`Msg e) -> log_err " Could not init audio: %s" e
   | Ok () -> ()

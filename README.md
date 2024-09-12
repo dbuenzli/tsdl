@@ -47,6 +47,6 @@ and listed with
 
 The resulting binaries are in `_build/test` :
 
-- `test.native`, tests the bindings, the executable should exit with 0.
+- `test_tsdl.native`, tests the bindings, the executable should exit with 0.
 - `sdlevents.native`, traces SDL events.
 - `min.native` a minimal SDL example.
