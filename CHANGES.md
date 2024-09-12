@@ -1,3 +1,5 @@
+v1.1.0 2024-04-12 Zagreb
+------------------------
 
 - Require SDL >= 2.0.18.
 - Add binding to `SDL_Vertex`, `SDL_RenderGeometry[Raw]`.
@@ -6,12 +8,12 @@
 - Fix segmentation fault on macOS arm64 when using varargs functions
   through ctypes (#99). Thanks to Jonah Beckford for the report and
   the help.
-- Fix `rw_from_const_mem` to pass the ocaml string rather than a copy.
-  Thanks to Maxence Guesdon for the patch.
-- Add `rw_from_mem`.
-  Thanks to Maxence Guesdon for the patch.
-- Improve linking into SDL documentation.
+- Fix `Sdl.rw_from_const_mem` to pass the ocaml string rather than a copy.
+  Thanks to Maxence Guesdon for the patch (#102).
+- Add binding to `SDL_RWFromMem`. Thanks to Maxence Guesdon for the 
+  patch (#102).
 - Use package `ctypes-foreign` instead of `ctypes.foreign`.
+- Improve documentation linking into SDL documentation.
 
 v1.0.0 2023-03-16 La Forclaz (VS)
 ---------------------------------
