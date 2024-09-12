@@ -12,6 +12,6 @@ true: bin_annot, safe_string, thread
 <src/tsdl.{cma,cmxa}> : record_tsdl_stubs
 <src/tsdl.cmxs> : link_tsdl_stubs_archive
 
-<src/tsdl_top.*> : package(compiler-libs.toplevel)
+<src/top/tsdl_top.*> : package(compiler-libs.toplevel)
 
 <test/**> : package(ctypes ctypes-foreign), use_tsdl

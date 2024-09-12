@@ -8,7 +8,7 @@ let () =
   Ok [
     Pkg.mllib ~api:["Tsdl"] "src/tsdl.mllib";
     Pkg.clib "src/libtsdl_stubs.clib";
-    Pkg.mllib ~api:[] "src/tsdl_top.mllib";
+    Pkg.mllib ~api:[] "src/top/tsdl_top.mllib";
     Pkg.lib "src/tsdl_top_init.ml";
     Pkg.doc "doc/index.mld" ~dst:"odoc-pages/index.mld";
     Pkg.doc "test/min.ml";
