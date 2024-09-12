@@ -462,49 +462,6 @@ module Color = struct
   let set_a c a = setf c color_a (Unsigned.UInt8.of_int a)
 end
 
-(* Color Bigarray *)
-module Color_ba = struct
-  type t = (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
-
-  let create len = Bigarray.(Array1.create int8_unsigned c_layout (4*len))
-
-  let set i ~r ~g ~b ~a ba =
-    (* From least-significant to most-significant byte, we have:
-       Big-endian: A, B, G, R
-       Little-endian: R, G, B, A *)
-    let ri, gi, bi, ai =
-      if Sys.big_endian then
-        (4*i + 3, 4*i + 2, 4*i + 1, 4*i)
-      else
-        (4*i, 4*i + 1, 4*i + 2, 4*i + 3)
-    in
-    ba.{ri} <- r; ba.{gi} <- g; ba.{bi} <- b; ba.{ai} <- a
-
-  let set_color i color ba =
-    set
-      i
-      ~r:(Color.r color)
-      ~g:(Color.g color)
-      ~b:(Color.b color)
-      ~a:(Color.a color)
-      ba
-
-  (* returned as (r, g, b, a) *)
-  let get i ba =
-    let ri, gi, bi, ai =
-      if Sys.big_endian then
-        (4*i + 3, 4*i + 2, 4*i + 1, 4*i)
-      else
-        (4*i, 4*i + 1, 4*i + 2, 4*i + 3)
-    in
-    (ba.{ri}, ba.{gi}, ba.{bi}, ba.{ai})
-
-  let get_color i ba =
-    let r, g, b, a = get i ba in
-    Color.create ~r ~g ~b ~a
-end
-
-
 (* Points *)
 
 type _point
