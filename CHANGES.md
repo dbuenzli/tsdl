@@ -1,5 +1,7 @@
 
 - Require SDL >= 2.0.18.
+- Add binding to `SDL_Vertex`, `SDL_RenderGeometry[Raw]`.
+  Thanks to Frank Standaert for the patches (#101).
 - Add binding to `SDL_GetTicks64`.
 - Fix segmentation fault on macOS arm64 when using varargs functions
   through ctypes (#99). Thanks to Jonah Beckford for the report and

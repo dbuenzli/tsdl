@@ -587,24 +587,30 @@ let test_renderers () =
           assert (Sdl.render_geometry r vertices ~indices = Ok ());
           assert (Sdl.render_geometry r vertices ~texture:t = Ok ());
           assert (Sdl.render_geometry r vertices ~texture:t ~indices = Ok ());
-          let xy_ba = create_bigarray Bigarray.float32 6 in
-          let color_ba = create_bigarray Bigarray.int8_unsigned 12 in
-          let uv_ba = create_bigarray Bigarray.float32 6 in
-          let indices_ba = create_bigarray Bigarray.int32 3 in
-          xy_ba.{0} <- 10.5; xy_ba.{1} <- 10.5;
-          xy_ba.{2} <- 20.5; xy_ba.{3} <- 10.5;
-          xy_ba.{4} <- 10.5; xy_ba.{5} <- 20.5;
-          color_ba.{0} <- 255; color_ba.{1} <- 0; color_ba.{2} <- 0; color_ba.{3} <- 255;
-          color_ba.{4} <- 0; color_ba.{5} <- 255; color_ba.{6} <- 0; color_ba.{7} <- 255;
-          color_ba.{8} <- 0; color_ba.{9} <- 0; color_ba.{10} <- 255; color_ba.{11} <- 255;
-          uv_ba.{0} <- 1.; uv_ba.{1} <- 1.;
-          uv_ba.{2} <- 1.; uv_ba.{3} <- 1.;
-          uv_ba.{4} <- 1.; uv_ba.{5} <- 1.;
-          indices_ba.{0} <- 2l; indices_ba.{1} <- 1l; indices_ba.{2} <- 0l;
-          assert (Sdl.render_geometry_raw r xy_ba color_ba uv_ba = Ok ());
-          assert (Sdl.render_geometry_raw ~indices:indices_ba r xy_ba color_ba uv_ba = Ok ());
-          assert (Sdl.render_geometry_raw ~texture:t r xy_ba color_ba uv_ba = Ok ());
-          assert (Sdl.render_geometry_raw ~texture:t ~indices:indices_ba r xy_ba color_ba uv_ba = Ok ());
+          let xy = create_bigarray Bigarray.float32 6 in
+          let color = create_bigarray Bigarray.int8_unsigned 12 in
+          let uv = create_bigarray Bigarray.float32 6 in
+          let indices = create_bigarray Bigarray.int32 3 in
+          let num_vertices = 3 in
+          xy.{0} <- 10.5; xy.{1} <- 10.5;
+          xy.{2} <- 20.5; xy.{3} <- 10.5;
+          xy.{4} <- 10.5; xy.{5} <- 20.5;
+          color.{0} <- 255; color.{1} <- 0; color.{2} <- 0; color.{3} <- 255;
+          color.{4} <- 0; color.{5} <- 255; color.{6} <- 0; color.{7} <- 255;
+          color.{8} <- 0; color.{9} <- 0; color.{10} <- 255; color.{11} <- 255;
+          uv.{0} <- 1.; uv.{1} <- 1.;
+          uv.{2} <- 1.; uv.{3} <- 1.;
+          uv.{4} <- 1.; uv.{5} <- 1.;
+          indices.{0} <- 2l; indices.{1} <- 1l; indices.{2} <- 0l;
+          assert (Sdl.render_geometry_raw r ~xy ~color ~uv ~num_vertices () =
+                  Ok ());
+          assert (Sdl.render_geometry_raw r
+                    ~indices ~xy ~color ~uv ~num_vertices () =
+                  Ok ());
+          assert (Sdl.render_geometry_raw r ~texture:t ~xy ~color ~uv
+                    ~num_vertices () = Ok ());
+          assert (Sdl.render_geometry_raw r ~texture:t ~indices ~xy ~color ~uv
+                    ~num_vertices () = Ok ());
           Sdl.destroy_texture t;
           Sdl.render_present r;
           test_vsync r;

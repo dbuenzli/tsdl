@@ -999,29 +999,19 @@ val render_geometry : ?indices:(int list) -> ?texture:texture -> renderer ->
   vertex list -> unit result
 (** {{:http://wiki.libsdl.org/SDL2/SDL_RenderGeometry}SDL_RenderGeometry} *)
 
-val render_geometry_raw : ?indices:(int32, Bigarray.int32_elt) bigarray -> ?texture:texture -> renderer -> (float, Bigarray.float32_elt) bigarray -> (int, Bigarray.int8_unsigned_elt) bigarray -> (float, Bigarray.float32_elt) bigarray -> unit result
+val render_geometry_raw :
+  ?indices:(int32, Bigarray.int32_elt) bigarray -> ?texture:texture ->
+  renderer ->
+  xy:(float, Bigarray.float32_elt) bigarray -> ?xy_stride:int ->
+  color:(int, Bigarray.int8_unsigned_elt) bigarray -> ?color_stride:int ->
+  uv:(float, Bigarray.float32_elt) bigarray -> ?uv_stride:int ->
+  num_vertices:int -> unit -> unit result
 (** {{:http://wiki.libsdl.org/SDL2/SDL_RenderGeometryRaw}SDL_RenderGeometryRaw}
 
-    This function is provided with only a bigarray interface. In
-    contrast to SDL's version, this version does not provide 'stride'
-    arguments. Indices are assumed to be signed 32-bit integers as the
-    type signature suggests.
+    {b Note.} The stride arguments are in bytes, like in the C call.
+    The defaults assume packed arrays.
 
-    Each consecutive pair in xy is a coordinate. Each consecutive quadruple
-    in color is a color. On little-endian machines, colors should be encoded
-    in the byte order R, G, B, A from lowest to highest index; and on
-    big-endian machines, they should be encoded as A, B, G, R, again
-    lowest to highest index. Each consecutive pair in uv is a coordinate.
-
-    @raise Invalid_argument if the length of the xy and uv arrays are
-    not multiples of 2.
-
-    @raise Invalid_argument if the length of the color array is not a
-    multiple of 4.
-
-    @raise Invalid_argument if the number of xy points, colors, and uv
-    points is not equal.
-  *)
+    @raises Invalid_argument if any of the arrays is wrongly sized. *)
 
 val render_get_clip_rect : renderer -> rect
 (** {{:http://wiki.libsdl.org/SDL2/SDL_RenderGetClipRect}SDL_RenderGetClipRect} *)

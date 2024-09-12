@@ -34,6 +34,9 @@ let err_bigarray_data len ba_el_size =
   str "invalid bigarray kind: data (%d bytes) not a multiple of bigarray \
        element byte size (%d)" len ba_el_size
 
+let err_array_to_short ~exp ~fnd =
+  str "array too short exp:%d bytes found:%d bytes" exp fnd
+
 (* ctypes views *)
 
 let write_never _ = assert false
@@ -1576,47 +1579,52 @@ let render_geometry ?indices ?texture r vertices =
 
 let render_geometry_raw =
   foreign "SDL_RenderGeometryRaw"
-    (renderer @-> texture @-> ptr void @-> int @-> ptr void @-> int
-              @-> ptr void @-> int @-> int @-> ptr void @-> int @-> int @-> returning zero_to_ok)
+    (renderer @-> texture @->
+     ptr void @-> int @->
+     ptr void @-> int @->
+     ptr void @-> int @->
+     int @-> ptr void @-> int @-> int @-> returning zero_to_ok)
 
-
-let render_geometry_raw ?indices ?texture r xy colors uv =
-  let t =
-    match texture with
-    | None -> null
-    | Some texture -> texture
+let render_geometry_raw
+    ?indices ?texture r ~xy ?(xy_stride = 8) ~color ?(color_stride = 4)
+    ~uv ?(uv_stride = 8) ~num_vertices ()
+  =
+  let t = match texture with
+  | None -> null | Some texture -> texture
   in
-  let i_ptr, i_len =
-    match indices with
-    | None -> null, 0
-    | Some is ->
-      to_voidp (bigarray_start array1 is), Bigarray.Array1.dim is
+  let i_ptr, i_len = match indices with
+  | None -> null, 0
+  | Some is -> to_voidp (bigarray_start array1 is), Bigarray.Array1.dim is
   in
-  (* indices are assumed to be 4-byte integers *)
-  let i_stride = 4 in
+  let i_stride = 4 in (* indices are assumed to be 4-byte integers *)
   let xy_ptr = to_voidp (bigarray_start array1 xy) in
-  let xy_len = Bigarray.Array1.dim xy in
-  (* one pair of single-precision floats is 8 bytes *)
-  let xy_stride = 8 in
-  let color_ptr = to_voidp (bigarray_start array1 colors) in
-  let color_len = Bigarray.Array1.dim colors in
-  (* one color is 4 bytes (rgba) *)
-  let color_stride = 4 in
+  let xy_len_bytes = Bigarray.Array1.dim xy * 4 in
+  let xy_exp_bytes = num_vertices * xy_stride - (xy_stride - 8) in
+  if xy_len_bytes < xy_exp_bytes then begin
+    let msg = "xy " ^ err_array_to_short ~exp:xy_exp_bytes ~fnd:xy_len_bytes in
+    invalid_arg msg
+  end;
+  let color_ptr = to_voidp (bigarray_start array1 color) in
+  let color_len_bytes = Bigarray.Array1.dim color in
+  let color_exp_bytes = num_vertices * color_stride - (color_stride - 4) in
+  if color_len_bytes < color_exp_bytes then begin
+    let msg =
+      "color " ^ err_array_to_short ~exp:color_exp_bytes ~fnd:color_len_bytes
+    in
+    invalid_arg msg
+  end;
   let uv_ptr = to_voidp (bigarray_start array1 uv) in
-  let uv_len = Bigarray.Array1.dim uv in
-  (* one pair of single-precision floats is 8 bytes *)
-  let uv_stride = 8 in
-  let num_vertices = xy_len / 2 in
-  if xy_len mod 2 <> 0 then
-    invalid_arg (err_length_mul xy_len 2)
-  else if color_len mod 4 <> 0 then
-    invalid_arg (err_length_mul color_len 4)
-  else if uv_len mod 2 <> 0 then
-    invalid_arg (err_length_mul uv_len 2)
-  else if num_vertices <> color_len / 4 || num_vertices <> uv_len / 2 then
-    invalid_arg "render_geometry_raw_ba: xy, colors, and uv have differing lengths"
-  else
-    render_geometry_raw r t xy_ptr xy_stride color_ptr color_stride uv_ptr uv_stride num_vertices i_ptr i_len i_stride
+  let uv_len_bytes = Bigarray.Array1.dim uv * 4 in
+  let uv_exp_bytes = num_vertices * uv_stride - (uv_stride - 8) in
+  if uv_len_bytes < uv_exp_bytes then begin
+    let msg =
+      "uv " ^ err_array_to_short ~exp:uv_exp_bytes ~fnd:uv_len_bytes
+    in
+    invalid_arg msg
+  end;
+  render_geometry_raw
+    r t xy_ptr xy_stride color_ptr color_stride uv_ptr uv_stride num_vertices
+    i_ptr i_len i_stride
 
 let render_get_clip_rect =
   foreign "SDL_RenderGetClipRect"
