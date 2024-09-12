@@ -10,6 +10,7 @@
   Thanks to Maxence Guesdon for the patch.
 - Add `rw_from_mem`.
   Thanks to Maxence Guesdon for the patch.
+- Improve linking into SDL documentation.
 - Use package `ctypes-foreign` instead of `ctypes.foreign`.
 
 v1.0.0 2023-03-16 La Forclaz (VS)
