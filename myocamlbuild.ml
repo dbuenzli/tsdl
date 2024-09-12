@@ -35,7 +35,7 @@ let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
   let clib_l = pkg_config "libs-only-l" clib in
   let clib_L = pkg_config "libs-only-L" clib in
   let clib_cflags = ccopts @@ (A has_lib) :: pkg_config "cflags" clib in
-  let clib_cclibs = cclibs @@ clib_l in
+  let clib_cclibs = cclibs @@ stub_l :: clib_l in
   let clib_ccopts = ccopts @@ clib_L in
   begin
     dep [record_stub_lib] [stub_ar];
@@ -48,7 +48,7 @@ let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
       (S (dllibs [stub_l] @ clib_ccopts @ clib_cclibs));
 
     flag ["link"; "ocaml"; "library"; "native"; record_stub_lib]
-      (S (clib_ccopts @ cclibs [stub_l] @ clib_cclibs));
+      (S (clib_ccopts @ clib_cclibs));
 
     flag_and_dep ["link"; "ocaml"; link_stub_archive] (P stub_ar);
 
