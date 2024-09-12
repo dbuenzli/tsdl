@@ -1,4 +1,6 @@
 
+- Require SDL >= 2.0.18.
+- Add binding to `SDL_GetTicks64`.
 - Fix segmentation fault on macOS arm64 when using varargs functions
   through ctypes (#99). Thanks to Jonah Beckford for the report and
   the help.

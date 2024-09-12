@@ -899,7 +899,8 @@ let test_opengl_contexts () =
                 (* might be expected on wayland *)
                 log_err "swap interval is -1 (adaptive)"
             | Ok n -> log_err "Expected swap interval 1, got %d" n; assert false
-            | Error (`Msg e) -> log_err "Cannot get GL swap interval: %s" e; assert false
+            | Error (`Msg e) ->
+                log_err "Cannot get GL swap interval: %s" e; assert false
           end;
           assert (Sdl.gl_make_current w ctx = Ok ());
           begin match Sdl.gl_get_current_context () with
@@ -1464,10 +1465,14 @@ let test_audio_devices () =
 let test_time d =
   log "Testing time functions";
   begin
-    log " Delay: %lums" d;
-    let t = Sdl.get_ticks () in
-    Sdl.delay d;
-    log " Elapsed: %lums (ticks)" (Int32.sub (Sdl.get_ticks ()) t)
+    let delay ticks sub pp =
+      log " Delay: %lums" d;
+      let t = ticks () in
+      Sdl.delay d;
+      log " Elapsed: %ams (ticks)" pp (sub (ticks ()) t)
+    in
+    delay Sdl.get_ticks Int32.sub (fun ppf d -> Format.fprintf ppf "%lu" d);
+    delay Sdl.get_ticks64 Int64.sub (fun ppf d -> Format.fprintf ppf "%Lu" d);
   end;
   begin
     log " Delay: %lums" d;

@@ -5229,6 +5229,9 @@ let delay =
 let get_ticks =
   foreign "SDL_GetTicks" (void @-> returning int32_t)
 
+let get_ticks64 =
+  foreign "SDL_GetTicks64" (void @-> returning int64_t)
+
 let get_performance_counter =
   foreign "SDL_GetPerformanceCounter" (void @-> returning int64_t)
 

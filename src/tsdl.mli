@@ -3704,6 +3704,9 @@ val delay : uint32 -> unit
 val get_ticks : unit -> uint32
 (** {{:http://wiki.libsdl.org/SDL2/SDL_GetTicks}SDL_GetTicks} *)
 
+val get_ticks64 : unit -> uint64
+(** {{:http://wiki.libsdl.org/SDL2/SDL_GetTicks64}SDL_GetTicks64} *)
+
 val get_performance_counter : unit -> uint64
 (** {{:http://wiki.libsdl.org/SDL2/SDL_GetPerformanceCounter}
     SDL_GetPerformanceCounter} *)
