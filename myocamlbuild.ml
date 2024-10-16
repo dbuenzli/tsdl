@@ -29,7 +29,7 @@ let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
   let link_stub_archive = strf "link_%s_archive" stublib in
   let stub_ar = ar (strf "%s/lib%s" src_dir stublib) in
   let static_stub_l = match !Ocamlbuild_plugin.Options.ext_lib with
-  | "lib" (* Windows *) -> A (strf "%s.lib" stublib)
+  | "lib" (* Windows *) -> A (strf "lib%s.lib" stublib)
   | _ -> A (strf "-l%s" stublib)
   in
   let dynamic_stub_l = match !Ocamlbuild_plugin.Options.ext_lib with
