@@ -3,19 +3,16 @@ open Command
 
 (* Generic pkg-config(1) support. *)
 
-let os = Ocamlbuild_pack.My_unix.run_and_read "uname -s"
-
-let strf = Printf.sprintf
-
-let pkg_config flags package =
-  let cmd tmp =
-    Command.execute ~quiet:true &
-    Cmd( S [ A "pkg-config"; A ("--" ^ flags); A package; Sh ">"; A tmp]);
-    List.map (fun arg -> A arg) (string_list_of_file tmp)
-  in
-  with_temp_file "pkgconfig" "pkg-config" cmd
-
 let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
+  let strf = Printf.sprintf in
+  let pkg_config flags package =
+    let cmd tmp =
+      Command.execute ~quiet:true &
+      Cmd( S [ A "pkg-config"; A ("--" ^ flags); A package; Sh ">"; A tmp]);
+      List.map (fun arg -> A arg) (string_list_of_file tmp)
+    in
+    with_temp_file "pkgconfig" "pkg-config" cmd
+  in
   let ar s = match !Ocamlbuild_plugin.Options.ext_lib with
   | "" -> s ^ ".a" | x -> s ^ "." ^ x
   in
