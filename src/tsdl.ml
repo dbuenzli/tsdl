@@ -386,9 +386,11 @@ let load_file filename = (* defined as a macro in SDL_rwops.h *)
   | Error _ as e -> e
   | Ok rw -> load_file_rw rw true
 
+let rw_close =
+  foreign "SDL_RWclose" (rw_ops @-> returning int)
+
 let rw_close ops =
-  let close = getf (!@ ops) rw_ops_close in
-  if close ops = 0 then Ok () else (error ())
+  if rw_close ops = 0 then Ok () else (error ())
 
 let unsafe_rw_ops_of_ptr addr : rw_ops =
   from_voidp rw_ops_struct (ptr_of_raw_address addr)
