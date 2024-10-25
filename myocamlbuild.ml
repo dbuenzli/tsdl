@@ -37,7 +37,13 @@ let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
     if windows then A (strf "dll%s.dll" stublib) else static_stub_l
   in
   let clib_l = pkg_config "libs-only-l" clib in
-  let clib_L = pkg_config "libs-only-L" clib in
+  let clib_L =
+    let dashldify = function
+    | A l when windows -> A (String.subst "/libpath:" "-L" l)
+    | arg -> arg
+    in
+    List.map dashldify (pkg_config "libs-only-L" clib)
+  in
   let clib_cflags = ccopts @@ (A has_lib) :: pkg_config "cflags" clib in
   let clib_cclibs = cclibs @@ static_stub_l :: clib_l in
   let clib_ccopts = ccopts @@ clib_L in
