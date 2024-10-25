@@ -5,10 +5,15 @@ open Command
 
 let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
   let strf = Printf.sprintf in
+  let windows = !Ocamlbuild_plugin.Options.ext_lib = "lib" in
   let pkg_config flags package =
     let cmd tmp =
+      let pkg_config =
+        if not windows then A "pkg-config" else
+        S [A "pkg-config"; A "--msvc-syntax"]
+      in
       Command.execute ~quiet:true &
-      Cmd( S [ A "pkg-config"; A ("--" ^ flags); A package; Sh ">"; A tmp]);
+      Cmd( S [ pkg_config; A ("--" ^ flags); A package; Sh ">"; A tmp]);
       List.map (fun arg -> A arg) (string_list_of_file tmp)
     in
     with_temp_file "pkgconfig" "pkg-config" cmd
@@ -25,13 +30,11 @@ let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
   let record_stub_lib = strf "record_%s" stublib in
   let link_stub_archive = strf "link_%s_archive" stublib in
   let stub_ar = ar (strf "%s/lib%s" src_dir stublib) in
-  let static_stub_l = match !Ocamlbuild_plugin.Options.ext_lib with
-  | "lib" (* Windows *) -> A (strf "lib%s.lib" stublib)
-  | _ -> A (strf "-l%s" stublib)
+  let static_stub_l =
+    if windows then A (strf "lib%s.lib" stublib) else A (strf "-l%s" stublib)
   in
-  let dynamic_stub_l = match !Ocamlbuild_plugin.Options.ext_lib with
-  | "lib" (* Windows *) -> A (strf "dll%s.dll" stublib)
-  | _ -> static_stub_l
+  let dynamic_stub_l =
+    if windows then A (strf "dll%s.dll" stublib) else static_stub_l
   in
   let clib_l = pkg_config "libs-only-l" clib in
   let clib_L = pkg_config "libs-only-L" clib in
