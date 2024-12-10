@@ -321,9 +321,6 @@ let get_version () =
 let get_revision =
   foreign "SDL_GetRevision" (void @-> returning string)
 
-let get_revision_number =
-  foreign "SDL_GetRevisionNumber" (void @-> returning int)
-
 (* IO absraction *)
 
 type _rw_ops

@@ -78,7 +78,6 @@ let test_version () =
   let min, maj, patch = Sdl.get_version () in
   log " Version: SDL %d.%d.%d" min maj patch;
   log " Revision: %s" (Sdl.get_revision ());
-  log " Revision number: %d" (Sdl.get_revision_number ());
   ()
 
 let test_rw_ops () =
