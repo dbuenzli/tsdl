@@ -1,3 +1,6 @@
+- Fix bug in `Message_box` color scheme handling.
+  Thanks to Matthieu Dubuget for the patch (#105).
+
 v1.1.0 2024-09-12 Zagreb
 ------------------------
 
