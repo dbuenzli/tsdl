@@ -9,8 +9,20 @@ let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
   let pkg_config flags package =
     let cmd tmp =
       let pkg_config =
-        if not windows then A "pkg-config" else
-        S [A "pkg-config"; A "--msvc-syntax"]
+        if not windows
+        then
+          begin
+            if
+              List.exists
+                file_or_exe_exists
+                (List.rev_map
+                   (fun p -> Ocamlbuild_plugin.Pathname.(concat (mk p) (mk "pkgconfig") ))
+                   (String.split_on_char ':' (getenv ~default:"." "PATH"))
+                )
+            then A "pkgconfig"
+            else A "pkg-config"
+          end
+        else S [A "pkg-config"; A "--msvc-syntax"]
       in
       Command.execute ~quiet:true &
       Cmd( S [ pkg_config; A ("--" ^ flags); A package; Sh ">"; A tmp]);
