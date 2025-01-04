@@ -2525,8 +2525,8 @@ module Message_box = struct
     let set i (rv, gv, bv) =
       let ct = CArray.get colors i in
       setf ct color_r (Unsigned.UInt8.of_int rv);
-      setf ct color_g (Unsigned.UInt8.of_int rv);
-      setf ct color_b (Unsigned.UInt8.of_int rv);
+      setf ct color_g (Unsigned.UInt8.of_int gv);
+      setf ct color_b (Unsigned.UInt8.of_int bv);
     in
     set color_background s.color_background;
     set color_text s.color_text;
