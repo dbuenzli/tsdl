@@ -87,11 +87,34 @@ let sdl_consts_build () =
     end;
 ;;
 
+let ctypes_stub_gen () =
+  (* Generate stubs. Steps 1, 2, & 3 of Makefile (1 & 2 via built-in rules).
+     ML -> C *)
+  rule "cstubs: x_c_gen.native -> x_stubs_gen.c"
+    ~dep:"%_c_gen.native"
+    ~prod:"%_stubs_gen.c"
+    (fun env _build -> Cmd (A (env "./%_c_gen.native")));
+
+  (* Step 4. OCamlbuild (nor ocamlc/ocamlopt) has a built in rule for
+     linking executables from C. Call out to 'cc'. *)
+  rule "stub_gen 1: x_stubs_gen.o -> x_stubs_gen"
+    ~dep:"%_stubs_gen.o"
+    ~prod:"%_stubs_gen"
+    (fun env _build ->
+      Cmd (S [ A "cc"; A "-o"; A (env "%_stubs_gen"); A (env "%_stubs_gen.o") ]));
+
+  (* Step 5. Generate ml stubs.  C -> ML  *)
+  rule "stubs_gen 2: x_stubs_gen -> x_stubs.ml"
+    ~dep:"support/%_stubs_gen"
+    ~prod:"src/%_stubs.ml"
+    (fun env _build -> Cmd (S[A (env "support/%_stubs_gen"); Sh">"; A (env "src/%_stubs.ml")]));
+
 let () =
   dispatch begin function
   | After_rules ->
       lib_with_clib ~lib:"tsdl" ~clib:"sdl2" ~has_lib:"-DHAS_SDL2"
         ~src_dir:"src" ~stublib:"tsdl_stubs";
-      sdl_consts_build ()
+      sdl_consts_build ();
+      ctypes_stub_gen ()
   | _ -> ()
   end
