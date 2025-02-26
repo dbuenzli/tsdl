@@ -68,25 +68,6 @@ let lib_with_clib ~lib ~clib ~has_lib ~src_dir ~stublib =
     ocaml_lib ~tag_name:use_lib ~dir:src_dir (strf "%s/%s" src_dir lib)
   end
 
-(* tsdl_const.ml generation. *)
-
-let sdl_consts_build () =
-  let obj s = match !Ocamlbuild_plugin.Options.ext_obj with
-  | "" -> s ^ ".o"
-  | x -> s ^ "." ^ x
-  in
-  dep [ "link"; "ocaml"; "link_consts_stub" ] [ obj "support/consts_stub" ];
-  dep [ "sdl_consts" ] [ "src/tsdl_consts.ml" ];
-  rule "sdl_consts: consts.byte -> tsdl_consts.ml"
-    ~dep:"support/consts.byte"
-    ~prod:"src/tsdl_consts.ml"
-    begin fun env build ->
-      let enums = env "support/consts.byte" in
-      let prod = env "src/tsdl_consts.ml" in
-      Cmd (S [A enums; A prod])
-    end;
-;;
-
 let ctypes_stub_gen () =
   (* Types stubs generators *)
   (* Generate stubs. Steps 1, 2, & 3 of Makefile (1 & 2 via built-in rules).
@@ -126,7 +107,6 @@ let () =
   | After_rules ->
       lib_with_clib ~lib:"tsdl" ~clib:"sdl2" ~has_lib:"-DHAS_SDL2"
         ~src_dir:"src" ~stublib:"tsdl_stubs";
-      sdl_consts_build ();
       ctypes_stub_gen ()
   | _ -> ()
   end

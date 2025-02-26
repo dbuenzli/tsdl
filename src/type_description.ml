@@ -985,12 +985,13 @@ module Types (F : Ctypes.TYPE) = struct
     let () = F.seal t
   end
 
-  (*type guid = _guid Ctypes_static.structure
+  type _guid
+  type guid = _guid Ctypes_static.structure
   let guid : guid F.typ = F.typedef (F.structure "_guid") "SDL_GUID"
   let _= F.field guid "data" F.(array 16 uint8_t)
   let () = F.seal guid
 
-  let joystick_guid = F.typedef guid "SDL_JoystickGUID"*)
+  let joystick_guid = F.typedef guid "SDL_JoystickGUID"
 
   type _joystick
   type joystick = _joystick Ctypes_static.structure
