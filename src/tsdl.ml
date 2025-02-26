@@ -10,7 +10,8 @@ open Foreign
 
 module Sdl = struct
 
-module Types = Type_description.Types(Types_stubs)
+module Types = Types_generated
+module Async_functions = Async_function_description.Functions (Async_functions_generated)
 
 (* Formatting with continuation. *)
 
@@ -1049,15 +1050,6 @@ let unsafe_texture_of_ptr addr : texture =
 let unsafe_ptr_of_texture texture =
   raw_address_of_ptr (to_voidp texture)
 
-type renderer = unit ptr
-let renderer : renderer typ = ptr void
-let renderer_opt : renderer option typ = ptr_opt void
-
-let unsafe_renderer_of_ptr addr : renderer =
-  ptr_of_raw_address addr
-let unsafe_ptr_of_renderer renderer =
-  raw_address_of_ptr (to_voidp renderer)
-
 module Renderer = struct
   type flags = Unsigned.uint32
   let i = Unsigned.UInt32.of_int
@@ -1067,6 +1059,15 @@ module Renderer = struct
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
   include Types.Renderer
 end
+
+type renderer = Renderer.t ptr
+let renderer : renderer typ = ptr Renderer.t
+let renderer_opt : renderer option typ = ptr_opt Renderer.t
+
+let unsafe_renderer_of_ptr addr : renderer =
+  from_voidp Renderer.t (Ctypes.ptr_of_raw_address addr)
+let unsafe_ptr_of_renderer renderer =
+  raw_address_of_ptr (to_voidp renderer)
 
 type renderer_info =
   { ri_name : string;
@@ -1409,9 +1410,7 @@ let render_get_viewport rend =
   render_get_viewport rend (addr r);
   r
 
-let render_present =
-  foreign ~release_runtime_lock:true "SDL_RenderPresent"
-    (renderer @-> returning void)
+let render_present = Async_functions.render_present
 
 let render_read_pixels =
   foreign "SDL_RenderReadPixels"
@@ -1774,7 +1773,7 @@ let create_window_and_renderer =
 
 let create_window_and_renderer ~w ~h flags =
   let win = allocate Window.t (from_voidp Window.raw null) in
-  let r = allocate renderer null in
+  let r = allocate renderer (from_voidp Renderer.t null) in
   match create_window_and_renderer w h flags win r with
   | 0 -> Ok (!@ win, !@ r) | _ -> error ()
 
@@ -3435,19 +3434,11 @@ let register_events =
 let register_event () = match Unsigned.UInt32.to_int32 (register_events 1) with
 | -1l -> None | t -> Some (Int32.to_int t)
 
-let wait_event =
-  foreign ~release_runtime_lock:true
-    "SDL_WaitEvent" (ptr Event.t @-> returning int)
-
-let wait_event e = match wait_event (Event.opt_addr e) with
+let wait_event e = match Async_functions.wait_event (Event.opt_addr e) with
 | 1 -> Ok () | _ -> error ()
 
-let wait_event_timeout =
-  foreign "SDL_WaitEventTimeout" ~release_runtime_lock:true
-    (ptr Event.t @-> int @-> returning bool)
-
 let wait_event_timeout e t =
-  wait_event_timeout (Event.opt_addr e) t
+  Async_functions.wait_event_timeout (Event.opt_addr e) t
 
 (* Force feedback *)
 
@@ -3978,15 +3969,10 @@ let get_num_audio_devices =
   foreign "SDL_GetNumAudioDevices" (bool @-> returning int)
 let get_num_audio_devices b = get_num_audio_devices b |> nat_to_ok
 
-let load_wav_rw =
-  foreign ~release_runtime_lock:true "SDL_LoadWAV_RW"
-    (Types.rw_ops @-> int @-> ptr Types.audio_spec @-> ptr (ptr void) @->
-       ptr uint32_t @-> returning (ptr_opt Types.audio_spec))
-
 let load_wav_rw ops spec kind =
-  let d = allocate (ptr void) null in
+  let d = allocate (ptr uint8_t) (from_voidp uint8_t null) in
   let len = allocate uint32_t Unsigned.UInt32.zero in
-  match load_wav_rw ops 0 (addr (audio_spec_to_c spec)) d len with
+  match Async_functions.load_wav_rw ops 0 (addr (audio_spec_to_c spec)) d len with
   | None -> error ()
   | Some r ->
       let rspec = audio_spec_of_c (!@ r) in
@@ -3997,7 +3983,7 @@ let load_wav_rw ops spec kind =
       else
       let ba_size = len / kind_size in
       let ba_ptr = access_ptr_typ_of_ba_kind kind in
-      let d = coerce (ptr void)  ba_ptr (!@ d) in
+      let d = coerce (ptr uint8_t)  ba_ptr (!@ d) in
       Ok (rspec, bigarray_of_ptr array1 ba_size kind d)
 
 let lock_audio_device =
@@ -4049,8 +4035,7 @@ let clear_queued_audio =
 
 (* Timer *)
 
-let delay =
-  foreign ~release_runtime_lock:true "SDL_Delay" (int32_t @-> returning void)
+let delay = Async_functions.delay
 
 let get_ticks =
   foreign "SDL_GetTicks" (void @-> returning int32_t)

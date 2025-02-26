@@ -88,6 +88,7 @@ let sdl_consts_build () =
 ;;
 
 let ctypes_stub_gen () =
+  (* Types stubs generators *)
   (* Generate stubs. Steps 1, 2, & 3 of Makefile (1 & 2 via built-in rules).
      ML -> C *)
   rule "cstubs: x_c_gen.native -> x_stubs_gen.c"
@@ -108,6 +109,17 @@ let ctypes_stub_gen () =
     ~dep:"support/%_stubs_gen"
     ~prod:"src/%_stubs.ml"
     (fun env _build -> Cmd (S[A (env "support/%_stubs_gen"); Sh">"; A (env "src/%_stubs.ml")]));
+
+  (* Functions stubs generators *)
+  rule "cstubs functions: x_generator.native -> x_stubs.c"
+    ~dep:"support/%_generator.native"
+    ~prod:"src/%_stubs.c"
+    (fun env _build -> Cmd (S[A (env "./support/%_generator.native"); A "c"]));
+
+ rule "mlstubs functions: x_generator.native -> x_generated.ml"
+    ~dep:"support/%_generator.native"
+    ~prod:"src/%_generated.ml"
+    (fun env _build -> Cmd (S[A (env "./support/%_generator.native"); A "ml"]))
 
 let () =
   dispatch begin function
