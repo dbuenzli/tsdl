@@ -1692,7 +1692,7 @@ end
 let create_texture =
   foreign "SDL_CreateTexture"
     (renderer @-> uint32_t @-> int @-> int @-> int @->
-     returning (some_to_ok renderer_opt))
+     returning (some_to_ok texture_opt))
 
 let create_texture r pf access ~w ~h =
   create_texture r pf access w h
@@ -1724,7 +1724,7 @@ let get_texture_blend_mode t =
 
 let get_texture_color_mod =
   foreign "SDL_GetTextureColorMod"
-    (renderer @-> ptr uint8_t @-> ptr uint8_t @-> ptr uint8_t @->
+    (texture @-> ptr uint8_t @-> ptr uint8_t @-> ptr uint8_t @->
      returning zero_to_ok)
 
 let get_texture_color_mod t =
