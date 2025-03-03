@@ -229,6 +229,7 @@ module Log : sig
   val category_video : category
   val category_render : category
   val category_input : category
+  val category_custom : category
 
   (** {1:priority Priority} *)
 
@@ -1110,6 +1111,7 @@ val set_render_target : renderer -> texture option -> unit result
 module Texture : sig
   type access
   (** {{:https://wiki.libsdl.org/SDL2/SDL_TextureAccess}SDL_TextureAccess} *)
+
   val access_static : access
   val access_streaming : access
   val access_target : access
@@ -1288,6 +1290,7 @@ module Window : sig
   val windowed : flags
   (** Equal to [0]. The flag doesn't exist in SDL, it's for using with
       {!set_window_fullscreen}. *)
+
   val fullscreen : flags
   val fullscreen_desktop : flags
   val opengl : flags
@@ -1304,6 +1307,7 @@ module Window : sig
   val allow_highdpi : flags
   val mouse_capture: flags
   val always_on_top: flags
+    val skip_taskbar: flags
   val utility: flags
   val popup_menu:flags
   val vulkan: flags
@@ -1544,6 +1548,7 @@ module Gl : sig
   val context_flags : attr
   val context_profile_mask : attr
   val context_release_behavior: attr (** 2.04.0 *)
+
   val share_with_current_context : attr
   val framebuffer_srgb_capable : attr
 end
@@ -2610,6 +2615,9 @@ val joystick_get_attached : joystick -> bool
 val joystick_get_axis : joystick -> int -> int16
 (** {{:http://wiki.libsdl.org/SDL2/SDL_JoystickGetAxis}SDL_JoystickGetAxis} *)
 
+val joystick_get_axis_initial_state : joystick -> int -> int16
+(** {{:http://wiki.libsdl.org/SDL_JoystickGetAxis}SDL_JoystickGetAxisInitialState} *)
+
 val joystick_get_ball : joystick -> int -> (int * int) result
 (** {{:http://wiki.libsdl.org/SDL2/SDL_JoystickGetBall}SDL_JoystickGetBall} *)
 
@@ -3106,6 +3114,7 @@ module Event : sig
   val mouse_button_button : uint8 field
   val mouse_button_state : button_state field
   val mouse_button_clicks : uint8 field (** SDL 2.0.2 *)
+
   val mouse_button_x : int field
   val mouse_button_y : int field
 
@@ -3661,8 +3670,6 @@ module Audio : sig
   val s16_msb : format
   val s16_sys : format
   val s16 : format
-  val s16_lsb : format
-  val u16_lsb : format
   val u16_msb : format
   val u16_sys : format
   val u16 : format
@@ -3671,7 +3678,6 @@ module Audio : sig
   val s32_msb : format
   val s32_sys : format
   val s32 : format
-  val s32_lsb : format
   val f32_lsb : format
   val f32_msb : format
   val f32_sys : format

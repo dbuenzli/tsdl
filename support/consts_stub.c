@@ -998,17 +998,14 @@ void consts (FILE *fd)
   int_v (AUDIO_S16MSB);
   int_v (AUDIO_S16SYS);
   int_v (AUDIO_S16);
-  int_v (AUDIO_S16LSB);
   int_v (AUDIO_U16LSB);
   int_v (AUDIO_U16MSB);
   int_v (AUDIO_U16SYS);
   int_v (AUDIO_U16);
-  int_v (AUDIO_U16LSB);
   int_v (AUDIO_S32LSB);
   int_v (AUDIO_S32MSB);
   int_v (AUDIO_S32SYS);
   int_v (AUDIO_S32);
-  int_v (AUDIO_S32LSB);
   int_v (AUDIO_F32LSB);
   int_v (AUDIO_F32MSB);
   int_v (AUDIO_F32SYS);

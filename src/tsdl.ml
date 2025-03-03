@@ -23,7 +23,6 @@ let kpp k fmt =
 (* Invalid_argument strings *)
 
 let str = Printf.sprintf
-let err_index i = str "invalid index: %d" i
 let err_length_mul l mul = str "invalid length: %d not a multiple of %d" l mul
 let err_read_field = "cannot read field"
 let err_bigarray_pitch pitch ba_el_size =
@@ -167,10 +166,6 @@ let access_ptr_typ_of_ba_kind : ('a, 'b) Bigarray.kind -> 'a ptr typ = fun k ->
   | k when k = nativeint -> Obj.magic (ptr Ctypes.nativeint)
   | k when k = char -> Obj.magic (ptr Ctypes.char)
   | _ -> assert false
-
-let ba_byte_size ba =
-  let el_size = ba_kind_byte_size (Bigarray.Array1.kind ba) in
-  el_size * Bigarray.Array1.dim ba
 
 (* Basics *)
 
@@ -510,10 +505,6 @@ module Fpoint = struct
 
   let set_x p x = setf p fpoint_x x
   let set_y p y = setf p fpoint_y y
-
-  let opt_addr = function
-  | None -> coerce (ptr void) (ptr fpoint) null
-  | Some v -> addr v
 end
 
 (* Vertices *)
@@ -611,10 +602,6 @@ module Frect = struct
   let set_y r y = setf r frect_y y
   let set_w r w = setf r frect_w w
   let set_h r h = setf r frect_h h
-
-  let opt_addr = function
-  | None -> coerce (ptr void) (ptr rect) null
-  | Some v -> addr v
 end
 
 let enclose_points =
@@ -1279,7 +1266,6 @@ module Renderer = struct
   let ( - ) f f' = Unsigned.UInt32.(logand f (lognot f'))
   let test f m = Unsigned.UInt32.(compare (logand f m) zero <> 0)
   let eq f f' = Unsigned.UInt32.(compare f f' = 0)
-  let none = Unsigned.UInt32.zero
   let software = i sdl_renderer_software
   let accelerated = i sdl_renderer_accelerated
   let presentvsync = i sdl_renderer_presentvsync
@@ -2472,7 +2458,6 @@ module Message_box = struct
   let color_b = field color "b" uint8_t
   let () = seal color
 
-  type color_type = int
   let color_background = sdl_messagebox_color_background
   let color_text = sdl_messagebox_color_text
   let color_button_border = sdl_messagebox_color_button_border
@@ -4665,11 +4650,6 @@ type haptic = unit ptr
 let haptic : haptic typ = ptr void
 let haptic_opt : haptic option typ = ptr_opt void
 
-let unsafe_haptic_of_ptr addr : haptic =
-  ptr_of_raw_address addr
-let unsafe_ptr_of_haptic haptic =
-  raw_address_of_ptr (to_voidp haptic)
-
 module Haptic = struct
   let infinity = -1l
 
@@ -4861,9 +4841,6 @@ module Haptic = struct
   type effect_type = int
 
   let create_effect () = make Effect.t
-  let opt_addr = function
-  | None -> coerce (ptr void) (ptr Effect.t) null
-  | Some v -> addr v
 
   type _ field =
       F : (* existential to hide the 'a structure *)
@@ -5145,17 +5122,14 @@ module Audio = struct
   let s16_msb = audio_s16msb
   let s16_sys = audio_s16sys
   let s16 = audio_s16
-  let s16_lsb = audio_s16lsb
   let u16_lsb = audio_u16lsb
   let u16_msb = audio_u16msb
   let u16_sys = audio_u16sys
   let u16 = audio_u16
-  let u16_lsb = audio_u16lsb
   let s32_lsb = audio_s32lsb
   let s32_msb = audio_s32msb
   let s32_sys = audio_s32sys
   let s32 = audio_s32
-  let s32_lsb = audio_s32lsb
   let f32_lsb = audio_f32lsb
   let f32_msb = audio_f32msb
   let f32_sys = audio_f32sys
@@ -5174,14 +5148,6 @@ let audio_device_id = int32_as_uint32_t
 
 type audio_callback =
   unit Ctypes_static.ptr -> Unsigned.uint8 Ctypes_static.ptr -> int -> unit
-
-let audio_callback kind f =
-  let kind_bytes = ba_kind_byte_size kind in
-  let ba_ptr_typ = access_ptr_typ_of_ba_kind kind in
-  fun _ p len ->
-    let p = coerce (ptr uint8_t) ba_ptr_typ p in
-    let len = len / kind_bytes in
-    f (bigarray_of_ptr array1 len kind p)
 
 type audio_spec =
   { as_freq : int;
