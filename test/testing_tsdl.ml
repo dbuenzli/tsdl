@@ -13,7 +13,6 @@ let button_state_str = function
 | _ -> assert false
 
 let pp = Format.fprintf
-let pp = Format.fprintf
 let pp_int = Format.pp_print_int
 let pp_str = Format.pp_print_string
 let pp_ipair ppf (x, y) = pp ppf "(%d %d)" x y
