@@ -1438,6 +1438,24 @@ module Functions (F : FOREIGN) = struct
 
   (* Audio *)
 
+  let as_callback_type =
+    ptr void @-> ptr uint8_t @-> int @-> returning void
+
+  type _audio_spec
+  let audio_spec : _audio_spec Ctypes_static.structure typ =
+    structure "SDL_AudioSpec"
+  let as_freq = field audio_spec "freq" int
+  let as_format = field audio_spec "format" uint16_t
+  let as_channels = field audio_spec "channels" uint8_t
+  let as_silence = field audio_spec "silence" uint8_t
+  let as_samples = field audio_spec "samples" uint16_t
+  let _ = field audio_spec "padding" uint16_t
+  let as_size = field audio_spec "size" uint32_t
+  let as_callback =
+    field audio_spec "callback" (static_funptr as_callback_type)
+  let as_userdata = field audio_spec "userdata" (ptr void)
+  let () = seal audio_spec
+
   (* Audio drivers *)
 
   let audio_init =
@@ -1464,6 +1482,11 @@ module Functions (F : FOREIGN) = struct
   let free_wav =
     F.(foreign "SDL_FreeWAV" (ptr void @-> returning void))
 
+  let load_wav_rw =
+    F.(foreign "SDL_LoadWAV_RW"
+         (Types.rw_ops @-> int @-> ptr audio_spec @-> ptr (ptr uint8_t) @->
+            ptr uint32_t @-> returning (ptr_opt audio_spec)))
+
   let get_audio_device_name =
     F.(foreign "SDL_GetAudioDeviceName"
          (int @-> bool @-> returning const_string_opt))
@@ -1479,8 +1502,8 @@ module Functions (F : FOREIGN) = struct
 
   let open_audio_device =
     F.(foreign "SDL_OpenAudioDevice"
-         (const_string_opt @-> bool @-> ptr Types.audio_spec @->
-          ptr Types.audio_spec @-> int @-> returning uint32_t))
+         (const_string_opt @-> bool @-> ptr audio_spec @->
+          ptr audio_spec @-> int @-> returning uint32_t))
 
   let pause_audio_device =
     F.(foreign "SDL_PauseAudioDevice" (uint32_t @-> bool @-> returning void))

@@ -1771,25 +1771,6 @@ module Types (F : Ctypes.TYPE) = struct
     let allow_any_change = F.constant "SDL_AUDIO_ALLOW_ANY_CHANGE" F.int
   end
 
-  let as_callback_type =
-    F.(ptr void @-> ptr uint8_t @-> int @-> returning void)
-
-  type _audio_spec
-  let audio_spec : _audio_spec Ctypes_static.structure F.typ =
-    F.structure "SDL_AudioSpec"
-  let as_freq = F.field audio_spec "freq" F.int
-  let as_format = F.field audio_spec "format" F.uint16_t
-  let as_channels = F.field audio_spec "channels" F.uint8_t
-  let as_silence = F.field audio_spec "silence" F.uint8_t
-  let as_samples = F.field audio_spec "samples" F.uint16_t
-  let _ = F.field audio_spec "padding" F.uint16_t
-  let as_size = F.field audio_spec "size" F.uint32_t
-  let as_callback =
-    F.field audio_spec "callback" (F.static_funptr as_callback_type)
-  let as_userdata = F.field audio_spec "userdata" F.(ptr void)
-  let () = F.seal audio_spec
-
-
   module Powerstate = struct
     let unknown = F.constant "SDL_POWERSTATE_UNKNOWN" F.int
     let on_battery = F.constant "SDL_POWERSTATE_ON_BATTERY" F.int

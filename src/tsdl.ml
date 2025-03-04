@@ -3037,30 +3037,30 @@ let audio_callback kind f =
     f (bigarray_of_ptr array1 len kind p)
 
 let as_callback =
-  Foreign.funptr_opt ~thread_registration:true ~runtime_lock:true C.Types.as_callback_type
+  Foreign.funptr_opt ~thread_registration:true ~runtime_lock:true C.Functions.as_callback_type
 
 let audio_spec_of_c c =
-  let as_freq = getf c C.Types.as_freq in
-  let as_format = Unsigned.UInt16.to_int (getf c C.Types.as_format) in
-  let as_channels = Unsigned.UInt8.to_int (getf c C.Types.as_channels) in
-  let as_silence = Unsigned.UInt8.to_int (getf c C.Types.as_silence) in
-  let as_samples = Unsigned.UInt16.to_int (getf c C.Types.as_samples) in
-  let as_size = Unsigned.UInt32.to_int32 (getf c C.Types.as_size) in
+  let as_freq = getf c C.Functions.as_freq in
+  let as_format = Unsigned.UInt16.to_int (getf c C.Functions.as_format) in
+  let as_channels = Unsigned.UInt8.to_int (getf c C.Functions.as_channels) in
+  let as_silence = Unsigned.UInt8.to_int (getf c C.Functions.as_silence) in
+  let as_samples = Unsigned.UInt16.to_int (getf c C.Functions.as_samples) in
+  let as_size = Unsigned.UInt32.to_int32 (getf c C.Functions.as_size) in
   let as_callback = None in
   { as_freq; as_format; as_channels; as_silence; as_samples; as_size;
     as_callback; }
 
 let audio_spec_to_c a =
-  let c = make C.Types.audio_spec in
-  setf c C.Types.as_freq a.as_freq;
-  setf c C.Types.as_format (Unsigned.UInt16.of_int a.as_format);
-  setf c C.Types.as_channels (Unsigned.UInt8.of_int a.as_channels);
-  setf c C.Types.as_silence (Unsigned.UInt8.of_int a.as_silence); (* irrelevant *)
-  setf c C.Types.as_samples (Unsigned.UInt16.of_int a.as_samples);
-  setf c C.Types.as_size (Unsigned.UInt32.of_int32 a.as_size); (* irrelevant *)
-  setf c C.Types.as_callback
-    (coerce as_callback (static_funptr C.Types.as_callback_type) a.as_callback);
-  setf c C.Types.as_userdata null;
+  let c = make C.Functions.audio_spec in
+  setf c C.Functions.as_freq a.as_freq;
+  setf c C.Functions.as_format (Unsigned.UInt16.of_int a.as_format);
+  setf c C.Functions.as_channels (Unsigned.UInt8.of_int a.as_channels);
+  setf c C.Functions.as_silence (Unsigned.UInt8.of_int a.as_silence); (* irrelevant *)
+  setf c C.Functions.as_samples (Unsigned.UInt16.of_int a.as_samples);
+  setf c C.Functions.as_size (Unsigned.UInt32.of_int32 a.as_size); (* irrelevant *)
+  setf c C.Functions.as_callback
+    (coerce as_callback (static_funptr C.Functions.as_callback_type) a.as_callback);
+  setf c C.Functions.as_userdata null;
   c
 
 let close_audio_device d =
@@ -3080,7 +3080,7 @@ let get_num_audio_devices b = nat_to_ok (C.Functions.get_num_audio_devices b)
 let load_wav_rw ops spec kind =
   let d = allocate (ptr uint8_t) (from_voidp uint8_t null) in
   let len = allocate uint32_t Unsigned.UInt32.zero in
-  match C.Async_functions.load_wav_rw
+  match C.Functions.load_wav_rw
           ops 0 (addr (audio_spec_to_c spec)) d len with
   | None -> error ()
   | Some r ->
@@ -3100,7 +3100,7 @@ let lock_audio_device d =
 
 let open_audio_device dev capture desired allow =
   let desiredc = audio_spec_to_c desired in
-  let obtained = make C.Types.audio_spec in
+  let obtained = make C.Functions.audio_spec in
   match C.Functions.open_audio_device
           dev capture (addr desiredc) (addr obtained) allow
   with

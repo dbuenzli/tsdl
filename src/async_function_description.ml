@@ -15,9 +15,4 @@ module Functions (F : FOREIGN) = struct
   let wait_event_timeout =
     F.(foreign "SDL_WaitEventTimeout"
          (ptr Types.Event.t @-> int @-> returning bool))
-
-  let load_wav_rw =
-    F.(foreign "SDL_LoadWAV_RW"
-         (Types.rw_ops @-> int @-> ptr Types.audio_spec @-> ptr (ptr uint8_t) @->
-          ptr uint32_t @-> returning (ptr_opt Types.audio_spec)))
 end
