@@ -1,4 +1,5 @@
-let c_headers = "#include <SDL.h>"
+let c_headers = "#include <SDL.h>\n\
+                 #define CAML_NAME_SPACE"
 
 let main () =
   let stubs_out = open_out "support/types_stubs_gen.c" in
