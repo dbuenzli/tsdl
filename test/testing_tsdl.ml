@@ -230,7 +230,7 @@ let pp_window_event ppf e =
     Sdl.Event.(get e window_data1)
     Sdl.Event.(get e window_data2)
 
-let cst s ppf e = pp ppf "%s" s
+let cst s ppf _e = pp ppf "%s" s
 let event_pp e =
   try List.assoc (Sdl.Event.(get e typ)) [
       Sdl.Event.app_did_enter_background, cst "app_did_enter_background";
