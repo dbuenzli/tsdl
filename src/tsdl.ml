@@ -5416,4 +5416,45 @@ let get_power_info () =
   let pi_secs = match !@ secs with -1 -> None | secs -> Some secs in
   let pi_pct = match !@ pct with -1 -> None | pct -> Some pct in
   { pi_state; pi_secs; pi_pct }
+
+(* Locale information *)
+
+type _sdl_locale
+let sdl_locale : _sdl_locale structure typ = structure "SDL_Locale"
+let language = field sdl_locale "language" (ptr_opt char)
+let country = field sdl_locale "country" (ptr_opt char)
+let () = seal sdl_locale
+
+let get_preferred_locales = foreign "SDL_GetPreferredLocales"
+    (void @-> returning (ptr sdl_locale))
+
+type locale = { language : string; country : string option }
+
+let copy_string p =
+  Ctypes_std_views.string_of_char_ptr p
+  |> Bytes.of_string
+  |> Bytes.to_string
+
+let language l =
+  getf l language |> Option.map copy_string
+let country l =
+  getf l country |> Option.map copy_string
+
+let create_locale_list c_array_ptr =
+  let rec loop list i =
+    let locale_ptr = !@(c_array_ptr +@ i) in
+    match language locale_ptr with
+    | None -> list
+    | Some language ->
+        let country = country locale_ptr in
+        loop ({ language; country } :: list) (i+1)
+  in
+  List.rev (loop [] 0)
+
+let get_preferred_locales () =
+  let p = get_preferred_locales () in
+  if is_null p then error () else
+  let list = create_locale_list p in
+  sdl_free (to_voidp p);
+  Ok list
 end

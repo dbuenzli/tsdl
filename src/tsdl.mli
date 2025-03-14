@@ -3917,6 +3917,16 @@ type power_info =
 val get_power_info : unit -> power_info
 (** {{:http://wiki.libsdl.org/SDL2/SDL_GetPowerInfo}SDL_GetPowerInfo} *)
 
+(** {1:locale {{:http://wiki.libsdl.org/SDL2/CategoryLocale}Locale}} *)
+
+type locale = { language : string; country : string option }
+(** The type for
+    {{:https://wiki.libsdl.org/SDL2/SDL_Locale}SDL_Locale}. *)
+
+val get_preferred_locales : unit -> (locale list) result
+(** {{:https://wiki.libsdl.org/SDL2/SDL_GetPreferredLocales}
+    SDL_GetPreferredLocales} *)
+
 (** {1:coverage Binding Coverage}
 
     Everything except the following functions/categories are available.
