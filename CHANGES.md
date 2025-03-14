@@ -1,5 +1,5 @@
-- Add `Sdl.get_preferred_locales`.
-  Thanks to Vu Ngoc San for the patch (#111)
+- Add `Sdl.get_preferred_locales` and `Sdl.Event.locale_changed`.
+  Thanks to Vu Ngoc San for the patches (#111, #112).
 - Fix bug in `Message_box` color scheme handling.
   Thanks to Matthieu Dubuget for the patch (#105).
 - Add `Sdl.{get,set}_texture_scale_mode.`
