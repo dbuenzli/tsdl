@@ -3199,6 +3199,10 @@ module Event : sig
   val user_window_id : int field
   val user_code : int field
 
+  (** {2:locale Locale} *)
+
+  val locale_changed_event : event_type
+
   (** {2:display Display events} *)
 
   val display_event : event_type
@@ -3306,7 +3310,7 @@ module Event : sig
   | `Render_targets_reset | `Render_device_reset
   | `Sys_wm_event
   | `Text_editing | `Text_input | `Unknown of int | `User_event
-  | `Window_event | `Display_event | `Sensor_update ]
+  | `Window_event | `Locale_changed_event | `Display_event | `Sensor_update ]
 
   val enum : event_type -> enum
 end
