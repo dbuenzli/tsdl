@@ -1438,7 +1438,7 @@ module Types (F : Ctypes.TYPE) = struct
       let _ = F.field t "type" F.uint32_t
       let _ = F.field t "timestamp" F.uint32_t
       let window_id = F.field t "windowID" F.uint32_t
-      let text = F.field t "text" F.(array 32 char (* FIXME *))
+      let text = F.field t "text" F.(array 32 char)
       let start = F.field t "start" F.int32_t
       let length = F.field t "length" F.int32_t
       let () = F.seal t
@@ -1451,7 +1451,7 @@ module Types (F : Ctypes.TYPE) = struct
       let _ = F.field t "type" F.uint32_t
       let _ = F.field t "timestamp" F.uint32_t
       let window_id = F.field t "windowID" F.uint32_t
-      let text = F.field t "text" F.(array 32 char (* FIXME *))
+      let text = F.field t "text" F.(array 32 char)
       let () = F.seal t
     end
 

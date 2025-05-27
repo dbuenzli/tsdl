@@ -1591,6 +1591,11 @@ let is_screen_saver_enabled = C.Functions.is_screen_saver_enabled
 module Message_box = struct
   include C.Types.Message_box
 
+  let () = assert (color_button_max = 5)
+  (* if this assertion fails, correct the length of the field
+     ["colors"] of [color_scheme] in type_description.ml before
+     updating it here *)
+
   type button_flags = Unsigned.uint32
   let button_no_default = Unsigned.UInt32.zero
 
@@ -2376,6 +2381,10 @@ module Event = struct
     F (multi_gesture_event, Multi_gesture_event.num_fingers,
        Unsigned.UInt16.to_int, (fun _ x -> Unsigned.UInt16.of_int x))
 
+  let () = assert (texteditingevent_text_size = 32)
+  (* if this assertion fails, correct the length of the field ["text"]
+     of [Text_editing_event.t] in type_description.ml before updating
+     it here *)
   let text_editing_window_id =
     F (text_editing_event, Text_editing_event.window_id,
        Unsigned.UInt32.to_int, (fun _ x -> Unsigned.UInt32.of_int x))
@@ -2390,6 +2399,10 @@ module Event = struct
     F (text_editing_event, Text_editing_event.length,
        Int32.to_int, (fun _ x -> Int32.of_int x))
 
+  let () = assert (textinputevent_text_size = 32)
+  (* if this assertion fails, correct the length of the field ["text"]
+     of [Text_input_event.t] in type_description.ml before updating it
+     here *)
   let text_input_window_id =
     F (text_input_event, Text_input_event.window_id,
        Unsigned.UInt32.to_int, (fun _ x -> Unsigned.UInt32.of_int x))
