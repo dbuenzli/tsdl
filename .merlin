@@ -1,4 +1,5 @@
 PKG b0.kit ctypes ctypes-foreign
 S src
+S support
 S test
 B _build/**

@@ -292,10 +292,6 @@ val get_version : unit -> (int * int * int)
 val get_revision : unit -> string
 (** {{:http://wiki.libsdl.org/SDL2/SDL_GetRevision}SDL_GetRevision} *)
 
-val get_revision_number : unit -> int
-(** {{:http://wiki.libsdl.org/SDL2/SDL_GetRevisionNumber}
-    SDL_GetRevisionNumber} *)
-
 (** {1:fileabstraction Files and IO abstraction} *)
 
 (** {2:io {{:https://wiki.libsdl.org/SDL2/CategoryIO}IO abstraction}} *)
@@ -3987,7 +3983,9 @@ val get_power_info : unit -> power_info
     {- {{:http://wiki.libsdl.org/SDL2/SDL_PauseAudio}SDL_PauseAudio}
         (SDL legacy function)}
     {- {{:http://wiki.libsdl.org/SDL2/SDL_UnlockAudio}SDL_UnlockAudio}
-        (SDL legacy function)}} *)
+        (SDL legacy function)}
+    {- {{:http://wiki.libsdl.org/SDL2/SDL_GetRevisionNumber}
+        SDL_GetRevisionNumber} (SDL legacy function)}} *)
 end
 
 (** {1:conventions Binding conventions}

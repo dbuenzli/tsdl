@@ -78,7 +78,6 @@ let test_version () =
   let min, maj, patch = Sdl.get_version () in
   log " Version: SDL %d.%d.%d" min maj patch;
   log " Revision: %s" (Sdl.get_revision ());
-  log " Revision number: %d" (Sdl.get_revision_number ());
   ()
 
 let test_rw_ops () =
@@ -260,7 +259,7 @@ let test_pixel_formats () =
   end;
   begin match Sdl.pixel_format_enum_to_masks Sdl.Pixel.format_argb8888 with
   | Error (`Msg e) -> log_err " Could not get pixel format masks: %s" e
-  | Ok (bpp, rm, gm, bm, am) ->
+  | Ok (_bpp, _rm, _gm, _bm, _am) ->
       let bpp', rm', gm', bm', am' =
         32, 0x00FF0000l, 0x0000FF00l, 0x000000FFl, 0xFF000000l
       in
@@ -437,7 +436,7 @@ let test_vsync r =
   let n = 100 in
   let threadfun () =
       let t0 = Sdl.get_ticks () in
-      for i = 1 to n do
+      for _ = 1 to n do
           Unix.sleepf 0.001;
       done;
       delta := Int32.sub (Sdl.get_ticks ()) t0;
@@ -799,7 +798,7 @@ let test_displays () =
         begin match Sdl.get_num_display_modes d with
         | Error (`Msg e) ->
             log_err " Could not get number of display modes: %s" e
-        | Ok count ->
+        | Ok _count ->
             begin match Sdl.get_num_display_modes d with
             | Error (`Msg e) ->
                 log_err " Could not get number of display modes: %s" e
@@ -999,7 +998,7 @@ let test_opengl_contexts () =
               | Ok t ->
                   begin match Sdl.gl_bind_texture t with
                   | Error (`Msg e) -> log " Could not bind texture: %s" e
-                  | Ok (w, h) ->
+                  | Ok (_w, _h) ->
                       (* FIXME: this segfaults in 2.0.1
                          see https://bugzilla.libsdl.org/show_bug.cgi?id=2296 *)
                       (* assert (Sdl.gl_unbind_texture t = Ok ()); *)
