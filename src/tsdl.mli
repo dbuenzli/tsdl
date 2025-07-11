@@ -1063,6 +1063,9 @@ val render_is_clip_enabled: renderer -> bool
 (** {{:http://wiki.libsdl.org/SDL2/SDL_RenderIsClipEnabled}
     SDL_RenderIsClipEnabled} *)
 
+val render_get_window : renderer -> window result
+(** {{https://wiki.libsdl.org/SDL2/SDL_RenderGetWindow}SDL_RenderGetWindow} *)
+
 val render_present : renderer -> unit
 (** {{:http://wiki.libsdl.org/SDL2/SDL_RenderPresent}SDL_RenderPresent} *)
 

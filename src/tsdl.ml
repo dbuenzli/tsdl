@@ -1616,6 +1616,9 @@ let render_get_viewport rend =
   render_get_viewport rend (addr r);
   r
 
+let render_get_window =
+  foreign "SDL_RenderGetWindow" (renderer @-> returning (some_to_ok window_opt))
+
 let render_present =
   foreign ~release_runtime_lock:true "SDL_RenderPresent"
     (renderer @-> returning void)
