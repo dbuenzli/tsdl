@@ -1,7 +1,9 @@
 - Fix bug in `Message_box` color scheme handling.
   Thanks to Matthieu Dubuget for the patch (#105).
-- Add {get,set}_texture_scale_mode.
-  Thanks to Maxence Guesdon for the patch.
+- Add `Sdl.{get,set}_texture_scale_mode.`
+  Thanks to Maxence Guesdon for the patch (#114).
+- Add `Sdl.render_get_window`
+  Thanks to Léo Andrès for the patch (#113).
 
 v1.1.0 2024-09-12 Zagreb
 ------------------------
