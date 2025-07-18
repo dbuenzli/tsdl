@@ -556,6 +556,15 @@ val compose_custom_blend_mode :
 (** {{:https://wiki.libsdl.org/SDL2/SDL_ComposeCustomBlendMode}
     SDL_ComposeCustomBlendMode} *)
 
+module Scale : sig
+   type mode
+   (** {{:https://wiki.libsdl.org/SDL2/SDL_ScaleMode}SDL_ScaleMode} *)
+
+   val mode_nearest : mode
+   val mode_linear : mode
+   val mode_best : mode
+end
+
 module Pixel : sig
   type format_enum
   (** {{:https://wiki.libsdl.org/SDL2/SDL_PixelFormatEnum}
@@ -1148,6 +1157,10 @@ val get_texture_color_mod : texture -> (uint8 * uint8 * uint8) result
 (** {{:http://wiki.libsdl.org/SDL2/SDL_GetTextureColorMod}
     SDL_GetTextureColorMod}. *)
 
+val get_texture_scale_mode : texture -> Scale.mode result
+(** {{:http://wiki.libsdl.org/SDL2/SDL_GetTextureScaleMode}
+    SDL_GetTextureScaleMode} *)
+
 val lock_texture :
   texture -> rect option -> ('a, 'b) Bigarray.kind ->
   (('a, 'b) bigarray * int) result
@@ -1172,6 +1185,10 @@ val set_texture_blend_mode : texture -> Blend.mode -> unit result
 val set_texture_color_mod : texture -> uint8 -> uint8 -> uint8 -> unit result
 (** {{:http://wiki.libsdl.org/SDL2/SDL_SetTextureColorMod}
     SDL_SetTextureColorMod} *)
+
+val set_texture_scale_mode : texture -> Scale.mode -> unit result
+(** {{:http://wiki.libsdl.org/SDL2/SDL_SetTextureScaleMode}
+    SDL_SetTextureScaleMode} *)
 
 val unlock_texture : texture -> unit
 (** {{:http://wiki.libsdl.org/SDL2/SDL_UnlockTexture}SDL_UnlockTexture} *)

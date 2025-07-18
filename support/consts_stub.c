@@ -179,6 +179,12 @@ void consts (FILE *fd)
   int_v (SDL_TEXTUREMODULATE_COLOR);
   int_v (SDL_TEXTUREMODULATE_ALPHA);
 
+  /* Scale mode */
+
+  int_v (SDL_ScaleModeNearest);
+  int_v (SDL_ScaleModeLinear);
+  int_v (SDL_ScaleModeBest);
+
   /* Windows and displays */
 
   int_v (SDL_WINDOW_FULLSCREEN);
