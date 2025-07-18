@@ -791,6 +791,13 @@ let compose_custom_blend_mode =
   foreign "SDL_ComposeCustomBlendMode"
     (int @-> int @-> int @-> int @-> int @-> int @-> returning uint)
 
+module Scale = struct
+   type mode = Unsigned.UInt.t
+   let mode_nearest = Unsigned.UInt.of_int sdl_scalemodenearest
+   let mode_linear = Unsigned.UInt.of_int sdl_scalemodelinear
+   let mode_best = Unsigned.UInt.of_int sdl_scalemodebest
+end
+
 module Pixel = struct
   type format_enum = Unsigned.UInt32.t
   let i = Unsigned.UInt32.of_int32
@@ -1736,6 +1743,15 @@ let get_texture_color_mod t =
   match get_texture_color_mod t r g b with
   | Ok () -> Ok (get r, get g, get b) | Error _ as e -> e
 
+let get_texture_scale_mode =
+  foreign "SDL_GetTextureScaleMode"
+    (texture @-> ptr uint @-> returning zero_to_ok)
+
+let get_texture_scale_mode t =
+  let m = allocate uint Unsigned.UInt.zero in
+  match get_texture_scale_mode t m with
+  | Ok () -> Ok (!@ m) | Error _ as e -> e
+
 let query_texture =
   foreign "SDL_QueryTexture"
     (texture @-> ptr uint32_t @-> ptr int @-> ptr int @-> ptr int @->
@@ -1792,6 +1808,10 @@ let set_texture_color_mod =
   foreign "SDL_SetTextureColorMod"
     (texture @-> int_as_uint8_t @-> int_as_uint8_t @-> int_as_uint8_t @->
      returning zero_to_ok)
+
+let set_texture_scale_mode =
+  foreign "SDL_SetTextureScaleMode"
+    (texture @-> uint @-> returning zero_to_ok)
 
 let unlock_texture =
   foreign "SDL_UnlockTexture" (texture @-> returning void)
