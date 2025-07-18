@@ -4472,6 +4472,10 @@ module Event = struct
   let window_event_enum id =
     try Imap.find id enum_of_window_event_id with Not_found -> `Unknown id
 
+  (* Locale changed event *)
+
+  let locale_changed = sdl_localechanged
+
   (* Display event *)
 
   let display_display =
@@ -4551,7 +4555,7 @@ module Event = struct
   | `Render_targets_reset | `Render_device_reset
   | `Sys_wm_event
   | `Text_editing | `Text_input | `Unknown of int | `User_event
-  | `Window_event | `Display_event | `Sensor_update ]
+  | `Window_event | `Locale_changed | `Display_event | `Sensor_update ]
 
   let enum_of_event_type =
     let add acc (k, v) = Imap.add k v acc in
@@ -4602,6 +4606,7 @@ module Event = struct
                   user_event, `User_event;
                   quit, `Quit;
                   window_event, `Window_event;
+                  locale_changed, `Locale_changed;
                   display_event, `Display_event;
                   sensor_update, `Sensor_update; ]
     in
