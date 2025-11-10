@@ -1,11 +1,18 @@
+v1.2.0 2025-11-10 Zagreb
+------------------------
+
 - Add `Sdl.get_preferred_locales` and `Sdl.Event.locale_changed`.
-  Thanks to Vu Ngoc San for the patches (#111, #112).
+  Thanks to Vu Ngoc San for the patches (#111, #112)
 - Fix bug in `Message_box` color scheme handling.
-  Thanks to Matthieu Dubuget for the patch (#105).
+  Thanks to Matthieu Dubuget for the patch (#105)
 - Add `Sdl.{get,set}_texture_scale_mode.`
-  Thanks to Maxence Guesdon for the patch (#114).
+  Thanks to Maxence Guesdon for the patch (#114)
 - Add `Sdl.render_get_window`
-  Thanks to Léo Andrès for the patch (#113).
+  Thanks to Léo Andrès for the patch (#113)
+- Change `Sdl.rw_close` to use the static function.
+  Thanks to Pierre Boutillier for the patch.
+- Other Internal ctypes changes. 
+  Thanks to Pierre Boutillier for the patches.
 
 v1.1.0 2024-09-12 Zagreb
 ------------------------
