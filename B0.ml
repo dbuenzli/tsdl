@@ -27,7 +27,9 @@ let default =
         "org:erratique" ]
     |> B0_meta.tag B0_opam.tag
     |> ~~ B0_opam.available
-      {|[(os-distribution != "opensuse-leap" | os-version >= 16)]|}
+      {|[((os-distribution != "opensuse-leap" &
+           os-distribution != "opensuse-tumbleweed")|
+          (os-distribution = "opensuse-leap" & os-version >= 16))]|}
     |> ~~ B0_opam.depends
       [ "ocaml", {|>= "4.08.0"|};
         "ocamlfind", {|build|};
