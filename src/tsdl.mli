@@ -1327,8 +1327,9 @@ module Window : sig
   val allow_highdpi : flags
   val mouse_capture: flags
   val always_on_top: flags
-    val skip_taskbar: flags
+  val skip_taskbar: flags
   val utility: flags
+  val tooltip : flags
   val popup_menu:flags
   val vulkan: flags
 end
