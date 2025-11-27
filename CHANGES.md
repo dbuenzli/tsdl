@@ -1,3 +1,6 @@
+- Add Sdl.Window.tooltip flag. Thanks to Maxence Guesdon for the
+  patch.
+
 v1.2.0 2025-11-10 Zagreb
 ------------------------
 

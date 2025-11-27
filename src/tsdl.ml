@@ -2007,6 +2007,7 @@ module Window = struct
   let always_on_top = i sdl_window_always_on_top
   let skip_taskbar = i sdl_window_skip_taskbar
   let utility = i sdl_window_utility
+  let tooltip = i sdl_window_tooltip
   let popup_menu = i sdl_window_popup_menu
   let vulkan = i sdl_window_vulkan
 end

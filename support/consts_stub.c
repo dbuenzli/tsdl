@@ -205,6 +205,7 @@ void consts (FILE *fd)
   int_v (SDL_WINDOW_ALWAYS_ON_TOP);
   int_v (SDL_WINDOW_SKIP_TASKBAR);
   int_v (SDL_WINDOW_UTILITY);
+  int_v (SDL_WINDOW_TOOLTIP);
   int_v (SDL_WINDOW_POPUP_MENU);
   int_v (SDL_WINDOW_VULKAN);
 
