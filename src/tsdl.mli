@@ -1332,6 +1332,7 @@ module Window : sig
   val tooltip : flags
   val popup_menu:flags
   val vulkan: flags
+  val metal: flags
 end
 
 val create_window : string -> ?x:int -> ?y:int -> w:int -> h:int ->

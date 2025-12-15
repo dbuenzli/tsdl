@@ -1,4 +1,6 @@
-- Add Sdl.Window.tooltip flag. Thanks to Maxence Guesdon for the
+- Add `Sdl.Window.metal` flag. Thanks to TheMaslowsDilema for the
+  patch.
+- Add `Sdl.Window.tooltip` flag. Thanks to Maxence Guesdon for the
   patch.
 
 v1.2.0 2025-11-10 Zagreb
