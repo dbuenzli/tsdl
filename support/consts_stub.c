@@ -208,6 +208,7 @@ void consts (FILE *fd)
   int_v (SDL_WINDOW_TOOLTIP);
   int_v (SDL_WINDOW_POPUP_MENU);
   int_v (SDL_WINDOW_VULKAN);
+  int_v (SDL_WINDOW_METAL);
 
   int_v (SDL_WINDOWPOS_CENTERED);
   int_v (SDL_WINDOWPOS_UNDEFINED);
