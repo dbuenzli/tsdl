@@ -2010,6 +2010,7 @@ module Window = struct
   let tooltip = i sdl_window_tooltip
   let popup_menu = i sdl_window_popup_menu
   let vulkan = i sdl_window_vulkan
+  let metal = i sdl_window_metal
 end
 
 let create_window =
