@@ -1,3 +1,5 @@
+- Add `Sdl.Pixel.format_rgba32`. Thanks to Maxence Guesdon for the
+  patch.
 - Add `Sdl.Window.metal` flag. Thanks to TheMaslowsDilema for the
   patch.
 - Add `Sdl.Window.tooltip` flag. Thanks to Maxence Guesdon for the
@@ -16,7 +18,7 @@ v1.2.0 2025-11-10 Zagreb
   Thanks to Léo Andrès for the patch (#113)
 - Change `Sdl.rw_close` to use the static function.
   Thanks to Pierre Boutillier for the patch.
-- Other Internal ctypes changes. 
+- Other Internal ctypes changes.
   Thanks to Pierre Boutillier for the patches.
 
 v1.1.0 2024-09-12 Zagreb

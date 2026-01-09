@@ -809,6 +809,7 @@ module Pixel = struct
   let format_index4lsb = i sdl_pixelformat_index4lsb
   let format_index4msb = i sdl_pixelformat_index4msb
   let format_index8 = i sdl_pixelformat_index8
+  let format_rgba32 = i sdl_pixelformat_rgba32
   let format_rgb332 = i sdl_pixelformat_rgb332
   let format_rgb444 = i sdl_pixelformat_rgb444
   let format_rgb555 = i sdl_pixelformat_rgb555

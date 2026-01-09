@@ -578,6 +578,7 @@ module Pixel : sig
   val format_index4lsb : format_enum
   val format_index4msb : format_enum
   val format_index8 : format_enum
+  val format_rgba32 : format_enum
   val format_rgb332 : format_enum
   val format_rgb444 : format_enum
   val format_rgb555 : format_enum
