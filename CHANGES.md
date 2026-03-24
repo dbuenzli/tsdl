@@ -1,3 +1,6 @@
+v1.3.0 2026-03-24
+-----------------
+
 - Add `Sdl.Pixel.format_rgba32`. Thanks to Maxence Guesdon for the
   patch.
 - Add `Sdl.Window.metal` flag. Thanks to TheMaslowsDilema for the
